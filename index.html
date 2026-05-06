@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="it"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programmazione Cloud</title>
+<style>
+  :root {
+    --bg: #fafaf8; --paper: #ffffff; --ink: #111111;
+    --muted: #777777; --line: #e5e3dd; --accent: #111111;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.4; }
+  .page { max-width: 900px; margin: 0 auto; padding: 0 20px 60px; }
+  .sticky { position: -webkit-sticky; position: sticky; top: 0; z-index: 50; background: var(--bg); padding-top: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+  .top { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--ink); padding-bottom: 8px; margin-bottom: 10px; gap: 12px; flex-wrap: wrap; }
+  .top h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .top .month { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .top .picker { display: flex; gap: 6px; margin-top: 6px; align-items: center; font-size: 12px; }
+  .top .picker select { font: inherit; font-size: 12px; padding: 3px 6px; border: 1px solid #ccc; border-radius: 3px; background: #fff; color: var(--ink); }
+  .day.empty-day .day-h { opacity: 0.55; border-left-color: #aaa; background: #555; }
+  .day .empty-msg { font-size: 11.5px; color: var(--muted); font-style: italic; padding: 2px 8px 4px; }
+  .top .bar { display: flex; gap: 6px; flex-wrap: wrap; }
+  .top .bar button { font: inherit; font-size: 12px; padding: 5px 10px; border: 1px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; border-radius: 3px; }
+  .top .bar button:hover { background: var(--ink); color: var(--paper); }
+  .top .bar button.danger { border-color: #999; color: #666; }
+  .top .bar button.primary { background: var(--ink); color: var(--paper); }
+  .form { display: grid; grid-template-columns: 130px 120px 85px 1fr 60px 60px auto; gap: 6px; padding: 8px; border: 1px dashed #bbb; border-radius: 4px 4px 0 0; border-bottom: none; background: var(--paper); align-items: center; }
+  .recurrence { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 6px 8px 8px; border: 1px dashed #bbb; border-top: 1px dotted #ddd; border-radius: 0 0 4px 4px; background: var(--paper); font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .recurrence select { font: inherit; font-size: 12px; padding: 4px 6px; border: 1px solid #ccc; border-radius: 3px; background: #fff; color: var(--ink); }
+  .recurrence .dow-toggles { display: flex; gap: 2px; }
+  .recurrence .dow-toggles button { font: inherit; font-size: 11px; font-weight: 600; width: 30px; height: 26px; border: 1px solid #ccc; background: #fff; color: var(--muted); cursor: pointer; border-radius: 3px; padding: 0; }
+  .recurrence .dow-toggles button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .recurrence .hint { font-style: italic; }
+  .search-bar { font: inherit; font-size: 13px; padding: 6px 12px; border: 1.5px solid var(--ink); border-radius: 20px; background: #fff; color: var(--ink); width: 220px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .legend-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .cat-toggle-btn { font: inherit; font-size: 11px; font-weight: 600; padding: 5px 11px; border: 1px solid #bbb; border-radius: 3px; background: transparent; color: var(--muted); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .cat-panel { margin-top: 6px; padding: 8px 10px 10px; border: 1px solid #ddd; border-radius: 4px; background: var(--paper); font-size: 12px; margin-bottom: 4px; }
+  .cat-panel h4 { margin: 0 0 8px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+  .cat-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; padding: 3px 5px; border: 1px solid #eee; border-radius: 3px; background: #fafafa; }
+  .cat-color-pick { -webkit-appearance: none; width: 32px; height: 26px; border: 1px solid #ccc; background: none; cursor: pointer; padding: 2px; border-radius: 3px; }
+  .cat-name-edit { flex: 1; font: inherit; font-size: 12px; padding: 3px 6px; border: 1px solid #ccc; border-radius: 3px; background: #fff; }
+  .cat-del { font: inherit; font-size: 13px; font-weight: 600; border: none; background: transparent; cursor: pointer; padding: 2px 7px; color: var(--muted); border-radius: 2px; line-height: 1; }
+  .cat-add { display: flex; gap: 6px; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px dotted #ddd; }
+  .cat-add input[type="color"] { -webkit-appearance: none; width: 32px; height: 26px; border: 1px solid #ccc; background: none; padding: 2px; cursor: pointer; border-radius: 3px; }
+  .cat-add input[type="text"] { flex: 1; font: inherit; font-size: 12px; padding: 4px 7px; border: 1px solid #ccc; border-radius: 3px; }
+  .cat-add button { font: inherit; font-size: 12px; font-weight: 600; padding: 5px 12px; background: var(--ink); color: var(--paper); border: none; border-radius: 3px; cursor: pointer; }
+  .row.has-overlap { background: #fff8f0; }
+  .overlap-badge { display: inline-block; background: #E65100; color: #fff; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 2px; margin-left: 6px; vertical-align: middle; white-space: nowrap; }
+  .grid-day { margin-bottom: 16px; }
+  .grid-day-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 3px; }
+  .grid-timeline { position: relative; height: 32px; background: #f0ede7; border-radius: 4px; overflow: hidden; }
+  .grid-tick { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,0.12); }
+  .grid-block { position: absolute; top: 2px; bottom: 2px; border-radius: 2px; overflow: hidden; cursor: default; min-width: 3px; display: flex; align-items: center; padding: 0 3px; font-size: 8.5px; font-weight: 600; white-space: nowrap; border: 1px solid rgba(0,0,0,0.18); }
+  .grid-hours { display: flex; justify-content: space-between; font-size: 8.5px; color: #aaa; margin-top: 2px; padding: 0 0 2px; }
+  .filter-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; margin-bottom: 4px; flex-wrap: wrap; gap: 6px; }
+  .time-filter { display: flex; flex-wrap: wrap; gap: 3px; }
+  .time-filter button, .view-toggle button { font: inherit; font-size: 11px; padding: 3px 8px; border: 1px solid #ccc; background: transparent; border-radius: 2px; cursor: pointer; color: var(--muted); }
+  .time-filter button.on, .view-toggle button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .stats-panel { padding: 12px 14px 14px; border: 1px solid #e0ddd7; border-radius: 4px; background: var(--paper); margin-bottom: 8px; font-size: 12px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 8px 0 10px; }
+  .stats-card { padding: 9px 11px; border: 1px solid #eee; border-radius: 4px; background: #fafaf8; }
+  .stats-card .val { font-size: 21px; font-weight: 700; color: var(--ink); line-height: 1; font-variant-numeric: tabular-nums; }
+  .stats-card .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+  .stats-cat-bar { display: flex; align-items: center; gap: 8px; margin-top: 5px; font-size: 11px; }
+  .stats-bar-bg { flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+  .stats-bar-fill { height: 100%; border-radius: 4px; }
+  @media (max-width: 680px) { .form { grid-template-columns: 1fr 1fr; } .form > div:last-child { grid-column: 1 / -1; } .recurrence { gap: 6px; } }
+  .form select, .form input { font: inherit; font-size: 13px; padding: 5px 7px; border: 1px solid #ccc; border-radius: 3px; background: #fff; width: 100%; }
+  .form .dur-wrap { display: contents; }
+  .form .dur-box { position: relative; }
+  .form .dur-box input { padding-right: 22px; text-align: center; }
+  .form .dur-box .suffix { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--muted); pointer-events: none; }
+  .form .go { font: inherit; font-size: 12px; font-weight: 600; padding: 6px 14px; background: var(--ink); color: var(--paper); border: none; border-radius: 3px; cursor: pointer; }
+  .form .cancel { font: inherit; font-size: 12px; padding: 5px 8px; background: transparent; border: 1px solid #ccc; color: var(--muted); border-radius: 3px; cursor: pointer; }
+  .filters { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; font-size: 11px; }
+  .filters button { font: inherit; font-size: 11px; padding: 3px 8px; border: 1px solid #ccc; background: transparent; border-radius: 2px; cursor: pointer; color: var(--muted); }
+  .filters button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; font-size: 11px; padding: 6px 0 4px; margin-bottom: 10px; }
+  .legend .it { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .sw { display: inline-block; width: 16px; height: 12px; border-radius: 2px; border: 1px solid rgba(0,0,0,0.15); }
+  .list { column-count: 1; }
+  .day { break-inside: avoid; margin-bottom: 14px; }
+  .day-h { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #fff; background: #111; padding: 6px 10px; border-left: 5px solid #d4a017; border-radius: 3px; margin: 14px 0 5px; }
+  .row { display: grid; grid-template-columns: 18px 50px 1fr 60px 50px; gap: 8px; align-items: center; padding: 4px 8px; font-size: 12.5px; margin-bottom: 2px; border-radius: 3px; background: #ffffff; }
+  .row .chip { width: 16px; height: 12px; border-radius: 2px; border: 1px solid rgba(0,0,0,0.2); }
+  .row .t { font-weight: 600; }
+  .row .n { overflow: hidden; text-overflow: ellipsis; }
+  .row .d { font-size: 11.5px; color: var(--muted); text-align: right; }
+  .row .act { display: flex; gap: 2px; justify-content: flex-end; }
+  .row .act button { font: inherit; font-size: 12px; border: none; background: transparent; cursor: pointer; padding: 2px 6px; color: var(--muted); border-radius: 2px; }
+  .row .act button.del:hover { background: #c62828; color: #fff; }
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-style: italic; }
+
+  /* Connessione status */
+  #sync-status { font-size: 11px; color: #4CAF50; font-weight: bold; margin-bottom: 5px; display: inline-block;}
+  .offline { color: #F44336 !important; }
+
+  @media print {
+    @page { size: A4; margin: 8mm 8mm; }
+    html, body { background: #fff !important; }
+    .page { padding: 0; max-width: 100%; }
+    .sticky { position: static; padding: 0; margin-bottom: 6px; border-bottom: none; }
+    .no-print { display: none !important; }
+    .top { padding-bottom: 4px; margin-bottom: 6px; border-bottom: 1px solid #000; }
+    .list { column-count: 2; column-gap: 8mm; column-rule: 1px dotted #ccc; }
+    .day { break-inside: avoid; margin-bottom: 7px; }
+    .day-h { font-size: 9pt; padding: 3px 6px; margin: 6px 0 2px; border-left-width: 4px; }
+    .row { grid-template-columns: 12px 32px 1fr 38px; gap: 4px; padding: 1px 5px; margin-bottom: 1px; font-size: 8.5pt; }
+    .row .act { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="sticky no-print-sticky">
+    <div class="top">
+      <div>
+        <h1>Programmazione</h1>
+        <div id="sync-status">Connessione a Firebase in corso...</div>
+        <div class="month" id="monthLabel">Caricamento dati in corso...</div>
+        <div class="picker no-print">
+          <label for="m-sel">Mese:</label>
+          <select id="m-sel"></select>
+          <select id="y-sel"></select>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="bar no-print">
+          <button class="primary" onclick="window.printPDF()">Stampa / PDF</button>
+          <button onclick="window.downloadBackup()" title="Scarica un file JSON con il backup del database">Backup Dati</button>
+          <button onclick="window.triggerImport()" title="Importa la programmazione da un file HTML salvato in precedenza">Importa HTML</button>
+          <input type="file" id="f-import" accept=".html,.json" style="display:none">
+          <button onclick="window.copyToNextMonth()" title="Copia tutti i programmi del mese visibile al mese successivo">Copia mese →</button>
+          <button class="danger" onclick="window.clearAll()">Svuota Mese</button>
+          <button onclick="window.exportCSV()">Esporta CSV</button>
+        </div>
+        <input type="search" id="f-search" class="search-bar no-print" placeholder="🔍 Cerca nel mese…">
+      </div>
+    </div>
+
+    <div class="form no-print" id="form">
+      <select id="f-cat"></select>
+      <input type="date" id="f-date">
+      <input type="time" id="f-time">
+      <input type="text" id="f-name" placeholder="Nome del programma">
+      <div class="dur-box">
+        <input type="number" id="f-dur-h" min="0" max="23" placeholder="0">
+        <span class="suffix">h</span>
+      </div>
+      <div class="dur-box">
+        <input type="number" id="f-dur-m" min="0" max="59" placeholder="0">
+        <span class="suffix">min</span>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <button class="go" id="f-go" onclick="window.submitForm()">Salva</button>
+        <button class="cancel" id="f-cancel" onclick="window.resetForm()" style="display: none;">×</button>
+      </div>
+    </div>
+
+    <div class="recurrence no-print" id="recurrence">
+      <span>Cadenza nel mese:</span>
+      <select id="f-preset">
+        <option value="single">Solo questo giorno</option>
+        <option value="every">Tutti i giorni</option>
+        <option value="no_sun">Tutti tranne Domenica (Lun–Sab)</option>
+        <option value="weekdays">Solo giorni feriali (Lun–Ven)</option>
+        <option value="same_dow">Stesso giorno della settimana</option>
+        <option value="custom">Personalizzato</option>
+      </select>
+      <div class="dow-toggles" id="f-dow">
+        <button type="button" data-dow="1">L</button>
+        <button type="button" data-dow="2">M</button>
+        <button type="button" data-dow="3">M</button>
+        <button type="button" data-dow="4">G</button>
+        <button type="button" data-dow="5">V</button>
+        <button type="button" data-dow="6">S</button>
+        <button type="button" data-dow="0">D</button>
+      </div>
+      <span class="hint" id="f-hint">Solo questo giorno</span>
+    </div>
+
+    <div class="cat-panel no-print" id="cat-panel" style="display: none;">
+      <h4>Gestione categorie</h4>
+      <div id="cat-list"></div>
+      <div class="cat-add">
+        <input type="color" id="cat-new-color" value="#607D8B">
+        <input type="text" id="cat-new-name" placeholder="Nome nuova categoria" maxlength="40">
+        <button onclick="window.addCategory()">+ Aggiungi</button>
+      </div>
+    </div>
+
+    <div class="stats-panel no-print" id="stats-panel" style="display:none"></div>
+
+    <div class="filters no-print" id="filters"></div>
+    <div class="filter-row no-print">
+      <div class="time-filter">
+        <button id="tf-all" class="on" onclick="window.setTimeRange('all')">Tutte le fasce</button>
+        <button id="tf-morning" onclick="window.setTimeRange('morning')">🌅 Mattina 6–13</button>
+        <button id="tf-afternoon" onclick="window.setTimeRange('afternoon')">🌤 Pomeriggio 13–20</button>
+        <button id="tf-evening" onclick="window.setTimeRange('evening')">🌙 Sera/Notte 20–6</button>
+      </div>
+      <div class="view-toggle">
+        <button id="vm-list" class="on" onclick="window.setViewMode('list')">☰ Lista</button>
+        <button id="vm-grid" onclick="window.setViewMode('grid')">▤ Griglia</button>
+      </div>
+    </div>
+
+    <div class="legend-row">
+      <button onclick="window.toggleCatPanel()" class="cat-toggle-btn no-print">Categorie ⚙</button>
+      <button onclick="window.toggleStats()" class="cat-toggle-btn no-print">📊 Statistiche</button>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<script type="module">
+  // ============================================================
+  // CONFIGURAZIONE FIREBASE & IMPORT SDK MODULARI
+  // ============================================================
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+  import { 
+    getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, writeBatch, getDocs, query, where 
+  } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBhHiwU1zuebF7K_d54efPb_DYbbmD3SvY",
+    authDomain: "programmazione-d1934.firebaseapp.com",
+    databaseURL: "https://programmazione-d1934-default-rtdb.firebaseio.com",
+    projectId: "programmazione-d1934",
+    storageBucket: "programmazione-d1934.firebasestorage.app",
+    messagingSenderId: "913374280448",
+    appId: "1:913374280448:web:601077e228339fca5051e5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // ============================================================
+  // VARIABILI DI STATO E DATI
+  // ============================================================
+  let events =[];
+  let CATEGORIES = {
+    prime_visioni: { label: "Prime Visioni", color: "#F9A825" },
+    nuovi_film:    { label: "Nuovi Film",    color: "#1976D2" },
+    serie_tv:      { label: "Serie TV",      color: "#7B1FA2" },
+    western:       { label: "Western",       color: "#8D6E63" },
+    nessuna:       { label: "Nessuna",       color: "#BDBDBD" },
+    film:          { label: "Film",          color: "#419636" }
+  };
+
+  let editingId = null;
+  let filter = "tutte";
+  let searchQuery = "";
+  let timeRange = "all";
+  let viewMode = "list";
+  let statsOpen = false;
+  let isFirstLoad = true;
+
+  const DAYS_SHORT =["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
+  const DAYS_LONG  =["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+  const MONTHS =["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+  
+  const TIME_RANGES = {
+    all:       { fn: () => true },
+    morning:   { fn: t => { const m = timeToMin(t); return m >= 360 && m < 780; } },
+    afternoon: { fn: t => { const m = timeToMin(t); return m >= 780 && m < 1200; } },
+    evening:   { fn: t => { const m = timeToMin(t); return m >= 1200 || m < 360; } }
+  };
+  
+  const today = new Date();
+  let viewYear = today.getFullYear();
+  let viewMonth = today.getMonth();
+
+  // Inizializzazione select mese e anno
+  const mSel = document.getElementById("m-sel");
+  const ySel = document.getElementById("y-sel");
+  MONTHS.forEach((name, i) => { mSel.appendChild(new Option(name, i)); });
+  for (let y = viewYear - 5; y <= viewYear + 10; y++) { ySel.appendChild(new Option(y, y)); }
+  
+  mSel.value = viewMonth;
+  ySel.value = viewYear;
+  
+  mSel.addEventListener("change", () => { viewMonth = parseInt(mSel.value, 10); render(); });
+  ySel.addEventListener("change", () => { viewYear = parseInt(ySel.value, 10); render(); });
+
+  // ============================================================
+  // SINCRONIZZAZIONE IN TEMPO REALE CON FIRESTORE
+  // ============================================================
+  
+  // Ascolta le categorie
+  onSnapshot(doc(db, "config", "categories"), (docSnap) => {
+    if (docSnap.exists() && Object.keys(docSnap.data()).length > 0) {
+      CATEGORIES = docSnap.data();
+    } else {
+      // Se non esiste, crea il documento di default
+      setDoc(doc(db, "config", "categories"), CATEGORIES);
+    }
+    rebuildCatSelect();
+    renderCatPanel();
+    render();
+  }, (error) => {
+    console.error("Errore lettura categorie:", error);
+  });
+
+  // Ascolta gli eventi
+  onSnapshot(collection(db, "events"), (snapshot) => {
+    const statusEl = document.getElementById("sync-status");
+    statusEl.textContent = "● Sincronizzato";
+    statusEl.className = "";
+    
+    events =[];
+    snapshot.forEach(doc => { events.push(doc.data()); });
+    
+    // Al primo caricamento, sposta la vista sul mese del primo evento
+    if (isFirstLoad && events.length > 0) {
+      isFirstLoad = false;
+      const first = events.map(e => e.date).sort()[0];
+      if (first) {
+        const [yy, mm] = first.split("-").map(Number);
+        viewYear = yy; viewMonth = mm - 1;
+        mSel.value = viewMonth; ySel.value = viewYear;
+      }
+    }
+    render();
+  }, (error) => {
+    const statusEl = document.getElementById("sync-status");
+    statusEl.textContent = "⚠ Disconnesso o Permesso Negato (Controlla le Regole di Firebase)";
+    statusEl.className = "offline";
+    console.error("Errore lettura eventi:", error);
+  });
+
+  // ============================================================
+  // HELPER FUNZIONI
+  // ============================================================
+  function rebuildCatSelect() {
+    const selCat = document.getElementById("f-cat");
+    const prev = selCat.value;
+    selCat.innerHTML = "";
+    Object.entries(CATEGORIES).forEach(([k, c]) => {
+      selCat.appendChild(new Option(c.label, k));
+    });
+    if (CATEGORIES[prev]) selCat.value = prev;
+    else if(Object.keys(CATEGORIES).length > 0) selCat.value = Object.keys(CATEGORIES)[0];
+  }
+
+  function parseDuration(str) {
+    if (!str) return { h: 0, m: 0 };
+    const s = String(str).trim().toLowerCase();
+    let h = 0, m = 0;
+    const hMatch = s.match(/(\d+)\s*h/);
+    const mMatch = s.match(/(\d+)\s*(?:m|min|')/);
+    if (hMatch) h = parseInt(hMatch[1], 10) || 0;
+    if (mMatch) m = parseInt(mMatch[1], 10) || 0;
+    if (!hMatch && !mMatch) {
+      const onlyNum = s.match(/^(\d+)$/);
+      if (onlyNum) m = parseInt(onlyNum[1], 10) || 0;
+    }
+    return { h, m };
+  }
+
+  function formatDuration(h, m) {
+    h = parseInt(h, 10) || 0; m = parseInt(m, 10) || 0;
+    if (h <= 0 && m <= 0) return "";
+    if (h > 0 && m > 0) return h + "h" + String(m).padStart(2, "0") + "m";
+    if (h > 0) return h + "h";
+    return m + "m";
+  }
+
+  function timeToMin(t) {
+    if (!t) return -1;
+    const parts = t.split(":");
+    return parseInt(parts[0], 10) * 60 + (parseInt(parts[1], 10) || 0);
+  }
+
+  function isLightColor(hex) {
+    const c = String(hex).replace("#", "");
+    const r = parseInt(c.substr(0, 2), 16), g = parseInt(c.substr(2, 2), 16), b = parseInt(c.substr(4, 2), 16);
+    return ((0.299 * r + 0.587 * g + 0.114 * b) / 255) > 0.65;
+  }
+
+  function eventsInView() {
+    const ymPrefix = viewYear + "-" + String(viewMonth + 1).padStart(2, "0");
+    return events.filter(e => e.date && e.date.startsWith(ymPrefix));
+  }
+
+  // ============================================================
+  // RENDER GRAFICO (LISTA E GRIGLIA)
+  // ============================================================
+  function render() {
+    mSel.value = viewMonth; ySel.value = viewYear;
+    const inView = eventsInView();
+    document.getElementById("monthLabel").textContent = MONTHS[viewMonth] + " " + viewYear + " • " + inView.length + " programmi";
+
+    // Menu Filtri Categorie
+    const filtersDiv = document.getElementById("filters");
+    filtersDiv.innerHTML = "";
+    const counts = { tutte: inView.length };
+    Object.keys(CATEGORIES).forEach(k => counts[k] = 0);
+    inView.forEach(e => {
+      const k = CATEGORIES[e.category] ? e.category : "nessuna";
+      counts[k]++;
+    });
+
+    const allBtn = document.createElement("button");
+    allBtn.className = filter === "tutte" ? "on" : "";
+    allBtn.textContent = "Tutte (" + counts.tutte + ")";
+    allBtn.onclick = () => { filter = "tutte"; render(); };
+    filtersDiv.appendChild(allBtn);
+
+    Object.entries(CATEGORIES).forEach(([k, c]) => {
+      const b = document.createElement("button");
+      b.className = filter === k ? "on" : "";
+      b.textContent = c.label + " (" + counts[k] + ")";
+      if (filter !== k) b.style.borderColor = c.color;
+      b.onclick = () => { filter = k; render(); };
+      filtersDiv.appendChild(b);
+    });
+
+    let filtered = filter === "tutte" ? inView : inView.filter(e => (CATEGORIES[e.category] ? e.category : "nessuna") === filter);
+    
+    const sq = (searchQuery || "").trim().toLowerCase();
+    if (sq) {
+      filtered = filtered.filter(e => (e.name || "").toLowerCase().includes(sq) || (e.time || "").includes(sq));
+    }
+    if (timeRange !== "all") {
+      filtered = filtered.filter(e => TIME_RANGES[timeRange].fn(e.time));
+    }["all","morning","afternoon","evening"].forEach(tr => {
+      const b = document.getElementById("tf-" + tr);
+      if (b) b.className = timeRange === tr ? "on" : "";
+    });["list","grid"].forEach(vm => {
+      const b = document.getElementById("vm-" + vm);
+      if (b) b.className = viewMode === vm ? "on" : "";
+    });
+
+    if (statsOpen) renderStats();
+
+    // Legenda colori
+    const legend = document.getElementById("legend");
+    legend.innerHTML = "";
+    Object.entries(CATEGORIES).forEach(([k, c]) => {
+      const it = document.createElement("div"); it.className = "it";
+      const sw = document.createElement("span"); sw.className = "sw"; sw.style.background = c.color;
+      it.appendChild(sw); it.appendChild(document.createTextNode(c.label));
+      legend.appendChild(it);
+    });
+
+    if (viewMode === "grid") { renderGrid(filtered); return; }
+
+    // RENDER LISTA
+    const groups = {};
+    filtered.forEach(e => {
+      if (!groups[e.date]) groups[e.date] =[];
+      groups[e.date].push(e);
+    });
+    Object.values(groups).forEach(arr => arr.sort((a, b) => a.time.localeCompare(b.time)));
+
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateKey = viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+      const items = groups[dateKey] ||[];
+      const dt = new Date(viewYear, viewMonth, d);
+      const dayName = DAYS_LONG[dt.getDay()];
+      const dateLabel = dayName + " " + String(d).padStart(2, "0") + "/" + String(viewMonth + 1).padStart(2, "0") + "/" + viewYear;
+
+      const dayDiv = document.createElement("div");
+      dayDiv.className = "day" + (items.length === 0 ? " empty-day" : "");
+      
+      const h = document.createElement("div");
+      h.className = "day-h"; h.textContent = dateLabel;
+      dayDiv.appendChild(h);
+
+      if (items.length === 0) {
+        const em = document.createElement("div");
+        em.className = "empty-msg"; em.textContent = "—";
+        dayDiv.appendChild(em);
+        list.appendChild(dayDiv);
+        continue;
+      }
+
+      // Sovrapposizioni
+      const overlapIds = new Set();
+      for (let i = 0; i < items.length - 1; i++) {
+        const { h: dh, m: dm } = parseDuration(items[i].duration);
+        const aEnd = timeToMin(items[i].time) + dh * 60 + dm;
+        const bStart = timeToMin(items[i + 1].time);
+        if (aEnd > 0 && bStart >= 0 && aEnd > bStart) {
+          overlapIds.add(items[i].id);
+          overlapIds.add(items[i + 1].id);
+        }
+      }
+
+      items.forEach(ev => {
+        const catKey = CATEGORIES[ev.category] ? ev.category : "nessuna";
+        const cat = CATEGORIES[catKey] || {color:"#ccc", label:"?"};
+        const row = document.createElement("div");
+        row.className = "row" + (overlapIds.has(ev.id) ? " has-overlap" : "");
+
+        const chip = document.createElement("div");
+        chip.className = "chip"; chip.style.background = cat.color; chip.title = cat.label;
+        row.appendChild(chip);
+
+        const t = document.createElement("div");
+        t.className = "t"; t.textContent = ev.time;
+        row.appendChild(t);
+
+        const n = document.createElement("div");
+        n.className = "n"; n.textContent = ev.name;
+        if (overlapIds.has(ev.id)) {
+          const badge = document.createElement("span");
+          badge.className = "overlap-badge no-print"; badge.textContent = "⚠ sovrapposizione";
+          n.appendChild(badge);
+        }
+        row.appendChild(n);
+
+        const du = document.createElement("div");
+        du.className = "d"; du.textContent = ev.duration || "";
+        row.appendChild(du);
+
+        const act = document.createElement("div");
+        act.className = "act no-print";
+        const editBtn = document.createElement("button"); editBtn.textContent = "✎"; editBtn.onclick = () => window.editEvent(ev.id);
+        const delBtn = document.createElement("button"); delBtn.textContent = "×"; delBtn.className = "del"; delBtn.onclick = () => window.deleteEvent(ev.id);
+        act.appendChild(editBtn); act.appendChild(delBtn);
+        row.appendChild(act);
+        dayDiv.appendChild(row);
+      });
+      list.appendChild(dayDiv);
+    }
+  }
+
+  // ============================================================
+  // GESTIONE GRIGLIA
+  // ============================================================
+  function renderGrid(filtered) {
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+    const groups = {};
+    filtered.forEach(e => {
+      if (!groups[e.date]) groups[e.date] = [];
+      groups[e.date].push(e);
+    });
+    Object.values(groups).forEach(arr => arr.sort((a, b) => a.time.localeCompare(b.time)));
+
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    let hasAny = false;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateKey = viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+      const items = groups[dateKey] ||[];
+      if (items.length === 0) continue;
+      hasAny = true;
+      const dt = new Date(viewYear, viewMonth, d);
+      const dayDiv = document.createElement("div");
+      dayDiv.className = "grid-day";
+
+      const header = document.createElement("div");
+      header.className = "grid-day-header";
+      header.textContent = DAYS_SHORT[dt.getDay()] + " " + String(d).padStart(2, "0") + "/" + String(viewMonth + 1).padStart(2, "0");
+      dayDiv.appendChild(header);
+
+      const timeline = document.createElement("div");
+      timeline.className = "grid-timeline";[0, 4, 8, 12, 16, 20].forEach(h => {
+        const tick = document.createElement("div"); tick.className = "grid-tick"; tick.style.left = (h / 24 * 100) + "%";
+        timeline.appendChild(tick);
+      });
+
+      items.forEach(ev => {
+        const startMin = timeToMin(ev.time);
+        if (startMin < 0) return;
+        const { h, m } = parseDuration(ev.duration);
+        const durMin = h * 60 + m;
+        const block = document.createElement("div");
+        block.className = "grid-block";
+        const catKey = CATEGORIES[ev.category] ? ev.category : "nessuna";
+        const cat = CATEGORIES[catKey] || {color:"#ccc"};
+        block.style.background = cat.color;
+        block.style.left = (startMin / 1440 * 100) + "%";
+        block.style.width = Math.max(durMin > 0 ? durMin / 1440 * 100 : 0.4, 0.4) + "%";
+        block.style.color = isLightColor(cat.color) ? "#111" : "#fff";
+        block.textContent = ev.name;
+        block.title = ev.time + " — " + ev.name + (ev.duration ? " (" + ev.duration + ")" : "");
+        timeline.appendChild(block);
+      });
+      dayDiv.appendChild(timeline);
+      list.appendChild(dayDiv);
+    }
+    if (!hasAny) list.innerHTML = '<div class="empty">Nessun programma trovato.</div>';
+  }
+
+  // ============================================================
+  // STATISTICHE E GESTIONE PANNELLI
+  // ============================================================
+  function renderStats() {
+    const panel = document.getElementById("stats-panel");
+    const inView = eventsInView();
+    let totalMin = 0;
+    inView.forEach(e => { const { h, m } = parseDuration(e.duration); totalMin += h * 60 + m; });
+    const totalH = Math.floor(totalMin / 60); const totalM = totalMin % 60;
+
+    const catMin = {};
+    Object.keys(CATEGORIES).forEach(k => catMin[k] = 0);
+    inView.forEach(e => {
+      const k = CATEGORIES[e.category] ? e.category : "nessuna";
+      const { h, m } = parseDuration(e.duration);
+      catMin[k] = (catMin[k] || 0) + h * 60 + m;
+    });
+
+    let html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
+    html += '<span style="font-weight:700;color:var(--muted);text-transform:uppercase;">Statistiche — ' + MONTHS[viewMonth] + ' ' + viewYear + '</span>';
+    html += '<button onclick="window.toggleStats()" style="font:inherit;font-size:11px;padding:2px 8px;border:1px solid #ccc;background:transparent;">Chiudi ×</button></div>';
+    html += '<div class="stats-grid">';
+    html += '<div class="stats-card"><div class="val">' + inView.length + '</div><div class="lbl">Programmi nel mese</div></div>';
+    html += '<div class="stats-card"><div class="val">' + totalH + 'h' + (totalM > 0 ? ' ' + totalM + 'm' : '') + '</div><div class="lbl">Ore programmate</div></div>';
+    html += '</div>';
+
+    const maxMin = Math.max(...Object.values(catMin).filter(v => v > 0), 1);
+    Object.entries(CATEGORIES).sort((a, b) => (catMin[b[0]] || 0) - (catMin[a[0]] || 0)).forEach(([k, c]) => {
+        const min = catMin[k] || 0;
+        const ch = Math.floor(min / 60); const cm = min % 60;
+        const pct = (min / maxMin * 100).toFixed(0);
+        const lbl = ch > 0 ? ch + "h" + (cm > 0 ? " " + cm + "m" : "") : (cm > 0 ? cm + "m" : "—");
+        html += '<div class="stats-cat-bar">';
+        html += '<span style="width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + c.label + '</span>';
+        html += '<div class="stats-bar-bg"><div class="stats-bar-fill" style="width:' + pct + '%;background:' + c.color + '"></div></div>';
+        html += '<span style="width:55px;text-align:right;">' + lbl + '</span></div>';
+    });
+    panel.innerHTML = html;
+  }
+
+  function renderCatPanel() {
+    const list = document.getElementById("cat-list");
+    list.innerHTML = "";
+    Object.entries(CATEGORIES).forEach(([k, c]) => {
+      const row = document.createElement("div"); row.className = "cat-row";
+      const colorPick = document.createElement("input"); colorPick.type = "color"; colorPick.value = c.color; colorPick.className = "cat-color-pick";
+      colorPick.addEventListener("input", () => { CATEGORIES[k].color = colorPick.value; setDoc(doc(db, "config", "categories"), CATEGORIES); });
+
+      const nameInput = document.createElement("input"); nameInput.type = "text"; nameInput.className = "cat-name-edit"; nameInput.value = c.label;
+      nameInput.addEventListener("change", () => {
+        if (nameInput.value.trim()) { CATEGORIES[k].label = nameInput.value.trim(); setDoc(doc(db, "config", "categories"), CATEGORIES); }
+      });
+
+      const delBtn = document.createElement("button"); delBtn.className = "cat-del"; delBtn.textContent = "×";
+      delBtn.addEventListener("click", () => {
+        if (Object.keys(CATEGORIES).length <= 1) return alert("Deve esserci almeno una categoria.");
+        if (confirm("Eliminare \"" + c.label + "\"?")) { delete CATEGORIES[k]; setDoc(doc(db, "config", "categories"), CATEGORIES); }
+      });
+
+      row.appendChild(colorPick); row.appendChild(nameInput); row.appendChild(delBtn);
+      list.appendChild(row);
+    });
+  }
+
+  // ============================================================
+  // FUNZIONI CRUD SU FIRESTORE
+  // ============================================================
+  window.submitForm = async function() {
+    const date = document.getElementById("f-date").value;
+    const time = document.getElementById("f-time").value;
+    const name = document.getElementById("f-name").value.trim();
+    const dh = document.getElementById("f-dur-h").value;
+    const dm = document.getElementById("f-dur-m").value;
+    const duration = formatDuration(dh, dm);
+    const category = document.getElementById("f-cat").value;
+
+    if (!date || !time || !name) return alert("Compila almeno data, orario e nome.");
+    
+    const selectedDows = getSelectedDows();
+    const[yy, mm, dd] = date.split("-").map(Number);
+
+    const batch = writeBatch(db);
+    
+    if (editingId) {
+      batch.delete(doc(db, "events", editingId));
+    }
+
+    if (selectedDows.length === 0) {
+      const eId = editingId || ("e" + Date.now() + Math.random().toString(36).slice(2, 5));
+      batch.set(doc(db, "events", eId), { id: eId, date, time, name, duration, category });
+    } else {
+      const daysInMonth = new Date(yy, mm, 0).getDate();
+      for (let d = dd; d <= daysInMonth; d++) {
+        const dt = new Date(yy, mm - 1, d);
+        if (!selectedDows.includes(dt.getDay())) continue;
+        const isoDate = yy + "-" + String(mm).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+        const eId = "e" + Date.now() + Math.random().toString(36).slice(2, 5) + "_" + d;
+        batch.set(doc(db, "events", eId), { id: eId, date: isoDate, time, name, duration, category });
+      }
+    }
+    
+    await batch.commit();
+    viewYear = yy; viewMonth = mm - 1;
+    window.resetForm();
+  };
+
+  window.deleteEvent = async function(id) {
+    if (!confirm("Eliminare questa riga?")) return;
+    await deleteDoc(doc(db, "events", id));
+    if (editingId === id) window.resetForm();
+  };
+
+  window.clearAll = async function() {
+    if (!confirm("Sei sicuro di voler eliminare TUTTI I PROGRAMMI DEL MESE VISIBILE dal database Cloud? Operazione irreversibile.")) return;
+    const inView = eventsInView();
+    if(inView.length === 0) return;
+    const batch = writeBatch(db);
+    inView.forEach(ev => batch.delete(doc(db, "events", ev.id)));
+    await batch.commit();
+    window.resetForm();
+  };
+
+  window.copyToNextMonth = async function() {
+    const evts = eventsInView();
+    if (evts.length === 0) return alert("Nessun programma nel mese corrente da copiare.");
+    
+    const nextMonth = viewMonth === 11 ? 0 : viewMonth + 1;
+    const nextYear  = viewMonth === 11 ? viewYear + 1 : viewYear;
+    const nextPrefix = nextYear + "-" + String(nextMonth + 1).padStart(2, "0");
+    const existing  = events.filter(e => e.date && e.date.startsWith(nextPrefix));
+
+    const batch = writeBatch(db);
+    let copied = 0, skipped = 0;
+    const daysInNext = new Date(nextYear, nextMonth + 1, 0).getDate();
+
+    function weekOccurrence(y, m, d) {
+      const wd = new Date(y, m - 1, d).getDay();
+      let first = 1; while (new Date(y, m - 1, first).getDay() !== wd) first++;
+      return Math.round((d - first) / 7) + 1;
+    }
+
+    evts.forEach(ev => {
+      const [yy, mm, dd] = ev.date.split("-").map(Number);
+      const wd  = new Date(yy, mm - 1, dd).getDay();
+      const occ = weekOccurrence(yy, mm, dd);
+
+      let count = 0, targetDay = null;
+      for (let d = 1; d <= daysInNext; d++) {
+        if (new Date(nextYear, nextMonth, d).getDay() === wd) {
+          count++; if (count === occ) { targetDay = d; break; }
+        }
+      }
+      if (!targetDay) { skipped++; return; }
+
+      const targetDate = nextYear + "-" + String(nextMonth + 1).padStart(2, "0") + "-" + String(targetDay).padStart(2, "0");
+      if (existing.some(e => e.date === targetDate && e.time === ev.time && e.name === ev.name)) { skipped++; return; }
+
+      const eId = "e" + Date.now() + Math.random().toString(36).slice(2, 5) + "_cp" + targetDay;
+      batch.set(doc(db, "events", eId), { id: eId, date: targetDate, time: ev.time, name: ev.name, duration: ev.duration, category: ev.category });
+      copied++;
+    });
+
+    if (copied > 0) {
+      await batch.commit();
+      viewYear = nextYear; viewMonth = nextMonth;
+      alert(`${copied} programmi copiati in ${MONTHS[nextMonth]} ${nextYear}.`);
+    } else {
+      alert("Nessun programma copiato (forse esistono già tutti o non c'è corrispondenza nel calendario).");
+    }
+  };
+
+  // ============================================================
+  // FUNZIONI UI / GLOBALI
+  // ============================================================
+  window.editEvent = function(id) {
+    const ev = events.find(e => e.id === id);
+    if (!ev) return;
+    editingId = id;
+    document.getElementById("f-cat").value = CATEGORIES[ev.category] ? ev.category : "nessuna";
+    document.getElementById("f-date").value = ev.date;
+    document.getElementById("f-time").value = ev.time;
+    document.getElementById("f-name").value = ev.name;
+    const { h, m } = parseDuration(ev.duration);
+    document.getElementById("f-dur-h").value = h || "";
+    document.getElementById("f-dur-m").value = m || "";
+    document.getElementById("f-preset").value = "single";
+    setSelectedDows([]);
+    document.getElementById("f-go").textContent = "Aggiorna";
+    document.getElementById("f-cancel").style.display = "inline-block";
+  };
+
+  window.resetForm = function() {
+    editingId = null;
+    document.getElementById("f-date").value = "";
+    document.getElementById("f-time").value = "";
+    document.getElementById("f-name").value = "";
+    document.getElementById("f-dur-h").value = "";
+    document.getElementById("f-dur-m").value = "";
+    document.getElementById("f-preset").value = "single";
+    setSelectedDows([]);
+    document.getElementById("f-go").textContent = "Salva";
+    document.getElementById("f-cancel").style.display = "none";
+  };
+
+  window.addCategory = function() {
+    const nameInput = document.getElementById("cat-new-name");
+    const name = nameInput.value.trim();
+    if (!name) return alert("Inserisci un nome.");
+    let key = name.toLowerCase().replace(/[^a-z0-9]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "") || "cat";
+    if (CATEGORIES[key]) key = key + "_" + Date.now().toString(36).slice(-4);
+    CATEGORIES[key] = { label: name, color: document.getElementById("cat-new-color").value };
+    setDoc(doc(db, "config", "categories"), CATEGORIES);
+    nameInput.value = "";
+  };
+
+  window.toggleCatPanel = function() {
+    const panel = document.getElementById("cat-panel");
+    if (panel.style.display !== "none") { panel.style.display = "none"; }
+    else { panel.style.display = "block"; renderCatPanel(); }
+  };
+
+  window.toggleStats = function() { statsOpen = !statsOpen; document.getElementById("stats-panel").style.display = statsOpen ? "block" : "none"; if(statsOpen) renderStats(); };
+  window.setTimeRange = function(tr) { timeRange = tr; render(); };
+  window.setViewMode = function(vm) { viewMode = vm; render(); };
+  window.printPDF = function() { window.print(); };
+  
+  // Barra ricerca e Ricorrenza UI
+  document.getElementById("f-search").addEventListener("input", (e) => { searchQuery = e.target.value; render(); });["f-name", "f-dur-h", "f-dur-m"].forEach(id => { document.getElementById(id).addEventListener("keydown", (e) => { if (e.key === "Enter") window.submitForm(); }); });
+
+  const PRESETS = { single: [], every: [1,2,3,4,5,6,0], no_sun: [1,2,3,4,5,6], weekdays:[1,2,3,4,5] };
+  function getSelectedDows() { return Array.from(document.querySelectorAll("#f-dow button.on")).map(b => parseInt(b.dataset.dow, 10)); }
+  function setSelectedDows(dows) {
+    document.querySelectorAll("#f-dow button").forEach(b => b.classList.toggle("on", dows.includes(parseInt(b.dataset.dow, 10))));
+    const names =[1,2,3,4,5,6,0].filter(d => dows.includes(d)).map(d => DAYS_SHORT[d]);
+    document.getElementById("f-hint").textContent = dows.length === 0 ? "Solo questo giorno" : (dows.length===7 ? "Tutti i giorni del mese" : "Ogni " + names.join(", ") + " dal giorno scelto");
+  }
+  document.querySelectorAll("#f-dow button").forEach(btn => {
+    btn.addEventListener("click", () => { btn.classList.toggle("on"); document.getElementById("f-preset").value = "custom"; setSelectedDows(getSelectedDows()); });
+  });
+  document.getElementById("f-preset").addEventListener("change", (e) => {
+    const p = e.target.value;
+    if (p === "same_dow") {
+      const dt = document.getElementById("f-date").value;
+      setSelectedDows(dt ?[new Date(dt).getDay()] : []);
+    } else if(PRESETS[p]) setSelectedDows(PRESETS[p]);
+  });
+
+  // ============================================================
+  // BACKUP, ESPORTAZIONE E IMPORTAZIONE
+  // ============================================================
+  window.downloadBackup = function() {
+    const data = { events: events, categories: CATEGORIES };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `backup_programmazione_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+  };
+
+  window.exportCSV = function() {
+    const inView = eventsInView();
+    if (inView.length === 0) return alert("Nessun programma.");
+    const rows = [["Data", "Giorno", "Orario", "Nome programma", "Durata", "Categoria"]];
+    inView.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)).forEach(e => {
+      const [yy, mm, dd] = e.date.split("-");
+      rows.push([`${dd}/${mm}/${yy}`, DAYS_LONG[new Date(e.date).getDay()], e.time, e.name, e.duration || "", (CATEGORIES[e.category]||{label:"Nessuna"}).label]);
+    });
+    const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(",")).join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
+    a.download = `programmazione_${MONTHS[viewMonth]}_${viewYear}.csv`;
+    a.click();
+  };
+
+  window.triggerImport = function() { document.getElementById("f-import").click(); };
+  document.getElementById("f-import").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(ev) {
+      try {
+        let importedEvents =[];
+        if (file.name.endsWith(".json")) {
+           const parsed = JSON.parse(ev.target.result);
+           importedEvents = parsed.events || parsed;
+        } else {
+           const match = ev.target.result.match(/<script[^>]*id="events-data"[^>]*>([\s\S]*?)<\/script>/);
+           if (!match) return alert("Nessun dato trovato nel file HTML.");
+           importedEvents = JSON.parse(match[1].trim());
+        }
+        
+        if (!confirm(`Trovati ${importedEvents.length} eventi nel file. Procedo all'importazione su Firebase? (ci vorrà qualche secondo)`)) return;
+        
+        const statusEl = document.getElementById("sync-status");
+        statusEl.textContent = "Sincronizzazione massiva in corso...";
+        
+        // Firestore limita i batch a 500 operazioni
+        let batch = writeBatch(db);
+        let count = 0;
+        for (let i=0; i<importedEvents.length; i++) {
+            const evData = importedEvents[i];
+            batch.set(doc(db, "events", evData.id), evData);
+            count++;
+            if (count === 490) {
+               await batch.commit();
+               batch = writeBatch(db);
+               count = 0;
+            }
+        }
+        if (count > 0) await batch.commit();
+        alert("Importazione su Firebase completata!");
+      } catch (err) { alert("Errore importazione: " + err.message); }
+    };
+    reader.readAsText(file);
+    this.value = "";
+  });
+</script>
+</body>
+</html>
