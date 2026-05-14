@@ -536,13 +536,13 @@
   <div class="header-top">
     <h1 id="header-title">💰 Cassa Comune</h1>
     <div class="header-actions">
-      <button class="header-btn export-btn" onclick="exportCSV()">📤 CSV</button>
-      <button class="header-btn gallery-btn" onclick="openGallery()">📸 Galleria</button>
+      <button class="header-btn export-btn" onclick="window._app.exportCSV()">📤 CSV</button>
+      <button class="header-btn gallery-btn" onclick="window._app.openGallery()">📸 Galleria</button>
     </div>
   </div>
   <div class="cassa-switcher">
-    <button class="sw-btn active-comune" id="sw-comune" onclick="switchCassa('comune')">💰 Cassa Comune</button>
-    <button class="sw-btn" id="sw-trasferte" onclick="switchCassa('trasferte')">✈️ Trasferte</button>
+    <button class="sw-btn active-comune" id="sw-comune" onclick="window._app.switchCassa('comune')">💰 Cassa Comune</button>
+    <button class="sw-btn" id="sw-trasferte" onclick="window._app.switchCassa('trasferte')">✈️ Trasferte</button>
   </div>
   <div class="balance-card" id="balance-card">
     <div>
@@ -564,8 +564,8 @@
       <div class="full" id="tipo-row" style="display:none">
         <label>Tipo</label>
         <div class="tipo-toggle">
-          <button class="tipo-btn active-out" id="btn-out" onclick="setTipo('out')">↓ Uscita</button>
-          <button class="tipo-btn"            id="btn-in"  onclick="setTipo('in')">↑ Entrata</button>
+          <button class="tipo-btn active-out" id="btn-out" onclick="window._app.setTipo('out')">↓ Uscita</button>
+          <button class="tipo-btn"            id="btn-in"  onclick="window._app.setTipo('in')">↑ Entrata</button>
         </div>
       </div>
 
@@ -609,7 +609,7 @@
       <div class="full">
         <label>Scontrino / Foto</label>
         <div class="upload-area" onclick="document.getElementById('file-input').click()">
-          <input type="file" id="file-input" accept="image/*" capture="environment" onchange="previewFile(this)" />
+          <input type="file" id="file-input" accept="image/*" capture="environment" onchange="window._app.previewFile(this)" />
           <label class="upload-label" id="upload-label">📎 Tocca per allegare foto</label>
           <img id="upload-preview" class="upload-preview" style="display:none" />
         </div>
@@ -620,8 +620,8 @@
     </div>
 
     <div class="form-actions">
-      <button class="submit-btn" id="submit-btn" onclick="submitMovement()">Aggiungi movimento</button>
-      <button class="cancel-edit-btn" id="cancel-edit-btn" onclick="cancelEdit()">✕</button>
+      <button class="submit-btn" id="submit-btn" onclick="window._app.submitMovement()">Aggiungi movimento</button>
+      <button class="cancel-edit-btn" id="cancel-edit-btn" onclick="window._app.cancelEdit()">✕</button>
     </div>
   </div>
 
@@ -645,11 +645,447 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Scontrino</div>
-      <button class="modal-close" onclick="closeModal('photo-modal')">✕</button>
+      <button class="modal-close" onclick="window._app.closeModal('photo-modal')">✕</button>
     </div>
     <img class="photo-viewer-img" id="photo-viewer-img" src="" alt="Scontrino" />
     <div style="margin-top:10px;font-size:13px;color:var(--text-muted)" id="photo-viewer-info"></div>
     <a id="photo-download-btn" href="#" download
       style="display:block;margin-top:14px;text-align:center;padding:10px 0;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;text-decoration:none;letter-spacing:0.3px;">
       ⬇️ Scarica foto
-    </
+    </a>
+  </div>
+</div>
+
+<!-- Modal galleria -->
+<div class="modal-overlay" id="gallery-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📸 Galleria</div>
+      <button class="modal-close" onclick="window._app.closeModal('gallery-modal')">✕</button>
+    </div>
+    <div class="gallery-filter" id="gallery-filter"></div>
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </div>
+</div>
+
+<!-- Confirm delete -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-sheet">
+    <div class="confirm-title">Eliminare movimento?</div>
+    <div class="confirm-desc">Questa azione è irreversibile.</div>
+    <div class="confirm-actions">
+      <button class="btn-cancel" onclick="window._app.closeConfirm()">Annulla</button>
+      <button class="btn-confirm-del" onclick="window._app.confirmDelete()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, query, orderBy, onSnapshot }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ── FIREBASE ────────────────────────────────────────────────────────────── */
+const app = initializeApp({
+  apiKey:            "AIzaSyDn0-T7wQOG9BiFcM0zikHKhiv-AopJ3Fw",
+  authDomain:        "cassa-comune-1835f.firebaseapp.com",
+  projectId:         "cassa-comune-1835f",
+  storageBucket:     "cassa-comune-1835f.firebasestorage.app",
+  messagingSenderId: "176811876172",
+  appId:             "1:176811876172:web:d5cfdabd82fa89d8b639e9"
+});
+const db = getFirestore(app);
+
+/* ── CONFIG ──────────────────────────────────────────────────────────────── */
+const CASSE = {
+  comune:    { col:"movements",  base:200, monthlyReset:true,  tipoToggle:false, label:"💰 Cassa Comune", balanceLabel:"Saldo mensile" },
+  trasferte: { col:"trasferte",  base:0,   monthlyReset:false, tipoToggle:true,  label:"✈️ Trasferte",    balanceLabel:"Saldo totale"  }
+};
+
+/* ── STATO ───────────────────────────────────────────────────────────────── */
+let currentCassa    = "comune";
+let movementsData   = { comune:[], trasferte:[] };
+let currentDate     = null;
+let currentTipo     = "out";
+let activeFilter    = "all";
+let pendingDeleteId = null;
+let pendingDeleteUrl= null;
+let editingId       = null;
+let editingDate     = null;
+let editingOldPhoto = null;
+
+function mv() { return movementsData[currentCassa]; }
+
+/* ── UTILS (dichiarate subito, hoisted) ──────────────────────────────────── */
+function formatCurrency(n, withEuro=true) {
+  return (withEuro?"€":"") + n.toFixed(2).replace(".",",");
+}
+function formatDate(dateStr) {
+  const [y,m,d] = dateStr.split("-");
+  return `${parseInt(d)} ${["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"][parseInt(m)-1]} ${y}`;
+}
+function formatMonth(ym) {
+  const [y,m] = ym.split("-");
+  return ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"][parseInt(m)-1] + " " + y;
+}
+function esc(str) {
+  if (!str) return "";
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function showToast(msg, type="") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show " + type;
+  setTimeout(() => t.className = "toast", 2800);
+}
+function openModal(id)  { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+/* ── RENDER ──────────────────────────────────────────────────────────────── */
+function renderFilterBar() {
+  const cats = ["all", ...new Set(mv().map(m => m.cat).filter(Boolean))];
+  document.getElementById("filter-bar").innerHTML = cats.map(cat => {
+    const label = cat === "all" ? "Tutti" : cat;
+    return `<button class="cat-chip ${activeFilter===cat?"active":""}" data-cat="${cat}" onclick="window._app.setFilter('${cat}')">${label}</button>`;
+  }).join("");
+}
+
+function renderList() {
+  const container = document.getElementById("list-container");
+  const countEl   = document.getElementById("results-count");
+  const filtered  = activeFilter === "all" ? mv() : mv().filter(m => m.cat === activeFilter);
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state">${activeFilter==="all"?"Nessun movimento ancora.<br>Aggiungi il primo!":"Nessun movimento per questa categoria."}</div>`;
+    countEl.textContent = "";
+    return;
+  }
+  countEl.textContent = filtered.length + " movimenti";
+
+  const groups = {};
+  filtered.forEach(m => { if (!groups[m.date]) groups[m.date]=[]; groups[m.date].push(m); });
+  const dates = Object.keys(groups).sort((a,b) => b.localeCompare(a));
+
+  container.innerHTML = dates.map(date => {
+    const rows = groups[date].map(m => {
+      const isOut    = m.tipo !== "in";
+      const sign     = isOut ? "−" : "+";
+      const icon     = isOut ? "↓" : "↑";
+      const catBadge = m.cat ? `<span class="movement-cat">${esc(m.cat)}</span>` : "";
+      const photoBtn = m.photoUrl
+        ? `<button class="photo-btn" onclick="window._app.viewPhoto('${m.photoUrl}','${esc(m.name)}','${esc(m.desc)}','${m.date}')">📎</button>`
+        : "";
+      return `
+        <div class="movement-item ${isOut?"is-out":"is-in"}">
+          <div class="movement-icon">${icon}</div>
+          <div class="movement-info">
+            <div class="movement-name">${esc(m.name)}</div>
+            <div class="movement-desc">${esc(m.desc)}</div>
+            ${catBadge}
+          </div>
+          <div class="movement-right">
+            <div class="movement-amount">${sign}${formatCurrency(m.amount)}</div>
+            <div class="item-actions">
+              ${photoBtn}
+              <button class="edit-btn"   onclick="window._app.startEdit('${m.id}')">✏️</button>
+              <button class="delete-btn" onclick="window._app.askDelete('${m.id}','${m.photoUrl||""}')">🗑</button>
+            </div>
+          </div>
+        </div>`;
+    }).join("");
+    return `<div class="day-group"><div class="day-label">${formatDate(date)}</div>${rows}</div>`;
+  }).join("");
+}
+
+function updateBalance() {
+  const cfg = CASSE[currentCassa];
+  let subset = mv();
+  if (cfg.monthlyReset) {
+    const ym = currentDate ? currentDate.slice(0,7) : new Date().toISOString().slice(0,7);
+    subset = subset.filter(m => m.date && m.date.startsWith(ym));
+  }
+  let balance=cfg.base, totalIn=0, totalOut=0;
+  subset.forEach(m => {
+    if (m.tipo==="in") { balance+=m.amount; totalIn+=m.amount; }
+    else               { balance-=m.amount; totalOut+=m.amount; }
+  });
+  document.getElementById("balance-display").textContent = formatCurrency(balance, true);
+  const outEl = document.getElementById("stat-out");
+  const inEl  = document.getElementById("stat-in");
+  if (outEl) outEl.textContent = formatCurrency(totalOut, true);
+  if (inEl)  inEl.textContent  = formatCurrency(totalIn,  true);
+}
+
+function resetForm() {
+  editingId=null; editingDate=null; editingOldPhoto=null;
+  document.getElementById("inp-name").value   = "";
+  document.getElementById("inp-desc").value   = "";
+  document.getElementById("inp-amount").value = "";
+  document.getElementById("inp-cat").value    = "🛒 Spesa";
+  document.getElementById("file-input").value = "";
+  document.getElementById("date-display-text").textContent = currentDate ? formatDate(currentDate) : "Caricamento...";
+  document.getElementById("upload-preview").style.display  = "none";
+  document.getElementById("upload-label").textContent      = "📎 Tocca per allegare foto";
+  document.getElementById("upload-progress").style.display = "none";
+  document.getElementById("upload-bar").style.width        = "0%";
+  document.getElementById("form-card").classList.remove("editing");
+  document.getElementById("form-title").textContent        = "Nuovo movimento";
+  document.getElementById("submit-btn").textContent        = "Aggiungi movimento";
+  document.getElementById("cancel-edit-btn").style.display = "none";
+  currentTipo = "out";
+  if (CASSE[currentCassa].tipoToggle) setTipoUI("out");
+}
+
+function setTipoUI(tipo) {
+  currentTipo = tipo;
+  document.getElementById("btn-out").className = tipo==="out" ? "tipo-btn active-out" : "tipo-btn";
+  document.getElementById("btn-in").className  = tipo==="in"  ? "tipo-btn active-in"  : "tipo-btn";
+}
+
+/* ── CLOUDINARY ──────────────────────────────────────────────────────────── */
+async function uploadPhoto(file) {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("upload_preset", "davgnwndp");
+  fd.append("folder", "cassa-comune");
+  document.getElementById("upload-progress").style.display = "block";
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://api.cloudinary.com/v1_1/davgnwndp/image/upload");
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable)
+        document.getElementById("upload-bar").style.width = (e.loaded/e.total*100)+"%";
+    };
+    xhr.onload = () => xhr.status===200
+      ? resolve(JSON.parse(xhr.responseText).secure_url)
+      : reject(new Error("Upload fallito"));
+    xhr.onerror = () => reject(new Error("Errore di rete"));
+    xhr.send(fd);
+  });
+}
+
+/* ── FUNZIONI GLOBALI (esposte via window._app) ──────────────────────────── */
+window._app = {
+
+  switchCassa(cassa) {
+    currentCassa = cassa;
+    const cfg = CASSE[cassa];
+    document.getElementById("sw-comune").className    = "sw-btn" + (cassa==="comune"    ? " active-comune"    : "");
+    document.getElementById("sw-trasferte").className = "sw-btn" + (cassa==="trasferte" ? " active-trasferte" : "");
+    document.getElementById("header-title").textContent  = cfg.label;
+    document.getElementById("balance-card").className    = "balance-card" + (cassa==="trasferte" ? " trasferte-card" : "");
+    document.getElementById("balance-label").textContent = cfg.balanceLabel;
+    const statsEl = document.getElementById("balance-stats");
+    if (cassa==="trasferte") {
+      statsEl.innerHTML = '<span class="in">↑ Entrate: <span id="stat-in">€0,00</span></span><span class="out" style="margin-left:12px">↓ Uscite: <span id="stat-out">€0,00</span></span>';
+    } else {
+      statsEl.innerHTML = '<span class="out">↓ Uscite mese: <span id="stat-out">€0,00</span></span>';
+    }
+    document.getElementById("tipo-row").style.display = cfg.tipoToggle ? "block" : "none";
+    currentTipo = "out";
+    activeFilter = "all";
+    this.cancelEdit();
+    renderFilterBar();
+    renderList();
+    updateBalance();
+  },
+
+  setTipo(tipo) { setTipoUI(tipo); },
+
+  previewFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById("upload-preview");
+      img.src = e.target.result;
+      img.style.display = "block";
+      document.getElementById("upload-label").textContent = "✅ " + file.name;
+    };
+    reader.readAsDataURL(file);
+  },
+
+  async submitMovement() {
+    const name   = document.getElementById("inp-name").value.trim();
+    const date   = editingId ? editingDate : currentDate;
+    const desc   = document.getElementById("inp-desc").value.trim();
+    const amount = parseFloat(document.getElementById("inp-amount").value);
+    const cat    = document.getElementById("inp-cat").value;
+    const fi     = document.getElementById("file-input");
+    const tipo   = CASSE[currentCassa].tipoToggle ? currentTipo : "out";
+
+    if (!name||!date||!desc||isNaN(amount)||amount<=0) { showToast("Compila tutti i campi","error"); return; }
+
+    const btn = document.getElementById("submit-btn");
+    btn.disabled = true;
+    btn.textContent = editingId ? "Aggiornamento..." : "Salvataggio...";
+
+    try {
+      let photoUrl = editingOldPhoto;
+      if (fi.files[0]) photoUrl = await uploadPhoto(fi.files[0]);
+
+      const col = CASSE[currentCassa].col;
+      if (editingId) {
+        await updateDoc(doc(db, col, editingId), {name,date,desc,amount,cat,tipo,photoUrl});
+        showToast("Movimento aggiornato ✓","success");
+      } else {
+        await addDoc(collection(db, col), {name,date,desc,amount,cat,tipo,photoUrl,createdAt:Date.now()});
+        showToast("Movimento aggiunto ✓","success");
+      }
+      resetForm();
+    } catch(e) {
+      console.error(e);
+      showToast("Errore nel salvataggio","error");
+    }
+    btn.disabled = false;
+    btn.textContent = "Aggiungi movimento";
+  },
+
+  startEdit(id) {
+    const m = mv().find(x => x.id===id);
+    if (!m) return;
+    editingId=id; editingDate=m.date; editingOldPhoto=m.photoUrl||null;
+    document.getElementById("inp-name").value   = m.name;
+    document.getElementById("inp-desc").value   = m.desc;
+    document.getElementById("inp-amount").value = m.amount;
+    document.getElementById("inp-cat").value    = m.cat||"📦 Altro";
+    document.getElementById("date-display-text").textContent = formatDate(m.date);
+    if (m.photoUrl) {
+      const img = document.getElementById("upload-preview");
+      img.src=m.photoUrl; img.style.display="block";
+      document.getElementById("upload-label").textContent = "✅ Foto esistente (sostituisci se vuoi)";
+    }
+    if (CASSE[currentCassa].tipoToggle) setTipoUI(m.tipo||"out");
+    document.getElementById("form-card").classList.add("editing");
+    document.getElementById("form-title").textContent        = "✏️ Modifica movimento";
+    document.getElementById("submit-btn").textContent        = "Salva modifiche";
+    document.getElementById("cancel-edit-btn").style.display = "block";
+    document.getElementById("form-card").scrollIntoView({behavior:"smooth"});
+  },
+
+  cancelEdit() { editingId=null; editingDate=null; editingOldPhoto=null; resetForm(); },
+
+  setFilter(cat) {
+    activeFilter = cat;
+    document.querySelectorAll(".cat-chip").forEach(c => c.classList.toggle("active", c.dataset.cat===cat));
+    renderList();
+  },
+
+  viewPhoto(url, name, desc, date) {
+    document.getElementById("photo-viewer-img").src = url;
+    document.getElementById("photo-viewer-info").textContent = `${name} • ${desc} • ${formatDate(date)}`;
+    const btn = document.getElementById("photo-download-btn");
+    btn.onclick = async e => {
+      e.preventDefault();
+      try {
+        const res=await fetch(url); const blob=await res.blob();
+        const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+        a.download=`scontrino_${name}_${date}.jpg`; a.click(); URL.revokeObjectURL(a.href);
+      } catch(_) { window.open(url,"_blank"); }
+    };
+    openModal("photo-modal");
+  },
+
+  openGallery() {
+    const withPhoto = mv().filter(m => m.photoUrl);
+    const grid=document.getElementById("gallery-grid"), filterEl=document.getElementById("gallery-filter");
+    if (withPhoto.length===0) {
+      grid.innerHTML='<div class="empty-state" style="grid-column:1/-1">Nessuna foto ancora.</div>';
+      filterEl.innerHTML=""; openModal("gallery-modal"); return;
+    }
+    const months=[...new Set(withPhoto.map(m=>m.date.substring(0,7)))].sort((a,b)=>b.localeCompare(a));
+    let activeMonth="all";
+    const render = () => {
+      const f=activeMonth==="all"?withPhoto:withPhoto.filter(m=>m.date.startsWith(activeMonth));
+      grid.innerHTML=f.map(m=>`
+        <div class="gallery-thumb" onclick="window._app.viewPhoto('${m.photoUrl}','${esc(m.name)}','${esc(m.desc)}','${m.date}')">
+          <img src="${m.photoUrl}" loading="lazy"/>
+          <div class="thumb-label">${esc(m.name)}<br>${formatDate(m.date)}</div>
+        </div>`).join("");
+    };
+    filterEl.innerHTML=["all",...months].map(mo=>
+      `<button class="filter-chip ${mo===activeMonth?"active":""}" data-mo="${mo}" onclick="window._app.setMonthFilter('${mo}')">${mo==="all"?"Tutte":formatMonth(mo)}</button>`
+    ).join("");
+    this.setMonthFilter = mo => {
+      activeMonth=mo;
+      document.querySelectorAll("#gallery-filter .filter-chip").forEach(c=>c.classList.toggle("active",c.dataset.mo===mo));
+      render();
+    };
+    render();
+    openModal("gallery-modal");
+  },
+
+  exportCSV() {
+    const data=mv();
+    if (data.length===0) { showToast("Nessun dato da esportare","error"); return; }
+    const isTr=currentCassa==="trasferte";
+    const header=isTr?["Data","Nome","Motivo","Categoria","Tipo","Importo (€)"]:["Data","Nome","Motivo","Categoria","Importo (€)"];
+    const rows=[header,...data.map(m=>isTr
+      ?[m.date,m.name,m.desc,m.cat||"",(m.tipo==="in"?"Entrata":"Uscita"),(m.tipo==="out"?"-":"+")+m.amount.toFixed(2)]
+      :[m.date,m.name,m.desc,m.cat||"","-"+m.amount.toFixed(2)]
+    )];
+    const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+    const url=URL.createObjectURL(blob);
+    const a=Object.assign(document.createElement("a"),{href:url,download:`cassa-${currentCassa}-${new Date().toISOString().slice(0,10)}.csv`});
+    a.click(); URL.revokeObjectURL(url);
+    showToast("CSV scaricato ✓","success");
+  },
+
+  askDelete(id, url) {
+    pendingDeleteId=id; pendingDeleteUrl=url;
+    document.getElementById("confirm-overlay").classList.add("open");
+  },
+
+  closeConfirm() {
+    pendingDeleteId=null; pendingDeleteUrl=null;
+    document.getElementById("confirm-overlay").classList.remove("open");
+  },
+
+  async confirmDelete() {
+    if (!pendingDeleteId) return;
+    try {
+      await deleteDoc(doc(db, CASSE[currentCassa].col, pendingDeleteId));
+      if (editingId===pendingDeleteId) this.cancelEdit();
+      showToast("Movimento eliminato","success");
+    } catch(e) { showToast("Errore eliminazione","error"); }
+    this.closeConfirm();
+  },
+
+  openModal,
+  closeModal
+};
+
+/* ── INIT ────────────────────────────────────────────────────────────────── */
+// Data da internet
+(async () => {
+  try {
+    const res  = await fetch("https://worldtimeapi.org/api/timezone/Europe/Rome");
+    const data = await res.json();
+    currentDate = data.datetime.slice(0,10);
+  } catch(_) {
+    const now=new Date();
+    currentDate=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  }
+  const el=document.getElementById("date-display-text");
+  if (el) el.textContent = formatDate(currentDate);
+})();
+
+// Listener Firestore entrambe le casse
+Object.entries(CASSE).forEach(([key, cfg]) => {
+  const q = query(collection(db, cfg.col), orderBy("date","desc"));
+  onSnapshot(q, snap => {
+    movementsData[key] = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    if (currentCassa===key) { renderFilterBar(); renderList(); updateBalance(); }
+  }, err => console.error("Firestore error ["+key+"]:", err));
+});
+
+// Event listeners modali
+document.querySelectorAll(".modal-overlay").forEach(el =>
+  el.addEventListener("click", e => { if (e.target===el) el.classList.remove("open"); })
+);
+</script>
+</body>
+</html>
