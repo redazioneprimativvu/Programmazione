@@ -7,565 +7,187 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #242424;
-    --border: #2e2e2e;
-    --text: #f0ece4;
-    --text-muted: #7a7a7a;
-    --green: #4ade80;
-    --green-dim: rgba(74, 222, 128, 0.12);
-    --red: #f87171;
-    --red-dim: rgba(248, 113, 113, 0.12);
-    --gold: #d4a843;
-    --gold-dim: rgba(212, 168, 67, 0.15);
-    --blue: #60a5fa;
-    --blue-dim: rgba(96, 165, 250, 0.12);
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424; --border: #2e2e2e;
+    --text: #f0ece4; --text-muted: #7a7a7a;
+    --green: #4ade80; --green-dim: rgba(74,222,128,0.12);
+    --red: #f87171;   --red-dim:   rgba(248,113,113,0.12);
+    --gold: #d4a843;  --gold-dim:  rgba(212,168,67,0.15);
+    --blue: #60a5fa;  --blue-dim:  rgba(96,165,250,0.12);
     --radius: 14px;
   }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100dvh;
-    padding-bottom: 100px;
-  }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100dvh; padding-bottom:100px; }
 
   /* HEADER */
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 20px 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(12px);
-  }
+  header { background:var(--surface); border-bottom:1px solid var(--border); padding:20px 20px 16px; position:sticky; top:0; z-index:100; backdrop-filter:blur(12px); }
+  .header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  h1 { font-family:'DM Serif Display',serif; font-size:22px; letter-spacing:-0.3px; }
+  .header-actions { display:flex; gap:8px; }
+  .header-btn { border:1px solid var(--border); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; padding:7px 13px; border-radius:999px; cursor:pointer; letter-spacing:0.3px; }
+  .gallery-btn { background:var(--gold-dim); border-color:var(--gold); color:var(--gold); }
+  .export-btn  { background:var(--blue-dim);  border-color:var(--blue);  color:var(--blue); }
 
-  .header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
+  /* SWITCHER */
+  .cassa-switcher { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; }
+  .sw-btn { padding:9px 0; border-radius:10px; border:1px solid var(--border); background:var(--surface2); color:var(--text-muted); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+  .sw-btn.active-comune    { background:var(--gold-dim); border-color:var(--gold); color:var(--gold); }
+  .sw-btn.active-trasferte { background:var(--blue-dim); border-color:var(--blue); color:var(--blue); }
 
-  h1 { font-family: 'DM Serif Display', serif; font-size: 22px; letter-spacing: -0.3px; }
-
-  .header-actions { display: flex; gap: 8px; }
-
-  .header-btn {
-    border: 1px solid var(--border);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 7px 13px;
-    border-radius: 999px;
-    cursor: pointer;
-    letter-spacing: 0.3px;
-  }
-
-  .gallery-btn { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
-  .export-btn  { background: var(--blue-dim);  border-color: var(--blue);  color: var(--blue); }
-
-  .balance-card {
-    background: linear-gradient(135deg, var(--gold-dim), transparent);
-    border: 1px solid var(--gold);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .balance-label { font-size: 11px; font-weight: 500; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
-  .balance-amount { font-family: 'DM Serif Display', serif; font-size: 30px; color: var(--gold); line-height: 1; }
-  .balance-stats { display: flex; gap: 16px; font-size: 12px; margin-top: 4px; }
-  .balance-stats .in  { color: var(--green); }
-  .balance-stats .out { color: var(--red); }
-
-
-  /* CASSA SWITCHER */
-  .cassa-switcher {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-
-  .sw-btn {
-    padding: 9px 0;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--text-muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.2px;
-  }
-
-  .sw-btn.active-comune    { background: var(--gold-dim);  border-color: var(--gold);  color: var(--gold); }
-  .sw-btn.active-trasferte { background: var(--blue-dim);  border-color: var(--blue);  color: var(--blue); }
-
-  /* TIPO TOGGLE (solo trasferte) */
-  .tipo-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-  .tipo-btn {
-    padding: 11px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    background: var(--surface2);
-    color: var(--text-muted);
-    transition: all 0.2s;
-  }
-
-  .tipo-btn.active-out { background: var(--red-dim);   border-color: var(--red);   color: var(--red); }
-  .tipo-btn.active-in  { background: var(--green-dim); border-color: var(--green); color: var(--green); }
-
-  /* balance trasferte in blu */
-  .balance-card.trasferte-card {
-    background: linear-gradient(135deg, var(--blue-dim), transparent);
-    border-color: var(--blue);
-  }
-  .trasferte-card .balance-label  { color: var(--blue); }
-  .trasferte-card .balance-amount { color: var(--blue); }
+  /* BALANCE */
+  .balance-card { background:linear-gradient(135deg,var(--gold-dim),transparent); border:1px solid var(--gold); border-radius:var(--radius); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; }
+  .balance-card.trasferte-card { background:linear-gradient(135deg,var(--blue-dim),transparent); border-color:var(--blue); }
+  .trasferte-card .balance-label, .trasferte-card .balance-amount { color:var(--blue); }
+  .balance-label { font-size:11px; font-weight:500; color:var(--gold); text-transform:uppercase; letter-spacing:1px; }
+  .balance-amount { font-family:'DM Serif Display',serif; font-size:30px; color:var(--gold); line-height:1; }
+  .balance-stats { display:flex; gap:14px; font-size:12px; margin-top:4px; flex-wrap:wrap; }
+  .balance-stats .in  { color:var(--green); }
+  .balance-stats .out { color:var(--red); }
 
   /* MAIN */
-  main { padding: 20px; }
+  main { padding:20px; }
 
   /* FILTER BAR */
-  .filter-bar {
-    display: flex;
-    gap: 7px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    margin-bottom: 18px;
-    scrollbar-width: none;
-  }
-  .filter-bar::-webkit-scrollbar { display: none; }
-
-  .cat-chip {
-    flex-shrink: 0;
-    padding: 6px 13px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    white-space: nowrap;
-    transition: all 0.15s;
-  }
-  .cat-chip.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+  .filter-bar { display:flex; gap:7px; overflow-x:auto; padding-bottom:4px; margin-bottom:18px; scrollbar-width:none; }
+  .filter-bar::-webkit-scrollbar { display:none; }
+  .cat-chip { flex-shrink:0; padding:6px 13px; border-radius:999px; border:1px solid var(--border); background:var(--surface2); color:var(--text-muted); font-size:12px; font-weight:500; cursor:pointer; font-family:'DM Sans',sans-serif; white-space:nowrap; transition:all 0.15s; }
+  .cat-chip.active { border-color:var(--gold); color:var(--gold); background:var(--gold-dim); }
 
   /* FORM */
-  .form-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px;
-    margin-bottom: 24px;
-    transition: border-color 0.2s;
-  }
+  .form-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; margin-bottom:24px; transition:border-color 0.2s; }
+  .form-card.editing { border-color:var(--blue); }
+  .form-card.editing .form-title { color:var(--blue); }
+  .form-title { font-size:13px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; transition:color 0.2s; }
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .form-grid .full { grid-column:1/-1; }
+  label { display:block; font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:5px; }
+  input, select { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:11px 13px; font-family:'DM Sans',sans-serif; font-size:15px; color:var(--text); outline:none; transition:border-color 0.2s; -webkit-appearance:none; }
+  input:focus, select:focus { border-color:var(--gold); }
+  input::placeholder { color:var(--text-muted); }
+  select option { background:#1a1a1a; }
+  .date-display { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:11px 13px; font-size:14px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+  .date-display span { color:var(--text); font-weight:500; }
 
-  .form-card.editing { border-color: var(--blue); }
-  .form-card.editing .form-title { color: var(--blue); }
+  /* TIPO TOGGLE */
+  .tipo-toggle { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .tipo-btn { padding:11px; border-radius:10px; border:1px solid var(--border); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; background:var(--surface2); color:var(--text-muted); transition:all 0.2s; }
+  .tipo-btn.active-out { background:var(--red-dim);   border-color:var(--red);   color:var(--red); }
+  .tipo-btn.active-in  { background:var(--green-dim); border-color:var(--green); color:var(--green); }
 
-  .form-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-    transition: color 0.2s;
-  }
+  /* UPLOAD */
+  .upload-area { border:1.5px dashed var(--border); border-radius:10px; padding:14px; text-align:center; cursor:pointer; transition:border-color 0.2s; }
+  .upload-area:hover { border-color:var(--gold); }
+  .upload-area input[type=file] { display:none; }
+  .upload-label { font-size:13px; color:var(--text-muted); cursor:pointer; display:block; }
+  .upload-progress { height:3px; background:var(--border); border-radius:2px; margin-top:10px; display:none; }
+  .upload-progress-bar { height:100%; background:var(--gold); border-radius:2px; transition:width 0.3s; width:0%; }
+  .photo-preview-grid { display:none; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px; }
+  .photo-preview-wrap { position:relative; }
+  .photo-preview-thumb { aspect-ratio:1; border-radius:8px; object-fit:cover; width:100%; border:1px solid var(--border); display:block; }
+  .photo-preview-del { position:absolute; top:3px; right:3px; background:rgba(0,0,0,0.65); color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
 
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .form-grid .full { grid-column: 1 / -1; }
-
-  label {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 5px;
-  }
-
-  input, select {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 11px 13px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-  }
-
-  input:focus, select:focus { border-color: var(--gold); }
-  input::placeholder { color: var(--text-muted); }
-  select option { background: #1a1a1a; }
-
-  .date-display {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 11px 13px;
-    font-size: 14px;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .date-display span { color: var(--text); font-weight: 500; }
-
-  .upload-area {
-    border: 1.5px dashed var(--border);
-    border-radius: 10px;
-    padding: 14px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s;
-  }
-
-  .upload-area:hover { border-color: var(--gold); }
-  .upload-area input[type=file] { display: none; }
-  .upload-area .upload-label { font-size: 13px; color: var(--text-muted); cursor: pointer; display: block; }
-  .upload-area .upload-preview { max-height: 80px; border-radius: 8px; margin-top: 8px; }
-
-  .upload-progress { height: 3px; background: var(--border); border-radius: 2px; margin-top: 10px; display: none; }
-  .upload-progress-bar { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.3s; width: 0%; }
-
-  .form-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 14px; }
-
-  .submit-btn {
-    padding: 14px;
-    background: var(--gold);
-    color: #0f0f0f;
-    border: none;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-
-  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .cancel-edit-btn {
-    padding: 14px 16px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    display: none;
-  }
+  /* FORM ACTIONS */
+  .form-actions { display:grid; grid-template-columns:1fr auto; gap:10px; margin-top:14px; }
+  .submit-btn { padding:14px; background:var(--gold); color:#0f0f0f; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .submit-btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .cancel-edit-btn { padding:14px 16px; background:var(--surface2); border:1px solid var(--border); color:var(--text-muted); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; display:none; }
 
   /* LISTA */
-  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .section-title  { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-  .results-count  { font-size: 12px; color: var(--text-muted); }
-
-  .day-group { margin-bottom: 20px; }
-
-  .day-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .movement-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 13px 14px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .movement-item.is-out { border-left: 3px solid var(--red); }
-  .movement-item.is-in  { border-left: 3px solid var(--green); }
-
-  .movement-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-
-  .is-out .movement-icon { background: var(--red-dim); }
-  .is-in  .movement-icon { background: var(--green-dim); }
-
-  .movement-info { flex: 1; min-width: 0; }
-
-  .movement-name {
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .movement-desc {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .movement-cat {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    margin-top: 3px;
-  }
-
-  .movement-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
-
-  .movement-amount { font-family: 'DM Serif Display', serif; font-size: 17px; }
-  .is-out .movement-amount { color: var(--red); }
-  .is-in  .movement-amount { color: var(--green); }
-
-  .item-actions { display: flex; gap: 5px; }
-
-  .photo-btn, .edit-btn, .delete-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 13px;
-    padding: 4px 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    line-height: 1.4;
-  }
-
-  .photo-btn:hover  { border-color: var(--gold);  color: var(--gold); }
-  .edit-btn:hover   { border-color: var(--blue);  color: var(--blue); }
-  .delete-btn:hover { border-color: var(--red);   color: var(--red); }
+  .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .section-title  { font-size:13px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; }
+  .results-count  { font-size:12px; color:var(--text-muted); }
+  .day-group { margin-bottom:20px; }
+  .day-label { font-size:12px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+  .movement-item { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px 14px; margin-bottom:8px; display:flex; align-items:center; gap:12px; }
+  .movement-item.is-out { border-left:3px solid var(--red); }
+  .movement-item.is-in  { border-left:3px solid var(--green); }
+  .movement-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+  .is-out .movement-icon { background:var(--red-dim); }
+  .is-in  .movement-icon { background:var(--green-dim); }
+  .movement-info { flex:1; min-width:0; }
+  .movement-name { font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .movement-desc { font-size:12px; color:var(--text-muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .movement-cat  { display:inline-block; font-size:10px; font-weight:600; padding:2px 7px; border-radius:999px; border:1px solid var(--border); color:var(--text-muted); margin-top:3px; }
+  .movement-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+  .movement-amount { font-family:'DM Serif Display',serif; font-size:17px; }
+  .is-out .movement-amount { color:var(--red); }
+  .is-in  .movement-amount { color:var(--green); }
+  .item-actions { display:flex; gap:5px; }
+  .photo-btn, .edit-btn { background:var(--surface2); border:1px solid var(--border); color:var(--text-muted); font-size:13px; padding:4px 8px; border-radius:6px; cursor:pointer; font-family:'DM Sans',sans-serif; line-height:1.4; }
+  .photo-btn:hover { border-color:var(--gold); color:var(--gold); }
+  .edit-btn:hover  { border-color:var(--blue); color:var(--blue); }
 
   /* LOADER */
-  .loader { text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px; }
-  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 10px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader { text-align:center; padding:40px; color:var(--text-muted); font-size:13px; }
+  .spinner { width:24px; height:24px; border:2px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 10px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
 
   /* MODAL */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .modal-overlay.open { display: flex; }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    width: 100%;
-    max-width: 500px;
-    max-height: 90dvh;
-    overflow-y: auto;
-    padding: 20px;
-  }
-
-  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .modal-title { font-family: 'DM Serif Display', serif; font-size: 20px; }
-
-  .modal-close {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .photo-viewer-img { width: 100%; border-radius: 10px; display: block; }
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; align-items:center; justify-content:center; padding:20px; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); width:100%; max-width:500px; max-height:90dvh; overflow-y:auto; padding:20px; }
+  .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .modal-title { font-family:'DM Serif Display',serif; font-size:20px; }
+  .modal-close { background:var(--surface2); border:1px solid var(--border); color:var(--text); width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; }
+  .photo-viewer-img { width:100%; border-radius:10px; display:block; }
 
   /* GALLERY */
-  .gallery-filter { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-
-  .filter-chip {
-    padding: 6px 13px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  .filter-chip.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
-
-  .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-  .gallery-thumb {
-    border-radius: 10px;
-    overflow: hidden;
-    aspect-ratio: 1;
-    background: var(--surface2);
-    cursor: pointer;
-    position: relative;
-  }
-
-  .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-  .gallery-thumb .thumb-label {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    background: linear-gradient(transparent, rgba(0,0,0,0.75));
-    padding: 20px 8px 8px;
-    font-size: 11px;
-    color: #fff;
-    font-weight: 500;
-  }
-
-  .empty-state { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 14px; }
+  .gallery-filter { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .filter-chip { padding:6px 13px; border-radius:999px; border:1px solid var(--border); background:var(--surface2); color:var(--text-muted); font-size:12px; font-weight:500; cursor:pointer; font-family:'DM Sans',sans-serif; }
+  .filter-chip.active { border-color:var(--gold); color:var(--gold); background:var(--gold-dim); }
+  .gallery-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .gallery-thumb { border-radius:10px; overflow:hidden; aspect-ratio:1; background:var(--surface2); cursor:pointer; position:relative; }
+  .gallery-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+  .gallery-thumb .thumb-label { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(0,0,0,0.75)); padding:20px 8px 8px; font-size:11px; color:#fff; font-weight:500; }
+  .empty-state { text-align:center; padding:30px 20px; color:var(--text-muted); font-size:14px; }
 
   /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 12px 20px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 500;
-    z-index: 300;
-    opacity: 0;
-    transition: all 0.3s;
-    pointer-events: none;
-    white-space: nowrap;
-  }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:12px 20px; border-radius:999px; font-size:13px; font-weight:500; z-index:300; opacity:0; transition:all 0.3s; pointer-events:none; white-space:nowrap; }
+  .toast.show    { opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.success { border-color:var(--green); color:var(--green); }
+  .toast.error   { border-color:var(--red);   color:var(--red); }
 
-  .toast.show    { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.success { border-color: var(--green); color: var(--green); }
-  .toast.error   { border-color: var(--red);   color: var(--red); }
-
-  /* CONFIRM SHEET */
-  .confirm-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 250;
-    align-items: flex-end;
-    justify-content: center;
-  }
-
-  .confirm-overlay.open { display: flex; }
-
-  .confirm-sheet {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius) var(--radius) 0 0;
-    padding: 24px 20px 36px;
-    width: 100%;
-    max-width: 500px;
-    text-align: center;
-  }
-
-  .confirm-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
-  .confirm-desc  { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
-  .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-  .btn-cancel      { padding: 13px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
-  .btn-confirm-del { padding: 13px; background: var(--red-dim); border: 1px solid var(--red); color: var(--red); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
+  /* NAV FOTO */
+  .photo-nav-row { margin-top:8px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .photo-nav-btn { padding:7px 14px; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; cursor:pointer; font-size:16px; display:none; }
+  .photo-info    { font-size:12px; color:var(--text-muted); flex:1; text-align:center; }
+  .photo-dl-btn  { display:block; width:100%; margin-top:10px; padding:10px 0; border-radius:10px; background:var(--surface2); border:1px solid var(--border); color:var(--text); font-size:13px; font-weight:600; cursor:pointer; letter-spacing:0.3px; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="header-top">
-    <h1 id="header-title">💰 Cassa Comune</h1>
+    <h1 id="header-title">&#x1F4B0; Cassa Comune</h1>
     <div class="header-actions">
-      <button class="header-btn export-btn" onclick="window._app.exportCSV()">📤 CSV</button>
-      <button class="header-btn gallery-btn" onclick="window._app.openGallery()">📸 Galleria</button>
+      <button class="header-btn export-btn"  onclick="exportCSV()">&#x1F4E4; CSV</button>
+      <button class="header-btn gallery-btn" onclick="openGallery()">&#x1F4F8; Galleria</button>
     </div>
   </div>
   <div class="cassa-switcher">
-    <button class="sw-btn active-comune" id="sw-comune" onclick="window._app.switchCassa('comune')">💰 Cassa Comune</button>
-    <button class="sw-btn" id="sw-trasferte" onclick="window._app.switchCassa('trasferte')">✈️ Trasferte</button>
+    <button class="sw-btn active-comune" id="sw-comune"    onclick="switchCassa('comune')">&#x1F4B0; Cassa Comune</button>
+    <button class="sw-btn"              id="sw-trasferte" onclick="switchCassa('trasferte')">&#x2708;&#xFE0F; Trasferte</button>
   </div>
   <div class="balance-card" id="balance-card">
     <div>
-      <div class="balance-label" id="balance-label">Saldo attuale</div>
+      <div class="balance-label" id="balance-label">Saldo mensile</div>
       <div class="balance-stats" id="balance-stats">
-        <span class="out">↓ Uscite mese: <span id="stat-out">€0,00</span></span>
+        <span class="out">&#x2193; Uscite mese: <span id="stat-out">&#x20AC;0,00</span></span>
       </div>
     </div>
-    <div class="balance-amount" id="balance-display">€200,00</div>
+    <div class="balance-amount" id="balance-display">&#x20AC;200,00</div>
   </div>
 </header>
 
 <main>
-  <!-- FORM -->
   <div class="form-card" id="form-card">
     <div class="form-title" id="form-title">Nuovo movimento</div>
-
     <div class="form-grid">
+
       <div class="full" id="tipo-row" style="display:none">
         <label>Tipo</label>
         <div class="tipo-toggle">
-          <button class="tipo-btn active-out" id="btn-out" onclick="window._app.setTipo('out')">↓ Uscita</button>
-          <button class="tipo-btn"            id="btn-in"  onclick="window._app.setTipo('in')">↑ Entrata</button>
+          <button class="tipo-btn active-out" id="btn-out" onclick="setTipo('out')">&#x2193; Uscita</button>
+          <button class="tipo-btn"            id="btn-in"  onclick="setTipo('in')">&#x2191; Entrata</button>
         </div>
       </div>
 
@@ -576,7 +198,7 @@
 
       <div>
         <label>Data</label>
-        <div class="date-display">📅 <span id="date-display-text">Caricamento...</span></div>
+        <div class="date-display">&#x1F4C5; <span id="date-display-text">Caricamento...</span></div>
       </div>
 
       <div class="full">
@@ -585,34 +207,28 @@
       </div>
 
       <div>
-        <label>Importo (€)</label>
+        <label>Importo (&#x20AC;)</label>
         <input type="number" id="inp-amount" placeholder="0,00" step="0.01" min="0" />
       </div>
 
       <div>
         <label>Categoria</label>
         <select id="inp-cat">
-          <option value="🛒 Spesa">🛒 Spesa</option>
-          <option value="🍽️ Ristorante">🍽️ Ristorante</option>
-          <option value="⛽ Benzina">⛽ Benzina</option>
-          <option value="💡 Bollette">💡 Bollette</option>
-          <option value="🏠 Casa">🏠 Casa</option>
-          <option value="💊 Farmacia">💊 Farmacia</option>
-          <option value="🎉 Svago">🎉 Svago</option>
-          <option value="🚗 Trasporti">🚗 Trasporti</option>
-          <option value="💰 Versamento">💰 Versamento</option>
-          <option value="🔧 Manutenzione">🔧 Manutenzione</option>
-          <option value="📦 Altro">📦 Altro</option>
+          <option value="&#x1F37D;&#xFE0F; Ristorante">&#x1F37D;&#xFE0F; Ristorante</option>
+          <option value="&#x26FD; Benzina">&#x26FD; Benzina</option>
+          <option value="&#x1F697; Trasporti">&#x1F697; Trasporti</option>
+          <option value="&#x1F527; Manutenzione">&#x1F527; Manutenzione</option>
+          <option value="&#x1F4E6; Altro">&#x1F4E6; Altro</option>
         </select>
       </div>
 
       <div class="full">
-        <label>Scontrino / Foto</label>
+        <label>Foto / Scontrini</label>
         <div class="upload-area" onclick="document.getElementById('file-input').click()">
-          <input type="file" id="file-input" accept="image/*" capture="environment" onchange="window._app.previewFile(this)" />
-          <label class="upload-label" id="upload-label">📎 Tocca per allegare foto</label>
-          <img id="upload-preview" class="upload-preview" style="display:none" />
+          <input type="file" id="file-input" accept="image/*" multiple onchange="previewFiles(this)" />
+          <span class="upload-label" id="upload-label">&#x1F4CE; Tocca per allegare foto (anche pi&ugrave; di una)</span>
         </div>
+        <div class="photo-preview-grid" id="photo-preview-grid"></div>
         <div class="upload-progress" id="upload-progress">
           <div class="upload-progress-bar" id="upload-bar"></div>
         </div>
@@ -620,17 +236,15 @@
     </div>
 
     <div class="form-actions">
-      <button class="submit-btn" id="submit-btn" onclick="window._app.submitMovement()">Aggiungi movimento</button>
-      <button class="cancel-edit-btn" id="cancel-edit-btn" onclick="window._app.cancelEdit()">✕</button>
+      <button class="submit-btn" id="submit-btn" onclick="submitMovement()">Aggiungi movimento</button>
+      <button class="cancel-edit-btn" id="cancel-edit-btn" onclick="cancelEdit()">&#x2715;</button>
     </div>
   </div>
 
-  <!-- FILTER BAR categorie -->
   <div class="filter-bar" id="filter-bar">
     <button class="cat-chip active" data-cat="all" onclick="setFilter('all')">Tutti</button>
   </div>
 
-  <!-- LISTA -->
   <div class="section-header">
     <div class="section-title">Cronologia</div>
     <div class="results-count" id="results-count"></div>
@@ -640,19 +254,20 @@
   </div>
 </main>
 
-<!-- Modal foto -->
+<!-- Modal foto (con navigazione) -->
 <div class="modal-overlay" id="photo-modal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">Scontrino</div>
-      <button class="modal-close" onclick="window._app.closeModal('photo-modal')">✕</button>
+      <div class="modal-title" id="photo-modal-title">Foto</div>
+      <button class="modal-close" onclick="closeModal('photo-modal')">&#x2715;</button>
     </div>
-    <img class="photo-viewer-img" id="photo-viewer-img" src="" alt="Scontrino" />
-    <div style="margin-top:10px;font-size:13px;color:var(--text-muted)" id="photo-viewer-info"></div>
-    <a id="photo-download-btn" href="#" download
-      style="display:block;margin-top:14px;text-align:center;padding:10px 0;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;text-decoration:none;letter-spacing:0.3px;">
-      ⬇️ Scarica foto
-    </a>
+    <img class="photo-viewer-img" id="photo-viewer-img" src="" alt="Foto" />
+    <div class="photo-nav-row">
+      <button class="photo-nav-btn" id="photo-prev-btn" onclick="photoNav(-1)">&#x2039;</button>
+      <div class="photo-info" id="photo-viewer-info"></div>
+      <button class="photo-nav-btn" id="photo-next-btn" onclick="photoNav(1)">&#x203A;</button>
+    </div>
+    <button class="photo-dl-btn" onclick="downloadCurrentPhoto()">&#x2B07;&#xFE0F; Scarica foto</button>
   </div>
 </div>
 
@@ -660,432 +275,368 @@
 <div class="modal-overlay" id="gallery-modal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">📸 Galleria</div>
-      <button class="modal-close" onclick="window._app.closeModal('gallery-modal')">✕</button>
+      <div class="modal-title">&#x1F4F8; Galleria</div>
+      <button class="modal-close" onclick="closeModal('gallery-modal')">&#x2715;</button>
     </div>
     <div class="gallery-filter" id="gallery-filter"></div>
-    <div class="gallery-grid" id="gallery-grid"></div>
-  </div>
-</div>
-
-<!-- Confirm delete -->
-<div class="confirm-overlay" id="confirm-overlay">
-  <div class="confirm-sheet">
-    <div class="confirm-title">Eliminare movimento?</div>
-    <div class="confirm-desc">Questa azione è irreversibile.</div>
-    <div class="confirm-actions">
-      <button class="btn-cancel" onclick="window._app.closeConfirm()">Annulla</button>
-      <button class="btn-confirm-del" onclick="window._app.confirmDelete()">Elimina</button>
-    </div>
+    <div class="gallery-grid"   id="gallery-grid"></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, query, orderBy, onSnapshot }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-/* ── FIREBASE ────────────────────────────────────────────────────────────── */
-const app = initializeApp({
-  apiKey:            "AIzaSyDn0-T7wQOG9BiFcM0zikHKhiv-AopJ3Fw",
-  authDomain:        "cassa-comune-1835f.firebaseapp.com",
-  projectId:         "cassa-comune-1835f",
-  storageBucket:     "cassa-comune-1835f.firebasestorage.app",
-  messagingSenderId: "176811876172",
-  appId:             "1:176811876172:web:d5cfdabd82fa89d8b639e9"
+<!-- Firebase Compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ── FIREBASE ──────────────────────────────────────────────────────────────── */
+firebase.initializeApp({
+  apiKey:"AIzaSyDn0-T7wQOG9BiFcM0zikHKhiv-AopJ3Fw",
+  authDomain:"cassa-comune-1835f.firebaseapp.com",
+  projectId:"cassa-comune-1835f",
+  storageBucket:"cassa-comune-1835f.firebasestorage.app",
+  messagingSenderId:"176811876172",
+  appId:"1:176811876172:web:d5cfdabd82fa89d8b639e9"
 });
-const db = getFirestore(app);
+var db = firebase.firestore();
 
-/* ── CONFIG ──────────────────────────────────────────────────────────────── */
-const CASSE = {
-  comune:    { col:"movements",  base:200, monthlyReset:true,  tipoToggle:false, label:"💰 Cassa Comune", balanceLabel:"Saldo mensile" },
-  trasferte: { col:"trasferte",  base:0,   monthlyReset:false, tipoToggle:true,  label:"✈️ Trasferte",    balanceLabel:"Saldo totale"  }
+/* ── CONFIG ────────────────────────────────────────────────────────────────── */
+var CASSE = {
+  comune:    {col:"movements", base:200, monthlyReset:true,  tipoToggle:false, label:"💰 Cassa Comune", balLabel:"Saldo mensile"},
+  trasferte: {col:"trasferte", base:0,   monthlyReset:false, tipoToggle:true,  label:"✈️ Trasferte",    balLabel:"Saldo totale"}
 };
 
-/* ── STATO ───────────────────────────────────────────────────────────────── */
-let currentCassa    = "comune";
-let movementsData   = { comune:[], trasferte:[] };
-let currentDate     = null;
-let currentTipo     = "out";
-let activeFilter    = "all";
-let pendingDeleteId = null;
-let pendingDeleteUrl= null;
-let editingId       = null;
-let editingDate     = null;
-let editingOldPhoto = null;
+/* ── STATO ─────────────────────────────────────────────────────────────────── */
+var currentCassa  = "comune";
+var mData         = {comune:[], trasferte:[]};
+var currentDate   = null;
+var currentTipo   = "out";
+var activeFilter  = "all";
+var editingId     = null;
+var editingDate   = null;
+var _selFiles     = [];
+var _existUrls    = [];
+var _viewUrls     = [];
+var _viewIdx      = 0;
+var _viewName     = "";
+var _viewDate     = "";
 
-function mv() { return movementsData[currentCassa]; }
+function mv() { return mData[currentCassa]; }
 
-/* ── UTILS (dichiarate subito, hoisted) ──────────────────────────────────── */
-function formatCurrency(n, withEuro=true) {
-  return (withEuro?"€":"") + n.toFixed(2).replace(".",",");
-}
-function formatDate(dateStr) {
-  const [y,m,d] = dateStr.split("-");
-  return `${parseInt(d)} ${["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"][parseInt(m)-1]} ${y}`;
-}
-function formatMonth(ym) {
-  const [y,m] = ym.split("-");
-  return ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"][parseInt(m)-1] + " " + y;
-}
-function esc(str) {
-  if (!str) return "";
-  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-}
-function showToast(msg, type="") {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.className = "toast show " + type;
-  setTimeout(() => t.className = "toast", 2800);
-}
-function openModal(id)  { document.getElementById(id).classList.add("open"); }
-function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+/* ── UTILS ─────────────────────────────────────────────────────────────────── */
+function fc(n,e){if(e===undefined)e=true;return(e?"€":"")+n.toFixed(2).replace(".",",");}
+function fd(s){var p=s.split("-");var mn=["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"];return parseInt(p[2])+" "+mn[parseInt(p[1])-1]+" "+p[0];}
+function fm(s){var p=s.split("-");var mn=["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];return mn[parseInt(p[1])-1]+" "+p[0];}
+function esc(s){if(!s)return"";return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function toast(msg,t){var el=document.getElementById("toast");el.textContent=msg;el.className="toast show "+(t||"");setTimeout(function(){el.className="toast";},2800);}
+function getUrls(m){if(m.photoUrls&&m.photoUrls.length)return m.photoUrls;if(m.photoUrl)return[m.photoUrl];return[];}
 
-/* ── RENDER ──────────────────────────────────────────────────────────────── */
-function renderFilterBar() {
-  const cats = ["all", ...new Set(mv().map(m => m.cat).filter(Boolean))];
-  document.getElementById("filter-bar").innerHTML = cats.map(cat => {
-    const label = cat === "all" ? "Tutti" : cat;
-    return `<button class="cat-chip ${activeFilter===cat?"active":""}" data-cat="${cat}" onclick="window._app.setFilter('${cat}')">${label}</button>`;
-  }).join("");
+/* ── SWITCH CASSA ──────────────────────────────────────────────────────────── */
+function switchCassa(c) {
+  currentCassa = c;
+  var cfg = CASSE[c];
+  document.getElementById("sw-comune").className    = "sw-btn"+(c==="comune"?" active-comune":"");
+  document.getElementById("sw-trasferte").className = "sw-btn"+(c==="trasferte"?" active-trasferte":"");
+  document.getElementById("header-title").textContent = cfg.label;
+  document.getElementById("balance-card").className = "balance-card"+(c==="trasferte"?" trasferte-card":"");
+  document.getElementById("balance-label").textContent = cfg.balLabel;
+  var st = document.getElementById("balance-stats");
+  st.innerHTML = c==="trasferte"
+    ? '<span class="in">↑ Entrate: <span id="stat-in">€0,00</span></span><span class="out" style="margin-left:12px">↓ Uscite: <span id="stat-out">€0,00</span></span>'
+    : '<span class="out">↓ Uscite mese: <span id="stat-out">€0,00</span></span>';
+  document.getElementById("tipo-row").style.display = cfg.tipoToggle?"block":"none";
+  currentTipo = "out"; activeFilter = "all";
+  cancelEdit();
+  renderFilterBar(); renderList(); updateBalance();
 }
 
-function renderList() {
-  const container = document.getElementById("list-container");
-  const countEl   = document.getElementById("results-count");
-  const filtered  = activeFilter === "all" ? mv() : mv().filter(m => m.cat === activeFilter);
+/* ── TIPO ──────────────────────────────────────────────────────────────────── */
+function setTipo(t) {
+  currentTipo = t;
+  document.getElementById("btn-out").className = t==="out"?"tipo-btn active-out":"tipo-btn";
+  document.getElementById("btn-in").className  = t==="in" ?"tipo-btn active-in" :"tipo-btn";
+}
 
-  if (filtered.length === 0) {
-    container.innerHTML = `<div class="empty-state">${activeFilter==="all"?"Nessun movimento ancora.<br>Aggiungi il primo!":"Nessun movimento per questa categoria."}</div>`;
-    countEl.textContent = "";
+/* ── FOTO PREVIEW ──────────────────────────────────────────────────────────── */
+function previewFiles(input) {
+  _selFiles = Array.from(input.files);
+  renderPhotoGrid();
+}
+function renderPhotoGrid() {
+  var g = document.getElementById("photo-preview-grid");
+  var total = _existUrls.length + _selFiles.length;
+  if (total===0) {
+    g.style.display="none"; g.innerHTML="";
+    document.getElementById("upload-label").textContent="📎 Tocca per allegare foto (anche più di una)";
     return;
   }
-  countEl.textContent = filtered.length + " movimenti";
+  g.style.display="grid";
+  document.getElementById("upload-label").textContent="✅ "+total+" foto";
+  var h="";
+  _existUrls.forEach(function(url,i){
+    h+='<div class="photo-preview-wrap"><img class="photo-preview-thumb" src="'+url+'" />'
+      +'<button class="photo-preview-del" onclick="rmExist('+i+')">×</button></div>';
+  });
+  _selFiles.forEach(function(f,i){
+    h+='<div class="photo-preview-wrap"><img class="photo-preview-thumb" src="'+URL.createObjectURL(f)+'" />'
+      +'<button class="photo-preview-del" onclick="rmNew('+i+')">×</button></div>';
+  });
+  g.innerHTML=h;
+}
+function rmExist(i){_existUrls.splice(i,1);renderPhotoGrid();}
+function rmNew(i)  {_selFiles.splice(i,1); renderPhotoGrid();}
 
-  const groups = {};
-  filtered.forEach(m => { if (!groups[m.date]) groups[m.date]=[]; groups[m.date].push(m); });
-  const dates = Object.keys(groups).sort((a,b) => b.localeCompare(a));
+/* ── UPLOAD CLOUDINARY ─────────────────────────────────────────────────────── */
+function uploadOne(file,onProg){
+  return new Promise(function(res,rej){
+    var fd=new FormData();
+    fd.append("file",file);fd.append("upload_preset","davgnwndp");fd.append("folder","cassa-comune");
+    var x=new XMLHttpRequest();
+    x.open("POST","https://api.cloudinary.com/v1_1/davgnwndp/image/upload");
+    x.upload.onprogress=function(e){if(e.lengthComputable&&onProg)onProg(e.loaded/e.total);};
+    x.onload=function(){x.status===200?res(JSON.parse(x.responseText).secure_url):rej(new Error("Upload fallito"));};
+    x.onerror=function(){rej(new Error("Rete"));};
+    x.send(fd);
+  });
+}
+function uploadAll(){
+  if(_selFiles.length===0)return Promise.resolve([]);
+  document.getElementById("upload-progress").style.display="block";
+  var bar=document.getElementById("upload-bar"),done=0,tot=_selFiles.length;
+  return Promise.all(_selFiles.map(function(f){
+    return uploadOne(f,function(){done+=1/tot;bar.style.width=Math.min(done*100,100)+"%";});
+  }));
+}
 
-  container.innerHTML = dates.map(date => {
-    const rows = groups[date].map(m => {
-      const isOut    = m.tipo !== "in";
-      const sign     = isOut ? "−" : "+";
-      const icon     = isOut ? "↓" : "↑";
-      const catBadge = m.cat ? `<span class="movement-cat">${esc(m.cat)}</span>` : "";
-      const photoBtn = m.photoUrl
-        ? `<button class="photo-btn" onclick="window._app.viewPhoto('${m.photoUrl}','${esc(m.name)}','${esc(m.desc)}','${m.date}')">📎</button>`
-        : "";
-      return `
-        <div class="movement-item ${isOut?"is-out":"is-in"}">
-          <div class="movement-icon">${icon}</div>
-          <div class="movement-info">
-            <div class="movement-name">${esc(m.name)}</div>
-            <div class="movement-desc">${esc(m.desc)}</div>
-            ${catBadge}
-          </div>
-          <div class="movement-right">
-            <div class="movement-amount">${sign}${formatCurrency(m.amount)}</div>
-            <div class="item-actions">
-              ${photoBtn}
-              <button class="edit-btn"   onclick="window._app.startEdit('${m.id}')">✏️</button>
-              <button class="delete-btn" onclick="window._app.askDelete('${m.id}','${m.photoUrl||""}')">🗑</button>
-            </div>
-          </div>
-        </div>`;
-    }).join("");
-    return `<div class="day-group"><div class="day-label">${formatDate(date)}</div>${rows}</div>`;
+/* ── SUBMIT ────────────────────────────────────────────────────────────────── */
+function submitMovement(){
+  var name  =document.getElementById("inp-name").value.trim();
+  var date  =editingId?editingDate:currentDate;
+  var desc  =document.getElementById("inp-desc").value.trim();
+  var amount=parseFloat(document.getElementById("inp-amount").value);
+  var cat   =document.getElementById("inp-cat").value;
+  var tipo  =CASSE[currentCassa].tipoToggle?currentTipo:"out";
+  if(!name||!date||!desc||isNaN(amount)||amount<=0){toast("Compila tutti i campi","error");return;}
+  var btn=document.getElementById("submit-btn");
+  btn.disabled=true;btn.textContent=editingId?"Aggiornamento...":"Salvataggio...";
+  uploadAll().then(function(newUrls){
+    var photoUrls=_existUrls.concat(newUrls);
+    var col=CASSE[currentCassa].col;
+    var d={name:name,date:date,desc:desc,amount:amount,cat:cat,tipo:tipo,photoUrls:photoUrls,createdAt:Date.now()};
+    return editingId?db.collection(col).doc(editingId).update(d):db.collection(col).add(d);
+  }).then(function(){
+    toast(editingId?"Movimento aggiornato ✓":"Movimento aggiunto ✓","success");
+    resetForm();
+  }).catch(function(e){console.error(e);toast("Errore nel salvataggio","error");})
+  .finally(function(){btn.disabled=false;btn.textContent="Aggiungi movimento";});
+}
+
+/* ── EDIT / RESET ──────────────────────────────────────────────────────────── */
+function startEdit(id){
+  var m=mv().find(function(x){return x.id===id;});
+  if(!m)return;
+  editingId=id;editingDate=m.date;
+  _existUrls=getUrls(m).slice();_selFiles=[];
+  document.getElementById("inp-name").value  =m.name;
+  document.getElementById("inp-desc").value  =m.desc;
+  document.getElementById("inp-amount").value=m.amount;
+  document.getElementById("inp-cat").value   =m.cat||"📦 Altro";
+  document.getElementById("date-display-text").textContent=fd(m.date);
+  document.getElementById("file-input").value="";
+  renderPhotoGrid();
+  if(CASSE[currentCassa].tipoToggle)setTipo(m.tipo||"out");
+  document.getElementById("form-card").classList.add("editing");
+  document.getElementById("form-title").textContent="✏️ Modifica movimento";
+  document.getElementById("submit-btn").textContent="Salva modifiche";
+  document.getElementById("cancel-edit-btn").style.display="block";
+  document.getElementById("form-card").scrollIntoView({behavior:"smooth"});
+}
+function cancelEdit(){editingId=null;editingDate=null;resetForm();}
+function resetForm(){
+  editingId=null;editingDate=null;_selFiles=[];_existUrls=[];
+  document.getElementById("inp-name").value  ="";
+  document.getElementById("inp-desc").value  ="";
+  document.getElementById("inp-amount").value="";
+  document.getElementById("inp-cat").value   ="🍽️ Ristorante";
+  document.getElementById("file-input").value="";
+  document.getElementById("date-display-text").textContent=currentDate?fd(currentDate):"Caricamento...";
+  document.getElementById("upload-progress").style.display="none";
+  document.getElementById("upload-bar").style.width="0%";
+  document.getElementById("form-card").classList.remove("editing");
+  document.getElementById("form-title").textContent="Nuovo movimento";
+  document.getElementById("submit-btn").textContent="Aggiungi movimento";
+  document.getElementById("cancel-edit-btn").style.display="none";
+  currentTipo="out";
+  renderPhotoGrid();
+  if(CASSE[currentCassa].tipoToggle)setTipo("out");
+}
+
+/* ── FILTER / RENDER ───────────────────────────────────────────────────────── */
+function setFilter(cat){
+  activeFilter=cat;
+  document.querySelectorAll(".cat-chip").forEach(function(c){c.classList.toggle("active",c.dataset.cat===cat);});
+  renderList();
+}
+function renderFilterBar(){
+  var seen={},cats=["all"];
+  mv().forEach(function(m){if(m.cat&&!seen[m.cat]){seen[m.cat]=true;cats.push(m.cat);}});
+  document.getElementById("filter-bar").innerHTML=cats.map(function(cat){
+    return '<button class="cat-chip '+(activeFilter===cat?"active":"")+'" data-cat="'+cat+'" onclick="setFilter(\''+cat+'\')">'+(cat==="all"?"Tutti":cat)+'</button>';
   }).join("");
 }
-
-function updateBalance() {
-  const cfg = CASSE[currentCassa];
-  let subset = mv();
-  if (cfg.monthlyReset) {
-    const ym = currentDate ? currentDate.slice(0,7) : new Date().toISOString().slice(0,7);
-    subset = subset.filter(m => m.date && m.date.startsWith(ym));
+function renderList(){
+  var container=document.getElementById("list-container");
+  var countEl=document.getElementById("results-count");
+  var all=mv();
+  var filtered=activeFilter==="all"?all:all.filter(function(m){return m.cat===activeFilter;});
+  if(filtered.length===0){
+    container.innerHTML='<div class="empty-state">'+(activeFilter==="all"?"Nessun movimento ancora.<br>Aggiungi il primo!":"Nessun movimento per questa categoria.")+"</div>";
+    countEl.textContent="";return;
   }
-  let balance=cfg.base, totalIn=0, totalOut=0;
-  subset.forEach(m => {
-    if (m.tipo==="in") { balance+=m.amount; totalIn+=m.amount; }
-    else               { balance-=m.amount; totalOut+=m.amount; }
+  countEl.textContent=filtered.length+" movimenti";
+  var groups={};
+  filtered.forEach(function(m){if(!groups[m.date])groups[m.date]=[];groups[m.date].push(m);});
+  var dates=Object.keys(groups).sort(function(a,b){return b.localeCompare(a);});
+  var html="";
+  dates.forEach(function(date){
+    var rows="";
+    groups[date].forEach(function(m){
+      var isOut=m.tipo!=="in";
+      var sign=isOut?"−":"+",icon=isOut?"↓":"↑";
+      var catBadge=m.cat?'<span class="movement-cat">'+esc(m.cat)+"</span>":"";
+      var urls=getUrls(m);
+      var photoBtn=urls.length>0?'<button class="photo-btn" onclick="openViewer(\''+m.id+'\')">📎'+(urls.length>1?" "+urls.length:"")+"</button>":"";
+      rows+='<div class="movement-item '+(isOut?"is-out":"is-in")+'">'
+        +'<div class="movement-icon">'+icon+"</div>"
+        +'<div class="movement-info">'
+        +'<div class="movement-name">'+esc(m.name)+"</div>"
+        +'<div class="movement-desc">'+esc(m.desc)+"</div>"
+        +catBadge+"</div>"
+        +'<div class="movement-right">'
+        +'<div class="movement-amount">'+sign+fc(m.amount)+"</div>"
+        +'<div class="item-actions">'+photoBtn
+        +'<button class="edit-btn" onclick="startEdit(\''+m.id+'\')">✏️</button>'
+        +"</div></div></div>";
+    });
+    html+='<div class="day-group"><div class="day-label">'+fd(date)+"</div>"+rows+"</div>";
   });
-  document.getElementById("balance-display").textContent = formatCurrency(balance, true);
-  const outEl = document.getElementById("stat-out");
-  const inEl  = document.getElementById("stat-in");
-  if (outEl) outEl.textContent = formatCurrency(totalOut, true);
-  if (inEl)  inEl.textContent  = formatCurrency(totalIn,  true);
+  container.innerHTML=html;
 }
 
-function resetForm() {
-  editingId=null; editingDate=null; editingOldPhoto=null;
-  document.getElementById("inp-name").value   = "";
-  document.getElementById("inp-desc").value   = "";
-  document.getElementById("inp-amount").value = "";
-  document.getElementById("inp-cat").value    = "🛒 Spesa";
-  document.getElementById("file-input").value = "";
-  document.getElementById("date-display-text").textContent = currentDate ? formatDate(currentDate) : "Caricamento...";
-  document.getElementById("upload-preview").style.display  = "none";
-  document.getElementById("upload-label").textContent      = "📎 Tocca per allegare foto";
-  document.getElementById("upload-progress").style.display = "none";
-  document.getElementById("upload-bar").style.width        = "0%";
-  document.getElementById("form-card").classList.remove("editing");
-  document.getElementById("form-title").textContent        = "Nuovo movimento";
-  document.getElementById("submit-btn").textContent        = "Aggiungi movimento";
-  document.getElementById("cancel-edit-btn").style.display = "none";
-  currentTipo = "out";
-  if (CASSE[currentCassa].tipoToggle) setTipoUI("out");
-}
-
-function setTipoUI(tipo) {
-  currentTipo = tipo;
-  document.getElementById("btn-out").className = tipo==="out" ? "tipo-btn active-out" : "tipo-btn";
-  document.getElementById("btn-in").className  = tipo==="in"  ? "tipo-btn active-in"  : "tipo-btn";
-}
-
-/* ── CLOUDINARY ──────────────────────────────────────────────────────────── */
-async function uploadPhoto(file) {
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("upload_preset", "davgnwndp");
-  fd.append("folder", "cassa-comune");
-  document.getElementById("upload-progress").style.display = "block";
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://api.cloudinary.com/v1_1/davgnwndp/image/upload");
-    xhr.upload.onprogress = e => {
-      if (e.lengthComputable)
-        document.getElementById("upload-bar").style.width = (e.loaded/e.total*100)+"%";
-    };
-    xhr.onload = () => xhr.status===200
-      ? resolve(JSON.parse(xhr.responseText).secure_url)
-      : reject(new Error("Upload fallito"));
-    xhr.onerror = () => reject(new Error("Errore di rete"));
-    xhr.send(fd);
-  });
-}
-
-/* ── FUNZIONI GLOBALI (esposte via window._app) ──────────────────────────── */
-window._app = {
-
-  switchCassa(cassa) {
-    currentCassa = cassa;
-    const cfg = CASSE[cassa];
-    document.getElementById("sw-comune").className    = "sw-btn" + (cassa==="comune"    ? " active-comune"    : "");
-    document.getElementById("sw-trasferte").className = "sw-btn" + (cassa==="trasferte" ? " active-trasferte" : "");
-    document.getElementById("header-title").textContent  = cfg.label;
-    document.getElementById("balance-card").className    = "balance-card" + (cassa==="trasferte" ? " trasferte-card" : "");
-    document.getElementById("balance-label").textContent = cfg.balanceLabel;
-    const statsEl = document.getElementById("balance-stats");
-    if (cassa==="trasferte") {
-      statsEl.innerHTML = '<span class="in">↑ Entrate: <span id="stat-in">€0,00</span></span><span class="out" style="margin-left:12px">↓ Uscite: <span id="stat-out">€0,00</span></span>';
-    } else {
-      statsEl.innerHTML = '<span class="out">↓ Uscite mese: <span id="stat-out">€0,00</span></span>';
-    }
-    document.getElementById("tipo-row").style.display = cfg.tipoToggle ? "block" : "none";
-    currentTipo = "out";
-    activeFilter = "all";
-    this.cancelEdit();
-    renderFilterBar();
-    renderList();
-    updateBalance();
-  },
-
-  setTipo(tipo) { setTipoUI(tipo); },
-
-  previewFile(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = document.getElementById("upload-preview");
-      img.src = e.target.result;
-      img.style.display = "block";
-      document.getElementById("upload-label").textContent = "✅ " + file.name;
-    };
-    reader.readAsDataURL(file);
-  },
-
-  async submitMovement() {
-    const name   = document.getElementById("inp-name").value.trim();
-    const date   = editingId ? editingDate : currentDate;
-    const desc   = document.getElementById("inp-desc").value.trim();
-    const amount = parseFloat(document.getElementById("inp-amount").value);
-    const cat    = document.getElementById("inp-cat").value;
-    const fi     = document.getElementById("file-input");
-    const tipo   = CASSE[currentCassa].tipoToggle ? currentTipo : "out";
-
-    if (!name||!date||!desc||isNaN(amount)||amount<=0) { showToast("Compila tutti i campi","error"); return; }
-
-    const btn = document.getElementById("submit-btn");
-    btn.disabled = true;
-    btn.textContent = editingId ? "Aggiornamento..." : "Salvataggio...";
-
-    try {
-      let photoUrl = editingOldPhoto;
-      if (fi.files[0]) photoUrl = await uploadPhoto(fi.files[0]);
-
-      const col = CASSE[currentCassa].col;
-      if (editingId) {
-        await updateDoc(doc(db, col, editingId), {name,date,desc,amount,cat,tipo,photoUrl});
-        showToast("Movimento aggiornato ✓","success");
-      } else {
-        await addDoc(collection(db, col), {name,date,desc,amount,cat,tipo,photoUrl,createdAt:Date.now()});
-        showToast("Movimento aggiunto ✓","success");
-      }
-      resetForm();
-    } catch(e) {
-      console.error(e);
-      showToast("Errore nel salvataggio","error");
-    }
-    btn.disabled = false;
-    btn.textContent = "Aggiungi movimento";
-  },
-
-  startEdit(id) {
-    const m = mv().find(x => x.id===id);
-    if (!m) return;
-    editingId=id; editingDate=m.date; editingOldPhoto=m.photoUrl||null;
-    document.getElementById("inp-name").value   = m.name;
-    document.getElementById("inp-desc").value   = m.desc;
-    document.getElementById("inp-amount").value = m.amount;
-    document.getElementById("inp-cat").value    = m.cat||"📦 Altro";
-    document.getElementById("date-display-text").textContent = formatDate(m.date);
-    if (m.photoUrl) {
-      const img = document.getElementById("upload-preview");
-      img.src=m.photoUrl; img.style.display="block";
-      document.getElementById("upload-label").textContent = "✅ Foto esistente (sostituisci se vuoi)";
-    }
-    if (CASSE[currentCassa].tipoToggle) setTipoUI(m.tipo||"out");
-    document.getElementById("form-card").classList.add("editing");
-    document.getElementById("form-title").textContent        = "✏️ Modifica movimento";
-    document.getElementById("submit-btn").textContent        = "Salva modifiche";
-    document.getElementById("cancel-edit-btn").style.display = "block";
-    document.getElementById("form-card").scrollIntoView({behavior:"smooth"});
-  },
-
-  cancelEdit() { editingId=null; editingDate=null; editingOldPhoto=null; resetForm(); },
-
-  setFilter(cat) {
-    activeFilter = cat;
-    document.querySelectorAll(".cat-chip").forEach(c => c.classList.toggle("active", c.dataset.cat===cat));
-    renderList();
-  },
-
-  viewPhoto(url, name, desc, date) {
-    document.getElementById("photo-viewer-img").src = url;
-    document.getElementById("photo-viewer-info").textContent = `${name} • ${desc} • ${formatDate(date)}`;
-    const btn = document.getElementById("photo-download-btn");
-    btn.onclick = async e => {
-      e.preventDefault();
-      try {
-        const res=await fetch(url); const blob=await res.blob();
-        const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-        a.download=`scontrino_${name}_${date}.jpg`; a.click(); URL.revokeObjectURL(a.href);
-      } catch(_) { window.open(url,"_blank"); }
-    };
-    openModal("photo-modal");
-  },
-
-  openGallery() {
-    const withPhoto = mv().filter(m => m.photoUrl);
-    const grid=document.getElementById("gallery-grid"), filterEl=document.getElementById("gallery-filter");
-    if (withPhoto.length===0) {
-      grid.innerHTML='<div class="empty-state" style="grid-column:1/-1">Nessuna foto ancora.</div>';
-      filterEl.innerHTML=""; openModal("gallery-modal"); return;
-    }
-    const months=[...new Set(withPhoto.map(m=>m.date.substring(0,7)))].sort((a,b)=>b.localeCompare(a));
-    let activeMonth="all";
-    const render = () => {
-      const f=activeMonth==="all"?withPhoto:withPhoto.filter(m=>m.date.startsWith(activeMonth));
-      grid.innerHTML=f.map(m=>`
-        <div class="gallery-thumb" onclick="window._app.viewPhoto('${m.photoUrl}','${esc(m.name)}','${esc(m.desc)}','${m.date}')">
-          <img src="${m.photoUrl}" loading="lazy"/>
-          <div class="thumb-label">${esc(m.name)}<br>${formatDate(m.date)}</div>
-        </div>`).join("");
-    };
-    filterEl.innerHTML=["all",...months].map(mo=>
-      `<button class="filter-chip ${mo===activeMonth?"active":""}" data-mo="${mo}" onclick="window._app.setMonthFilter('${mo}')">${mo==="all"?"Tutte":formatMonth(mo)}</button>`
-    ).join("");
-    this.setMonthFilter = mo => {
-      activeMonth=mo;
-      document.querySelectorAll("#gallery-filter .filter-chip").forEach(c=>c.classList.toggle("active",c.dataset.mo===mo));
-      render();
-    };
-    render();
-    openModal("gallery-modal");
-  },
-
-  exportCSV() {
-    const data=mv();
-    if (data.length===0) { showToast("Nessun dato da esportare","error"); return; }
-    const isTr=currentCassa==="trasferte";
-    const header=isTr?["Data","Nome","Motivo","Categoria","Tipo","Importo (€)"]:["Data","Nome","Motivo","Categoria","Importo (€)"];
-    const rows=[header,...data.map(m=>isTr
-      ?[m.date,m.name,m.desc,m.cat||"",(m.tipo==="in"?"Entrata":"Uscita"),(m.tipo==="out"?"-":"+")+m.amount.toFixed(2)]
-      :[m.date,m.name,m.desc,m.cat||"","-"+m.amount.toFixed(2)]
-    )];
-    const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
-    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
-    const url=URL.createObjectURL(blob);
-    const a=Object.assign(document.createElement("a"),{href:url,download:`cassa-${currentCassa}-${new Date().toISOString().slice(0,10)}.csv`});
-    a.click(); URL.revokeObjectURL(url);
-    showToast("CSV scaricato ✓","success");
-  },
-
-  askDelete(id, url) {
-    pendingDeleteId=id; pendingDeleteUrl=url;
-    document.getElementById("confirm-overlay").classList.add("open");
-  },
-
-  closeConfirm() {
-    pendingDeleteId=null; pendingDeleteUrl=null;
-    document.getElementById("confirm-overlay").classList.remove("open");
-  },
-
-  async confirmDelete() {
-    if (!pendingDeleteId) return;
-    try {
-      await deleteDoc(doc(db, CASSE[currentCassa].col, pendingDeleteId));
-      if (editingId===pendingDeleteId) this.cancelEdit();
-      showToast("Movimento eliminato","success");
-    } catch(e) { showToast("Errore eliminazione","error"); }
-    this.closeConfirm();
-  },
-
-  openModal,
-  closeModal
-};
-
-/* ── INIT ────────────────────────────────────────────────────────────────── */
-// Data da internet
-(async () => {
-  try {
-    const res  = await fetch("https://worldtimeapi.org/api/timezone/Europe/Rome");
-    const data = await res.json();
-    currentDate = data.datetime.slice(0,10);
-  } catch(_) {
-    const now=new Date();
-    currentDate=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+/* ── BALANCE ───────────────────────────────────────────────────────────────── */
+function updateBalance(){
+  var cfg=CASSE[currentCassa];
+  var sub=mv();
+  if(cfg.monthlyReset){
+    var ym=currentDate?currentDate.slice(0,7):new Date().toISOString().slice(0,7);
+    sub=sub.filter(function(m){return m.date&&m.date.startsWith(ym);});
   }
-  const el=document.getElementById("date-display-text");
-  if (el) el.textContent = formatDate(currentDate);
-})();
+  var bal=cfg.base,ti=0,to=0;
+  sub.forEach(function(m){if(m.tipo==="in"){bal+=m.amount;ti+=m.amount;}else{bal-=m.amount;to+=m.amount;}});
+  document.getElementById("balance-display").textContent=fc(bal,true);
+  var oe=document.getElementById("stat-out"),ie=document.getElementById("stat-in");
+  if(oe)oe.textContent=fc(to,true);
+  if(ie)ie.textContent=fc(ti,true);
+}
 
-// Listener Firestore entrambe le casse
-Object.entries(CASSE).forEach(([key, cfg]) => {
-  const q = query(collection(db, cfg.col), orderBy("date","desc"));
-  onSnapshot(q, snap => {
-    movementsData[key] = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-    if (currentCassa===key) { renderFilterBar(); renderList(); updateBalance(); }
-  }, err => console.error("Firestore error ["+key+"]:", err));
+/* ── FIRESTORE ─────────────────────────────────────────────────────────────── */
+Object.keys(CASSE).forEach(function(key){
+  db.collection(CASSE[key].col).orderBy("date","desc").onSnapshot(function(snap){
+    mData[key]=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    if(currentCassa===key){renderFilterBar();renderList();updateBalance();}
+  },function(err){console.error("Firestore ["+key+"]:",err);});
 });
 
-// Event listeners modali
-document.querySelectorAll(".modal-overlay").forEach(el =>
-  el.addEventListener("click", e => { if (e.target===el) el.classList.remove("open"); })
-);
+/* ── DATA DA INTERNET ──────────────────────────────────────────────────────── */
+fetch("https://worldtimeapi.org/api/timezone/Europe/Rome")
+  .then(function(r){return r.json();})
+  .then(function(d){
+    currentDate=d.datetime.slice(0,10);
+    var el=document.getElementById("date-display-text");
+    if(el)el.textContent=fd(currentDate);
+  })
+  .catch(function(){
+    var n=new Date();
+    currentDate=n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0");
+    var el=document.getElementById("date-display-text");
+    if(el)el.textContent=fd(currentDate);
+  });
+
+/* ── PHOTO VIEWER ──────────────────────────────────────────────────────────── */
+function openViewer(id){
+  var m=mv().find(function(x){return x.id===id;});
+  if(!m)return;
+  _viewUrls=getUrls(m);_viewIdx=0;_viewName=m.name;_viewDate=m.date;
+  renderViewer();
+  document.getElementById("photo-modal").classList.add("open");
+}
+function renderViewer(){
+  document.getElementById("photo-viewer-img").src=_viewUrls[_viewIdx];
+  var tot=_viewUrls.length;
+  document.getElementById("photo-modal-title").textContent=tot>1?"Foto "+(_viewIdx+1)+" di "+tot:"Foto";
+  document.getElementById("photo-viewer-info").textContent=_viewName+" • "+fd(_viewDate);
+  document.getElementById("photo-prev-btn").style.display=tot>1?"block":"none";
+  document.getElementById("photo-next-btn").style.display=tot>1?"block":"none";
+}
+function photoNav(d){_viewIdx=(_viewIdx+d+_viewUrls.length)%_viewUrls.length;renderViewer();}
+function downloadCurrentPhoto(){
+  var url=_viewUrls[_viewIdx];
+  fetch(url).then(function(r){return r.blob();}).then(function(b){
+    var a=document.createElement("a");a.href=URL.createObjectURL(b);
+    a.download="foto_"+_viewName+"_"+_viewDate+"_"+(_viewIdx+1)+".jpg";a.click();URL.revokeObjectURL(a.href);
+  }).catch(function(){window.open(url,"_blank");});
+}
+
+/* ── GALLERY ───────────────────────────────────────────────────────────────── */
+function openGallery(){
+  var flat=[];
+  mv().forEach(function(m){getUrls(m).forEach(function(url){flat.push({photoUrl:url,name:m.name,date:m.date,id:m.id});});});
+  var grid=document.getElementById("gallery-grid"),fe=document.getElementById("gallery-filter");
+  if(flat.length===0){
+    grid.innerHTML='<div class="empty-state" style="grid-column:1/-1">Nessuna foto ancora.</div>';
+    fe.innerHTML="";document.getElementById("gallery-modal").classList.add("open");return;
+  }
+  var ms={};flat.forEach(function(x){ms[x.date.substring(0,7)]=true;});
+  var months=Object.keys(ms).sort(function(a,b){return b.localeCompare(a);});
+  var am="all";
+  function rg(){
+    var f=am==="all"?flat:flat.filter(function(x){return x.date.startsWith(am);});
+    grid.innerHTML=f.map(function(x){
+      return '<div class="gallery-thumb" onclick="openViewer(\''+x.id+'\')"><img src="'+x.photoUrl+'" loading="lazy"/><div class="thumb-label">'+esc(x.name)+"<br>"+fd(x.date)+"</div></div>";
+    }).join("");
+  }
+  fe.innerHTML=["all"].concat(months).map(function(mo){
+    return '<button class="filter-chip '+(mo===am?"active":"")+'" data-mo="'+mo+'" onclick="setGMon(\''+mo+\')">'+(mo==="all"?"Tutte":fm(mo))+"</button>";
+  }).join("");
+  window.setGMon=function(mo){
+    am=mo;document.querySelectorAll("#gallery-filter .filter-chip").forEach(function(c){c.classList.toggle("active",c.dataset.mo===mo);});rg();
+  };
+  rg();document.getElementById("gallery-modal").classList.add("open");
+}
+
+/* ── CSV ───────────────────────────────────────────────────────────────────── */
+function exportCSV(){
+  var data=mv();if(data.length===0){toast("Nessun dato da esportare","error");return;}
+  var isTr=currentCassa==="trasferte";
+  var hdr=isTr?["Data","Nome","Motivo","Categoria","Tipo","Importo (€)"]:["Data","Nome","Motivo","Categoria","Importo (€)"];
+  var rows=[hdr].concat(data.map(function(m){
+    return isTr?[m.date,m.name,m.desc,m.cat||"",(m.tipo==="in"?"Entrata":"Uscita"),(m.tipo==="out"?"-":"+")+m.amount.toFixed(2)]
+               :[m.date,m.name,m.desc,m.cat||"","-"+m.amount.toFixed(2)];
+  }));
+  var csv=rows.map(function(r){return r.map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");a.href=url;a.download="cassa-"+currentCassa+"-"+new Date().toISOString().slice(0,10)+".csv";
+  a.click();URL.revokeObjectURL(url);toast("CSV scaricato ✓","success");
+}
+
+/* ── MODALI ────────────────────────────────────────────────────────────────── */
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+document.addEventListener("DOMContentLoaded",function(){
+  document.querySelectorAll(".modal-overlay").forEach(function(el){
+    el.addEventListener("click",function(e){if(e.target===el)el.classList.remove("open");});
+  });
+});
 </script>
 </body>
 </html>
