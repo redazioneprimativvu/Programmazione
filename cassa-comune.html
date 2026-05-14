@@ -170,23 +170,19 @@
   input::placeholder { color: var(--text-muted); }
   select option { background: #1a1a1a; }
 
-  .tipo-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-  .tipo-btn {
-    padding: 11px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
+  .date-display {
     background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-size: 14px;
     color: var(--text-muted);
-    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
-  .tipo-btn.active-out { background: var(--red-dim);   border-color: var(--red);   color: var(--red); }
-  .tipo-btn.active-in  { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+  .date-display span { color: var(--text); font-weight: 500; }
 
   .upload-area {
     border: 1.5px dashed var(--border);
@@ -495,8 +491,7 @@
     <div>
       <div class="balance-label">Saldo attuale</div>
       <div class="balance-stats">
-        <span class="in">↑ <span id="stat-in">€0,00</span></span>
-        <span class="out">↓ <span id="stat-out">€0,00</span></span>
+        <span class="out">↓ Uscite mese: <span id="stat-out">€0,00</span></span>
       </div>
     </div>
     <div class="balance-amount" id="balance-display">€200,00</div>
@@ -509,14 +504,6 @@
     <div class="form-title" id="form-title">Nuovo movimento</div>
 
     <div class="form-grid">
-      <div class="full">
-        <label>Tipo</label>
-        <div class="tipo-toggle">
-          <button class="tipo-btn active-out" id="btn-out" onclick="setTipo('out')">↓ Uscita</button>
-          <button class="tipo-btn"            id="btn-in"  onclick="setTipo('in')">↑ Entrata</button>
-        </div>
-      </div>
-
       <div>
         <label>Nome</label>
         <input type="text" id="inp-name" placeholder="Chi sei?" autocomplete="off" />
@@ -524,7 +511,7 @@
 
       <div>
         <label>Data</label>
-        <input type="date" id="inp-date" />
+        <div class="date-display">📅 <span id="date-display-text">Caricamento...</span></div>
       </div>
 
       <div class="full">
@@ -597,6 +584,10 @@
     </div>
     <img class="photo-viewer-img" id="photo-viewer-img" src="" alt="Scontrino" />
     <div style="margin-top:10px;font-size:13px;color:var(--text-muted)" id="photo-viewer-info"></div>
+    <a id="photo-download-btn" href="#" download
+      style="display:block;margin-top:14px;text-align:center;padding:10px 0;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;text-decoration:none;letter-spacing:0.3px;">
+      ⬇️ Scarica foto
+    </a>
   </div>
 </div>
 
@@ -646,15 +637,31 @@ const db      = getFirestore(app);
 
 const BASE_BALANCE = 200;
 let movements       = [];
-let currentTipo     = 'out';
+let currentDate     = null;   // data da internet (stringa YYYY-MM-DD)
 let activeFilter    = 'all';
 let pendingDeleteId = null;
 let pendingDeleteUrl= null;
 let editingId       = null;
 let editingOldPhoto = null;
 
-// today
-document.getElementById('inp-date').valueAsDate = new Date();
+// Fetch data da internet (WorldTimeAPI) per impedire manomissioni
+async function fetchCurrentDate() {
+  try {
+    const res  = await fetch('https://worldtimeapi.org/api/timezone/Europe/Rome');
+    const data = await res.json();
+    currentDate = data.datetime.slice(0, 10); // YYYY-MM-DD
+  } catch(_) {
+    // fallback al dispositivo solo se l'API non risponde
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    currentDate = `${y}-${m}-${d}`;
+  }
+  document.getElementById('date-display-text').textContent = formatDate(currentDate);
+}
+
+fetchCurrentDate();
 
 // realtime listener
 const q = query(collection(db, 'movements'), orderBy('date', 'desc'));
@@ -665,13 +672,6 @@ onSnapshot(q, snap => {
   renderList();
   updateBalance();
 });
-
-// TIPO
-window.setTipo = tipo => {
-  currentTipo = tipo;
-  document.getElementById('btn-out').className = tipo === 'out' ? 'tipo-btn active-out' : 'tipo-btn';
-  document.getElementById('btn-in').className  = tipo === 'in'  ? 'tipo-btn active-in'  : 'tipo-btn';
-};
 
 // FILE PREVIEW
 window.previewFile = input => {
@@ -690,7 +690,7 @@ window.previewFile = input => {
 // SUBMIT
 window.submitMovement = async () => {
   const name   = document.getElementById('inp-name').value.trim();
-  const date   = document.getElementById('inp-date').value;
+  const date   = editingId ? editingDate : currentDate;
   const desc   = document.getElementById('inp-desc').value.trim();
   const amount = parseFloat(document.getElementById('inp-amount').value);
   const cat    = document.getElementById('inp-cat').value;
@@ -713,10 +713,10 @@ window.submitMovement = async () => {
     }
 
     if (editingId) {
-      await updateDoc(doc(db, 'movements', editingId), { name, date, desc, amount, cat, tipo: currentTipo, photoUrl });
+      await updateDoc(doc(db, 'movements', editingId), { name, date, desc, amount, cat, tipo: 'out', photoUrl });
       showToast('Movimento aggiornato ✓', 'success');
     } else {
-      await addDoc(collection(db, 'movements'), { name, date, desc, amount, cat, tipo: currentTipo, photoUrl, createdAt: Date.now() });
+      await addDoc(collection(db, 'movements'), { name, date, desc, amount, cat, tipo: 'out', photoUrl, createdAt: Date.now() });
       showToast('Movimento aggiunto ✓', 'success');
     }
 
@@ -765,19 +765,20 @@ async function uploadPhoto(file) {
 }
 
 // EDIT
+let editingDate = null;
 window.startEdit = id => {
   const m = movements.find(x => x.id === id);
   if (!m) return;
 
   editingId       = id;
+  editingDate     = m.date;
   editingOldPhoto = m.photoUrl || null;
 
   document.getElementById('inp-name').value   = m.name;
-  document.getElementById('inp-date').value   = m.date;
+  document.getElementById('date-display-text').textContent = formatDate(m.date);
   document.getElementById('inp-desc').value   = m.desc;
   document.getElementById('inp-amount').value = m.amount;
   document.getElementById('inp-cat').value    = m.cat || '📦 Altro';
-  setTipo(m.tipo || 'out');
 
   if (m.photoUrl) {
     const img = document.getElementById('upload-preview');
@@ -793,14 +794,14 @@ window.startEdit = id => {
   document.getElementById('form-card').scrollIntoView({ behavior: 'smooth' });
 };
 
-window.cancelEdit = () => { editingId = null; editingOldPhoto = null; resetForm(); };
+window.cancelEdit = () => { editingId = null; editingDate = null; editingOldPhoto = null; resetForm(); };
 
 function resetForm() {
-  editingId = null; editingOldPhoto = null;
+  editingId = null; editingDate = null; editingOldPhoto = null;
   document.getElementById('inp-name').value        = '';
   document.getElementById('inp-desc').value        = '';
   document.getElementById('inp-amount').value      = '';
-  document.getElementById('inp-date').valueAsDate  = new Date();
+  document.getElementById('date-display-text').textContent = currentDate ? formatDate(currentDate) : 'Caricamento...';
   document.getElementById('inp-cat').value         = '🛒 Spesa';
   document.getElementById('file-input').value      = '';
   document.getElementById('upload-preview').style.display = 'none';
@@ -811,7 +812,6 @@ function resetForm() {
   document.getElementById('form-title').textContent        = 'Nuovo movimento';
   document.getElementById('submit-btn').textContent        = 'Aggiungi movimento';
   document.getElementById('cancel-edit-btn').style.display = 'none';
-  setTipo('out');
 }
 
 // FILTER BAR
@@ -881,15 +881,16 @@ window.renderList = () => {
   }).join('');
 };
 
-// BALANCE
+// BALANCE (reset mensile: conta solo i movimenti del mese corrente, partendo da €200)
 window.updateBalance = () => {
-  let balance = BASE_BALANCE, totalIn = 0, totalOut = 0;
-  movements.forEach(m => {
-    if (m.tipo === 'in') { balance += m.amount; totalIn  += m.amount; }
+  const currentMonth = currentDate ? currentDate.slice(0, 7) : new Date().toISOString().slice(0, 7);
+  const thisMonth    = movements.filter(m => m.date && m.date.startsWith(currentMonth));
+  let balance = BASE_BALANCE, totalOut = 0;
+  thisMonth.forEach(m => {
+    if (m.tipo === 'in') { balance += m.amount; }
     else                  { balance -= m.amount; totalOut += m.amount; }
   });
   document.getElementById('balance-display').textContent = formatCurrency(balance, true);
-  document.getElementById('stat-in').textContent         = formatCurrency(totalIn,  true);
   document.getElementById('stat-out').textContent        = formatCurrency(totalOut, true);
 };
 
@@ -897,6 +898,22 @@ window.updateBalance = () => {
 window.viewPhoto = (url, name, desc, date) => {
   document.getElementById('photo-viewer-img').src = url;
   document.getElementById('photo-viewer-info').textContent = `${name} • ${desc} • ${formatDate(date)}`;
+  // Forza il download tramite fetch (bypassa il redirect Cloudinary)
+  const btn = document.getElementById('photo-download-btn');
+  btn.onclick = async e => {
+    e.preventDefault();
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `scontrino_${name}_${date}.jpg`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch(_) {
+      window.open(url, '_blank');
+    }
+  };
   openModal('photo-modal');
 };
 
@@ -943,11 +960,10 @@ window.exportCSV = () => {
   if (movements.length === 0) { showToast('Nessun dato da esportare', 'error'); return; }
 
   const rows = [
-    ['Data','Nome','Motivo','Categoria','Tipo','Importo (€)'],
+    ['Data','Nome','Motivo','Categoria','Importo (€)'],
     ...movements.map(m => [
       m.date, m.name, m.desc, m.cat || '',
-      m.tipo === 'in' ? 'Entrata' : 'Uscita',
-      (m.tipo === 'out' ? '-' : '+') + m.amount.toFixed(2)
+      '-' + m.amount.toFixed(2)
     ])
   ];
 
