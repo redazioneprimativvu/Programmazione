@@ -630,8 +630,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, query, orderBy, onSnapshot }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyDn0-T7wQOG9BiFcM0zikHKhiv-AopJ3Fw",
@@ -644,7 +643,6 @@ const firebaseConfig = {
 
 const app     = initializeApp(firebaseConfig);
 const db      = getFirestore(app);
-const storage = getStorage(app);
 
 const BASE_BALANCE = 200;
 let movements       = [];
@@ -711,9 +709,7 @@ window.submitMovement = async () => {
 
     if (fileInput.files[0]) {
       photoUrl = await uploadPhoto(fileInput.files[0]);
-      if (editingOldPhoto) {
-        try { await deleteObject(ref(storage, editingOldPhoto)); } catch(_) {}
-      }
+      // Nota: la vecchia foto su Cloudinary rimane (rimozione richiede backend)
     }
 
     if (editingId) {
@@ -734,17 +730,37 @@ window.submitMovement = async () => {
   btn.textContent = 'Aggiungi movimento';
 };
 
-// UPLOAD
+// UPLOAD (Cloudinary)
+const CLOUDINARY_CLOUD = 'davgnwndp';
+const CLOUDINARY_PRESET = 'davgnwndp';
+const CLOUDINARY_FOLDER = 'cassa-comune';
+
 async function uploadPhoto(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_PRESET);
+  formData.append('folder', CLOUDINARY_FOLDER);
+
+  document.getElementById('upload-progress').style.display = 'block';
+
   return new Promise((resolve, reject) => {
-    const storageRef = ref(storage, `receipts/${Date.now()}_${file.name}`);
-    const task = uploadBytesResumable(storageRef, file);
-    document.getElementById('upload-progress').style.display = 'block';
-    task.on('state_changed',
-      snap => { document.getElementById('upload-bar').style.width = (snap.bytesTransferred / snap.totalBytes * 100) + '%'; },
-      reject,
-      async () => resolve(await getDownloadURL(task.snapshot.ref))
-    );
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`);
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable) {
+        document.getElementById('upload-bar').style.width = (e.loaded / e.total * 100) + '%';
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+        resolve(data.secure_url);
+      } else {
+        reject(new Error('Upload fallito: ' + xhr.responseText));
+      }
+    };
+    xhr.onerror = () => reject(new Error('Errore di rete'));
+    xhr.send(formData);
   });
 }
 
@@ -960,9 +976,7 @@ window.confirmDelete = async () => {
   if (!pendingDeleteId) return;
   try {
     await deleteDoc(doc(db, 'movements', pendingDeleteId));
-    if (pendingDeleteUrl) {
-      try { await deleteObject(ref(storage, pendingDeleteUrl)); } catch(_) {}
-    }
+    // Nota: la foto su Cloudinary non viene rimossa (richiede backend)
     if (editingId === pendingDeleteId) cancelEdit();
     showToast('Movimento eliminato', 'success');
   } catch(e) {
