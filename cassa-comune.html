@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<title>Cassa Comune</title>
+<title>Cassa</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
   :root {
@@ -85,6 +85,59 @@
   .balance-stats { display: flex; gap: 16px; font-size: 12px; margin-top: 4px; }
   .balance-stats .in  { color: var(--green); }
   .balance-stats .out { color: var(--red); }
+
+
+  /* CASSA SWITCHER */
+  .cassa-switcher {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .sw-btn {
+    padding: 9px 0;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.2px;
+  }
+
+  .sw-btn.active-comune    { background: var(--gold-dim);  border-color: var(--gold);  color: var(--gold); }
+  .sw-btn.active-trasferte { background: var(--blue-dim);  border-color: var(--blue);  color: var(--blue); }
+
+  /* TIPO TOGGLE (solo trasferte) */
+  .tipo-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .tipo-btn {
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--surface2);
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+
+  .tipo-btn.active-out { background: var(--red-dim);   border-color: var(--red);   color: var(--red); }
+  .tipo-btn.active-in  { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+
+  /* balance trasferte in blu */
+  .balance-card.trasferte-card {
+    background: linear-gradient(135deg, var(--blue-dim), transparent);
+    border-color: var(--blue);
+  }
+  .trasferte-card .balance-label  { color: var(--blue); }
+  .trasferte-card .balance-amount { color: var(--blue); }
 
   /* MAIN */
   main { padding: 20px; }
@@ -481,16 +534,20 @@
 
 <header>
   <div class="header-top">
-    <h1>💰 Cassa Comune</h1>
+    <h1 id="header-title">💰 Cassa Comune</h1>
     <div class="header-actions">
       <button class="header-btn export-btn" onclick="exportCSV()">📤 CSV</button>
       <button class="header-btn gallery-btn" onclick="openGallery()">📸 Galleria</button>
     </div>
   </div>
-  <div class="balance-card">
+  <div class="cassa-switcher">
+    <button class="sw-btn active-comune" id="sw-comune" onclick="switchCassa('comune')">💰 Cassa Comune</button>
+    <button class="sw-btn" id="sw-trasferte" onclick="switchCassa('trasferte')">✈️ Trasferte</button>
+  </div>
+  <div class="balance-card" id="balance-card">
     <div>
-      <div class="balance-label">Saldo attuale</div>
-      <div class="balance-stats">
+      <div class="balance-label" id="balance-label">Saldo attuale</div>
+      <div class="balance-stats" id="balance-stats">
         <span class="out">↓ Uscite mese: <span id="stat-out">€0,00</span></span>
       </div>
     </div>
@@ -504,6 +561,14 @@
     <div class="form-title" id="form-title">Nuovo movimento</div>
 
     <div class="form-grid">
+      <div class="full" id="tipo-row" style="display:none">
+        <label>Tipo</label>
+        <div class="tipo-toggle">
+          <button class="tipo-btn active-out" id="btn-out" onclick="setTipo('out')">↓ Uscita</button>
+          <button class="tipo-btn"            id="btn-in"  onclick="setTipo('in')">↑ Entrata</button>
+        </div>
+      </div>
+
       <div>
         <label>Nome</label>
         <input type="text" id="inp-name" placeholder="Chi sei?" autocomplete="off" />
@@ -635,14 +700,66 @@ const firebaseConfig = {
 const app     = initializeApp(firebaseConfig);
 const db      = getFirestore(app);
 
-const BASE_BALANCE = 200;
-let movements       = [];
-let currentDate     = null;   // data da internet (stringa YYYY-MM-DD)
+// CONFIG CASSE
+const CASSE = {
+  comune:    { col: 'movements',   base: 200, monthlyReset: true,  tipoToggle: false, label: '💰 Cassa Comune', balanceLabel: 'Saldo mensile' },
+  trasferte: { col: 'trasferte',   base: 0,   monthlyReset: false, tipoToggle: true,  label: '✈️ Trasferte',    balanceLabel: 'Saldo totale'  }
+};
+
+let currentCassa    = 'comune';
+let movementsData   = { comune: [], trasferte: [] };
+let unsubscribers   = {};
+let currentDate     = null;
+let currentTipo     = 'out';
 let activeFilter    = 'all';
 let pendingDeleteId = null;
 let pendingDeleteUrl= null;
 let editingId       = null;
+let editingDate     = null;
 let editingOldPhoto = null;
+
+// SWITCH CASSA
+window.switchCassa = cassa => {
+  currentCassa = cassa;
+  const cfg = CASSE[cassa];
+
+  // switcher buttons
+  document.getElementById('sw-comune').className    = 'sw-btn' + (cassa === 'comune'    ? ' active-comune'    : '');
+  document.getElementById('sw-trasferte').className = 'sw-btn' + (cassa === 'trasferte' ? ' active-trasferte' : '');
+
+  // header
+  document.getElementById('header-title').textContent = cfg.label;
+
+  // balance card colore
+  const card = document.getElementById('balance-card');
+  card.className = 'balance-card' + (cassa === 'trasferte' ? ' trasferte-card' : '');
+  document.getElementById('balance-label').textContent = cfg.balanceLabel;
+
+  // tipo toggle nel form
+  document.getElementById('tipo-row').style.display = cfg.tipoToggle ? 'block' : 'none';
+
+  // balance stats: trasferte mostra entrate+uscite, comune solo uscite mese
+  const statsEl = document.getElementById('balance-stats');
+  if (cassa === 'trasferte') {
+    statsEl.innerHTML = '<span class="in">↑ Entrate: <span id="stat-in">€0,00</span></span><span class="out">↓ Uscite: <span id="stat-out">€0,00</span></span>';
+  } else {
+    statsEl.innerHTML = '<span class="out">↓ Uscite mese: <span id="stat-out">€0,00</span></span>';
+  }
+
+  // reset form e ri-renderizza
+  cancelEdit();
+  activeFilter = 'all';
+  renderFilterBar();
+  renderList();
+  updateBalance();
+};
+
+// TIPO (solo trasferte)
+window.setTipo = tipo => {
+  currentTipo = tipo;
+  document.getElementById('btn-out').className = tipo === 'out' ? 'tipo-btn active-out' : 'tipo-btn';
+  document.getElementById('btn-in').className  = tipo === 'in'  ? 'tipo-btn active-in'  : 'tipo-btn';
+};
 
 // Fetch data da internet (WorldTimeAPI) per impedire manomissioni
 async function fetchCurrentDate() {
@@ -663,15 +780,25 @@ async function fetchCurrentDate() {
 
 fetchCurrentDate();
 
-// realtime listener
-const q = query(collection(db, 'movements'), orderBy('date', 'desc'));
-onSnapshot(q, snap => {
-  movements = [];
-  snap.forEach(d => movements.push({ id: d.id, ...d.data() }));
-  renderFilterBar();
-  renderList();
-  updateBalance();
-});
+// Getter convenienza
+function movements() { return movementsData[currentCassa]; }
+
+// Avvia listener per entrambe le casse
+function startListeners() {
+  Object.entries(CASSE).forEach(([key, cfg]) => {
+    const q = query(collection(db, cfg.col), orderBy('date', 'desc'));
+    unsubscribers[key] = onSnapshot(q, snap => {
+      movementsData[key] = [];
+      snap.forEach(d => movementsData[key].push({ id: d.id, ...d.data() }));
+      if (currentCassa === key) {
+        renderFilterBar();
+        renderList();
+        updateBalance();
+      }
+    });
+  });
+}
+startListeners();
 
 // FILE PREVIEW
 window.previewFile = input => {
@@ -713,10 +840,10 @@ window.submitMovement = async () => {
     }
 
     if (editingId) {
-      await updateDoc(doc(db, 'movements', editingId), { name, date, desc, amount, cat, tipo: 'out', photoUrl });
+      await updateDoc(doc(db, CASSE[currentCassa].col, editingId), { name, date, desc, amount, cat, tipo: currentCassa === 'trasferte' ? currentTipo : 'out', photoUrl });
       showToast('Movimento aggiornato ✓', 'success');
     } else {
-      await addDoc(collection(db, 'movements'), { name, date, desc, amount, cat, tipo: 'out', photoUrl, createdAt: Date.now() });
+      await addDoc(collection(db, CASSE[currentCassa].col), { name, date, desc, amount, cat, tipo: currentCassa === 'trasferte' ? currentTipo : 'out', photoUrl, createdAt: Date.now() });
       showToast('Movimento aggiunto ✓', 'success');
     }
 
@@ -767,7 +894,7 @@ async function uploadPhoto(file) {
 // EDIT
 let editingDate = null;
 window.startEdit = id => {
-  const m = movements.find(x => x.id === id);
+  const m = movements().find(x => x.id === id);
   if (!m) return;
 
   editingId       = id;
@@ -791,6 +918,7 @@ window.startEdit = id => {
   document.getElementById('form-title').textContent        = '✏️ Modifica movimento';
   document.getElementById('submit-btn').textContent        = 'Salva modifiche';
   document.getElementById('cancel-edit-btn').style.display = 'block';
+  if (CASSE[currentCassa].tipoToggle) setTipo(m.tipo || 'out');
   document.getElementById('form-card').scrollIntoView({ behavior: 'smooth' });
 };
 
@@ -812,6 +940,7 @@ function resetForm() {
   document.getElementById('form-title').textContent        = 'Nuovo movimento';
   document.getElementById('submit-btn').textContent        = 'Aggiungi movimento';
   document.getElementById('cancel-edit-btn').style.display = 'none';
+  if (CASSE[currentCassa].tipoToggle) setTipo('out');
 }
 
 // FILTER BAR
@@ -822,7 +951,7 @@ window.setFilter = cat => {
 };
 
 window.renderFilterBar = () => {
-  const cats = ['all', ...new Set(movements.map(m => m.cat).filter(Boolean))];
+  const cats = ['all', ...new Set(movements().map(m => m.cat).filter(Boolean))];
   const bar  = document.getElementById('filter-bar');
   bar.innerHTML = cats.map(cat => {
     const label = cat === 'all' ? 'Tutti' : cat;
@@ -834,7 +963,7 @@ window.renderFilterBar = () => {
 window.renderList = () => {
   const container = document.getElementById('list-container');
   const countEl   = document.getElementById('results-count');
-  const filtered  = activeFilter === 'all' ? movements : movements.filter(m => m.cat === activeFilter);
+  const filtered  = activeFilter === 'all' ? movements() : movements()().filter(m => m.cat === activeFilter);
 
   if (filtered.length === 0) {
     container.innerHTML = `<div class="empty-state">${activeFilter === 'all' ? 'Nessun movimento ancora.<br>Aggiungi il primo!' : 'Nessun movimento per questa categoria.'}</div>`;
@@ -881,17 +1010,27 @@ window.renderList = () => {
   }).join('');
 };
 
-// BALANCE (reset mensile: conta solo i movimenti del mese corrente, partendo da €200)
+// BALANCE
 window.updateBalance = () => {
-  const currentMonth = currentDate ? currentDate.slice(0, 7) : new Date().toISOString().slice(0, 7);
-  const thisMonth    = movements.filter(m => m.date && m.date.startsWith(currentMonth));
-  let balance = BASE_BALANCE, totalOut = 0;
-  thisMonth.forEach(m => {
-    if (m.tipo === 'in') { balance += m.amount; }
+  const cfg = CASSE[currentCassa];
+  let subset = movements();
+
+  if (cfg.monthlyReset) {
+    const currentMonth = currentDate ? currentDate.slice(0, 7) : new Date().toISOString().slice(0, 7);
+    subset = subset.filter(m => m.date && m.date.startsWith(currentMonth));
+  }
+
+  let balance = cfg.base, totalIn = 0, totalOut = 0;
+  subset.forEach(m => {
+    if (m.tipo === 'in') { balance += m.amount; totalIn  += m.amount; }
     else                  { balance -= m.amount; totalOut += m.amount; }
   });
+
   document.getElementById('balance-display').textContent = formatCurrency(balance, true);
-  document.getElementById('stat-out').textContent        = formatCurrency(totalOut, true);
+  const outEl = document.getElementById('stat-out');
+  if (outEl) outEl.textContent = formatCurrency(totalOut, true);
+  const inEl  = document.getElementById('stat-in');
+  if (inEl)  inEl.textContent  = formatCurrency(totalIn,  true);
 };
 
 // PHOTO VIEWER
@@ -919,7 +1058,7 @@ window.viewPhoto = (url, name, desc, date) => {
 
 // GALLERY
 window.openGallery = () => {
-  const withPhoto = movements.filter(m => m.photoUrl);
+  const withPhoto = movements().filter(m => m.photoUrl);
   const grid      = document.getElementById('gallery-grid');
   const filterEl  = document.getElementById('gallery-filter');
 
@@ -957,14 +1096,16 @@ window.openGallery = () => {
 
 // EXPORT CSV
 window.exportCSV = () => {
-  if (movements.length === 0) { showToast('Nessun dato da esportare', 'error'); return; }
+  if (movements().length === 0) { showToast('Nessun dato da esportare', 'error'); return; }
 
   const rows = [
-    ['Data','Nome','Motivo','Categoria','Importo (€)'],
-    ...movements.map(m => [
-      m.date, m.name, m.desc, m.cat || '',
-      '-' + m.amount.toFixed(2)
-    ])
+    currentCassa === 'trasferte'
+      ? ['Data','Nome','Motivo','Categoria','Tipo','Importo (€)']
+      : ['Data','Nome','Motivo','Categoria','Importo (€)'],
+    ...movements().map(m => currentCassa === 'trasferte'
+      ? [m.date, m.name, m.desc, m.cat || '', m.tipo === 'in' ? 'Entrata' : 'Uscita', (m.tipo === 'out' ? '-' : '+') + m.amount.toFixed(2)]
+      : [m.date, m.name, m.desc, m.cat || '', '-' + m.amount.toFixed(2)]
+    )
   ];
 
   const csv  = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
@@ -991,7 +1132,7 @@ window.closeConfirm = () => {
 window.confirmDelete = async () => {
   if (!pendingDeleteId) return;
   try {
-    await deleteDoc(doc(db, 'movements', pendingDeleteId));
+    await deleteDoc(doc(db, CASSE[currentCassa].col, pendingDeleteId));
     // Nota: la foto su Cloudinary non viene rimossa (richiede backend)
     if (editingId === pendingDeleteId) cancelEdit();
     showToast('Movimento eliminato', 'success');
