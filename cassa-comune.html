@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Cassa Comune</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --text: #f0ece4;
+    --text-muted: #7a7a7a;
+    --green: #4ade80;
+    --green-dim: rgba(74, 222, 128, 0.12);
+    --red: #f87171;
+    --red-dim: rgba(248, 113, 113, 0.12);
+    --gold: #d4a843;
+    --gold-dim: rgba(212, 168, 67, 0.15);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96, 165, 250, 0.12);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    padding-bottom: 100px;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  h1 { font-family: 'DM Serif Display', serif; font-size: 22px; letter-spacing: -0.3px; }
+
+  .header-actions { display: flex; gap: 8px; }
+
+  .header-btn {
+    border: 1px solid var(--border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 13px;
+    border-radius: 999px;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+  }
+
+  .gallery-btn { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+  .export-btn  { background: var(--blue-dim);  border-color: var(--blue);  color: var(--blue); }
+
+  .balance-card {
+    background: linear-gradient(135deg, var(--gold-dim), transparent);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .balance-label { font-size: 11px; font-weight: 500; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+  .balance-amount { font-family: 'DM Serif Display', serif; font-size: 30px; color: var(--gold); line-height: 1; }
+  .balance-stats { display: flex; gap: 16px; font-size: 12px; margin-top: 4px; }
+  .balance-stats .in  { color: var(--green); }
+  .balance-stats .out { color: var(--red); }
+
+  /* MAIN */
+  main { padding: 20px; }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 18px;
+    scrollbar-width: none;
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+
+  .cat-chip {
+    flex-shrink: 0;
+    padding: 6px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .cat-chip.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+  /* FORM */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 24px;
+    transition: border-color 0.2s;
+  }
+
+  .form-card.editing { border-color: var(--blue); }
+  .form-card.editing .form-title { color: var(--blue); }
+
+  .form-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    transition: color 0.2s;
+  }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-grid .full { grid-column: 1 / -1; }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 5px;
+  }
+
+  input, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus { border-color: var(--gold); }
+  input::placeholder { color: var(--text-muted); }
+  select option { background: #1a1a1a; }
+
+  .tipo-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .tipo-btn {
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--surface2);
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+
+  .tipo-btn.active-out { background: var(--red-dim);   border-color: var(--red);   color: var(--red); }
+  .tipo-btn.active-in  { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+
+  .upload-area {
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .upload-area:hover { border-color: var(--gold); }
+  .upload-area input[type=file] { display: none; }
+  .upload-area .upload-label { font-size: 13px; color: var(--text-muted); cursor: pointer; display: block; }
+  .upload-area .upload-preview { max-height: 80px; border-radius: 8px; margin-top: 8px; }
+
+  .upload-progress { height: 3px; background: var(--border); border-radius: 2px; margin-top: 10px; display: none; }
+  .upload-progress-bar { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.3s; width: 0%; }
+
+  .form-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 14px; }
+
+  .submit-btn {
+    padding: 14px;
+    background: var(--gold);
+    color: #0f0f0f;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .cancel-edit-btn {
+    padding: 14px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: none;
+  }
+
+  /* LISTA */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .section-title  { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .results-count  { font-size: 12px; color: var(--text-muted); }
+
+  .day-group { margin-bottom: 20px; }
+
+  .day-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .movement-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .movement-item.is-out { border-left: 3px solid var(--red); }
+  .movement-item.is-in  { border-left: 3px solid var(--green); }
+
+  .movement-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .is-out .movement-icon { background: var(--red-dim); }
+  .is-in  .movement-icon { background: var(--green-dim); }
+
+  .movement-info { flex: 1; min-width: 0; }
+
+  .movement-name {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .movement-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .movement-cat {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .movement-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+
+  .movement-amount { font-family: 'DM Serif Display', serif; font-size: 17px; }
+  .is-out .movement-amount { color: var(--red); }
+  .is-in  .movement-amount { color: var(--green); }
+
+  .item-actions { display: flex; gap: 5px; }
+
+  .photo-btn, .edit-btn, .delete-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.4;
+  }
+
+  .photo-btn:hover  { border-color: var(--gold);  color: var(--gold); }
+  .edit-btn:hover   { border-color: var(--blue);  color: var(--blue); }
+  .delete-btn:hover { border-color: var(--red);   color: var(--red); }
+
+  /* LOADER */
+  .loader { text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px; }
+  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 500px;
+    max-height: 90dvh;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .modal-title { font-family: 'DM Serif Display', serif; font-size: 20px; }
+
+  .modal-close {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .photo-viewer-img { width: 100%; border-radius: 10px; display: block; }
+
+  /* GALLERY */
+  .gallery-filter { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+
+  .filter-chip {
+    padding: 6px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .filter-chip.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+  .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .gallery-thumb {
+    border-radius: 10px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: var(--surface2);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .gallery-thumb .thumb-label {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.75));
+    padding: 20px 8px 8px;
+    font-size: 11px;
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .empty-state { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 14px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 300;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .toast.show    { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error   { border-color: var(--red);   color: var(--red); }
+
+  /* CONFIRM SHEET */
+  .confirm-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 250;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .confirm-overlay.open { display: flex; }
+
+  .confirm-sheet {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 24px 20px 36px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+  }
+
+  .confirm-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+  .confirm-desc  { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+  .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .btn-cancel      { padding: 13px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn-confirm-del { padding: 13px; background: var(--red-dim); border: 1px solid var(--red); color: var(--red); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>💰 Cassa Comune</h1>
+    <div class="header-actions">
+      <button class="header-btn export-btn" onclick="exportCSV()">📤 CSV</button>
+      <button class="header-btn gallery-btn" onclick="openGallery()">📸 Galleria</button>
+    </div>
+  </div>
+  <div class="balance-card">
+    <div>
+      <div class="balance-label">Saldo attuale</div>
+      <div class="balance-stats">
+        <span class="in">↑ <span id="stat-in">€0,00</span></span>
+        <span class="out">↓ <span id="stat-out">€0,00</span></span>
+      </div>
+    </div>
+    <div class="balance-amount" id="balance-display">€200,00</div>
+  </div>
+</header>
+
+<main>
+  <!-- FORM -->
+  <div class="form-card" id="form-card">
+    <div class="form-title" id="form-title">Nuovo movimento</div>
+
+    <div class="form-grid">
+      <div class="full">
+        <label>Tipo</label>
+        <div class="tipo-toggle">
+          <button class="tipo-btn active-out" id="btn-out" onclick="setTipo('out')">↓ Uscita</button>
+          <button class="tipo-btn"            id="btn-in"  onclick="setTipo('in')">↑ Entrata</button>
+        </div>
+      </div>
+
+      <div>
+        <label>Nome</label>
+        <input type="text" id="inp-name" placeholder="Chi sei?" autocomplete="off" />
+      </div>
+
+      <div>
+        <label>Data</label>
+        <input type="date" id="inp-date" />
+      </div>
+
+      <div class="full">
+        <label>Motivo</label>
+        <input type="text" id="inp-desc" placeholder="A cosa serve?" autocomplete="off" />
+      </div>
+
+      <div>
+        <label>Importo (€)</label>
+        <input type="number" id="inp-amount" placeholder="0,00" step="0.01" min="0" />
+      </div>
+
+      <div>
+        <label>Categoria</label>
+        <select id="inp-cat">
+          <option value="🛒 Spesa">🛒 Spesa</option>
+          <option value="🍽️ Ristorante">🍽️ Ristorante</option>
+          <option value="⛽ Benzina">⛽ Benzina</option>
+          <option value="💡 Bollette">💡 Bollette</option>
+          <option value="🏠 Casa">🏠 Casa</option>
+          <option value="💊 Farmacia">💊 Farmacia</option>
+          <option value="🎉 Svago">🎉 Svago</option>
+          <option value="🚗 Trasporti">🚗 Trasporti</option>
+          <option value="💰 Versamento">💰 Versamento</option>
+          <option value="🔧 Manutenzione">🔧 Manutenzione</option>
+          <option value="📦 Altro">📦 Altro</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label>Scontrino / Foto</label>
+        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+          <input type="file" id="file-input" accept="image/*" capture="environment" onchange="previewFile(this)" />
+          <label class="upload-label" id="upload-label">📎 Tocca per allegare foto</label>
+          <img id="upload-preview" class="upload-preview" style="display:none" />
+        </div>
+        <div class="upload-progress" id="upload-progress">
+          <div class="upload-progress-bar" id="upload-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="submit-btn" id="submit-btn" onclick="submitMovement()">Aggiungi movimento</button>
+      <button class="cancel-edit-btn" id="cancel-edit-btn" onclick="cancelEdit()">✕</button>
+    </div>
+  </div>
+
+  <!-- FILTER BAR categorie -->
+  <div class="filter-bar" id="filter-bar">
+    <button class="cat-chip active" data-cat="all" onclick="setFilter('all')">Tutti</button>
+  </div>
+
+  <!-- LISTA -->
+  <div class="section-header">
+    <div class="section-title">Cronologia</div>
+    <div class="results-count" id="results-count"></div>
+  </div>
+  <div id="list-container">
+    <div class="loader"><div class="spinner"></div>Caricamento...</div>
+  </div>
+</main>
+
+<!-- Modal foto -->
+<div class="modal-overlay" id="photo-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Scontrino</div>
+      <button class="modal-close" onclick="closeModal('photo-modal')">✕</button>
+    </div>
+    <img class="photo-viewer-img" id="photo-viewer-img" src="" alt="Scontrino" />
+    <div style="margin-top:10px;font-size:13px;color:var(--text-muted)" id="photo-viewer-info"></div>
+  </div>
+</div>
+
+<!-- Modal galleria -->
+<div class="modal-overlay" id="gallery-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📸 Galleria</div>
+      <button class="modal-close" onclick="closeModal('gallery-modal')">✕</button>
+    </div>
+    <div class="gallery-filter" id="gallery-filter"></div>
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </div>
+</div>
+
+<!-- Confirm delete -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-sheet">
+    <div class="confirm-title">Eliminare movimento?</div>
+    <div class="confirm-desc">Questa azione è irreversibile.</div>
+    <div class="confirm-actions">
+      <button class="btn-cancel" onclick="closeConfirm()">Annulla</button>
+      <button class="btn-confirm-del" onclick="confirmDelete()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, query, orderBy, onSnapshot }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDn0-T7wQOG9BiFcM0zikHKhiv-AopJ3Fw",
+  authDomain: "cassa-comune-1835f.firebaseapp.com",
+  projectId: "cassa-comune-1835f",
+  storageBucket: "cassa-comune-1835f.firebasestorage.app",
+  messagingSenderId: "176811876172",
+  appId: "1:176811876172:web:d5cfdabd82fa89d8b639e9"
+};
+
+const app     = initializeApp(firebaseConfig);
+const db      = getFirestore(app);
+const storage = getStorage(app);
+
+const BASE_BALANCE = 200;
+let movements       = [];
+let currentTipo     = 'out';
+let activeFilter    = 'all';
+let pendingDeleteId = null;
+let pendingDeleteUrl= null;
+let editingId       = null;
+let editingOldPhoto = null;
+
+// today
+document.getElementById('inp-date').valueAsDate = new Date();
+
+// realtime listener
+const q = query(collection(db, 'movements'), orderBy('date', 'desc'));
+onSnapshot(q, snap => {
+  movements = [];
+  snap.forEach(d => movements.push({ id: d.id, ...d.data() }));
+  renderFilterBar();
+  renderList();
+  updateBalance();
+});
+
+// TIPO
+window.setTipo = tipo => {
+  currentTipo = tipo;
+  document.getElementById('btn-out').className = tipo === 'out' ? 'tipo-btn active-out' : 'tipo-btn';
+  document.getElementById('btn-in').className  = tipo === 'in'  ? 'tipo-btn active-in'  : 'tipo-btn';
+};
+
+// FILE PREVIEW
+window.previewFile = input => {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('upload-preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('upload-label').textContent = '✅ ' + file.name;
+  };
+  reader.readAsDataURL(file);
+};
+
+// SUBMIT
+window.submitMovement = async () => {
+  const name   = document.getElementById('inp-name').value.trim();
+  const date   = document.getElementById('inp-date').value;
+  const desc   = document.getElementById('inp-desc').value.trim();
+  const amount = parseFloat(document.getElementById('inp-amount').value);
+  const cat    = document.getElementById('inp-cat').value;
+  const fileInput = document.getElementById('file-input');
+
+  if (!name || !date || !desc || isNaN(amount) || amount <= 0) {
+    showToast('Compila tutti i campi', 'error'); return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = editingId ? 'Aggiornamento...' : 'Salvataggio...';
+
+  try {
+    let photoUrl = editingOldPhoto;
+
+    if (fileInput.files[0]) {
+      photoUrl = await uploadPhoto(fileInput.files[0]);
+      if (editingOldPhoto) {
+        try { await deleteObject(ref(storage, editingOldPhoto)); } catch(_) {}
+      }
+    }
+
+    if (editingId) {
+      await updateDoc(doc(db, 'movements', editingId), { name, date, desc, amount, cat, tipo: currentTipo, photoUrl });
+      showToast('Movimento aggiornato ✓', 'success');
+    } else {
+      await addDoc(collection(db, 'movements'), { name, date, desc, amount, cat, tipo: currentTipo, photoUrl, createdAt: Date.now() });
+      showToast('Movimento aggiunto ✓', 'success');
+    }
+
+    resetForm();
+  } catch(e) {
+    console.error(e);
+    showToast('Errore nel salvataggio', 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Aggiungi movimento';
+};
+
+// UPLOAD
+async function uploadPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const storageRef = ref(storage, `receipts/${Date.now()}_${file.name}`);
+    const task = uploadBytesResumable(storageRef, file);
+    document.getElementById('upload-progress').style.display = 'block';
+    task.on('state_changed',
+      snap => { document.getElementById('upload-bar').style.width = (snap.bytesTransferred / snap.totalBytes * 100) + '%'; },
+      reject,
+      async () => resolve(await getDownloadURL(task.snapshot.ref))
+    );
+  });
+}
+
+// EDIT
+window.startEdit = id => {
+  const m = movements.find(x => x.id === id);
+  if (!m) return;
+
+  editingId       = id;
+  editingOldPhoto = m.photoUrl || null;
+
+  document.getElementById('inp-name').value   = m.name;
+  document.getElementById('inp-date').value   = m.date;
+  document.getElementById('inp-desc').value   = m.desc;
+  document.getElementById('inp-amount').value = m.amount;
+  document.getElementById('inp-cat').value    = m.cat || '📦 Altro';
+  setTipo(m.tipo || 'out');
+
+  if (m.photoUrl) {
+    const img = document.getElementById('upload-preview');
+    img.src = m.photoUrl;
+    img.style.display = 'block';
+    document.getElementById('upload-label').textContent = '✅ Foto esistente (sostituisci se vuoi)';
+  }
+
+  document.getElementById('form-card').classList.add('editing');
+  document.getElementById('form-title').textContent        = '✏️ Modifica movimento';
+  document.getElementById('submit-btn').textContent        = 'Salva modifiche';
+  document.getElementById('cancel-edit-btn').style.display = 'block';
+  document.getElementById('form-card').scrollIntoView({ behavior: 'smooth' });
+};
+
+window.cancelEdit = () => { editingId = null; editingOldPhoto = null; resetForm(); };
+
+function resetForm() {
+  editingId = null; editingOldPhoto = null;
+  document.getElementById('inp-name').value        = '';
+  document.getElementById('inp-desc').value        = '';
+  document.getElementById('inp-amount').value      = '';
+  document.getElementById('inp-date').valueAsDate  = new Date();
+  document.getElementById('inp-cat').value         = '🛒 Spesa';
+  document.getElementById('file-input').value      = '';
+  document.getElementById('upload-preview').style.display = 'none';
+  document.getElementById('upload-label').textContent     = '📎 Tocca per allegare foto';
+  document.getElementById('upload-progress').style.display = 'none';
+  document.getElementById('upload-bar').style.width        = '0%';
+  document.getElementById('form-card').classList.remove('editing');
+  document.getElementById('form-title').textContent        = 'Nuovo movimento';
+  document.getElementById('submit-btn').textContent        = 'Aggiungi movimento';
+  document.getElementById('cancel-edit-btn').style.display = 'none';
+  setTipo('out');
+}
+
+// FILTER BAR
+window.setFilter = cat => {
+  activeFilter = cat;
+  document.querySelectorAll('.cat-chip').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
+  renderList();
+};
+
+window.renderFilterBar = () => {
+  const cats = ['all', ...new Set(movements.map(m => m.cat).filter(Boolean))];
+  const bar  = document.getElementById('filter-bar');
+  bar.innerHTML = cats.map(cat => {
+    const label = cat === 'all' ? 'Tutti' : cat;
+    return `<button class="cat-chip ${activeFilter === cat ? 'active' : ''}" data-cat="${cat}" onclick="setFilter('${cat}')">${label}</button>`;
+  }).join('');
+};
+
+// RENDER LIST
+window.renderList = () => {
+  const container = document.getElementById('list-container');
+  const countEl   = document.getElementById('results-count');
+  const filtered  = activeFilter === 'all' ? movements : movements.filter(m => m.cat === activeFilter);
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state">${activeFilter === 'all' ? 'Nessun movimento ancora.<br>Aggiungi il primo!' : 'Nessun movimento per questa categoria.'}</div>`;
+    countEl.textContent = '';
+    return;
+  }
+
+  countEl.textContent = filtered.length + ' movimenti';
+
+  const groups = {};
+  filtered.forEach(m => { if (!groups[m.date]) groups[m.date] = []; groups[m.date].push(m); });
+  const dates = Object.keys(groups).sort((a,b) => b.localeCompare(a));
+
+  container.innerHTML = dates.map(date => {
+    const rows = groups[date].map(m => {
+      const isOut    = m.tipo === 'out';
+      const sign     = isOut ? '−' : '+';
+      const icon     = isOut ? '↓' : '↑';
+      const catBadge = m.cat ? `<span class="movement-cat">${m.cat}</span>` : '';
+      const photoBtn = m.photoUrl
+        ? `<button class="photo-btn" onclick="viewPhoto('${m.photoUrl}','${esc(m.name)}','${esc(m.desc)}','${m.date}')">📎</button>`
+        : '';
+
+      return `
+        <div class="movement-item ${isOut ? 'is-out' : 'is-in'}">
+          <div class="movement-icon">${icon}</div>
+          <div class="movement-info">
+            <div class="movement-name">${esc(m.name)}</div>
+            <div class="movement-desc">${esc(m.desc)}</div>
+            ${catBadge}
+          </div>
+          <div class="movement-right">
+            <div class="movement-amount">${sign}${formatCurrency(m.amount)}</div>
+            <div class="item-actions">
+              ${photoBtn}
+              <button class="edit-btn"   onclick="startEdit('${m.id}')">✏️</button>
+              <button class="delete-btn" onclick="askDelete('${m.id}','${m.photoUrl || ''}')">🗑</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    return `<div class="day-group"><div class="day-label">${formatDate(date)}</div>${rows}</div>`;
+  }).join('');
+};
+
+// BALANCE
+window.updateBalance = () => {
+  let balance = BASE_BALANCE, totalIn = 0, totalOut = 0;
+  movements.forEach(m => {
+    if (m.tipo === 'in') { balance += m.amount; totalIn  += m.amount; }
+    else                  { balance -= m.amount; totalOut += m.amount; }
+  });
+  document.getElementById('balance-display').textContent = formatCurrency(balance, true);
+  document.getElementById('stat-in').textContent         = formatCurrency(totalIn,  true);
+  document.getElementById('stat-out').textContent        = formatCurrency(totalOut, true);
+};
+
+// PHOTO VIEWER
+window.viewPhoto = (url, name, desc, date) => {
+  document.getElementById('photo-viewer-img').src = url;
+  document.getElementById('photo-viewer-info').textContent = `${name} • ${desc} • ${formatDate(date)}`;
+  openModal('photo-modal');
+};
+
+// GALLERY
+window.openGallery = () => {
+  const withPhoto = movements.filter(m => m.photoUrl);
+  const grid      = document.getElementById('gallery-grid');
+  const filterEl  = document.getElementById('gallery-filter');
+
+  if (withPhoto.length === 0) {
+    grid.innerHTML    = '<div class="empty-state" style="grid-column:1/-1">Nessuna foto ancora.</div>';
+    filterEl.innerHTML = '';
+  } else {
+    const months = [...new Set(withPhoto.map(m => m.date.substring(0,7)))].sort((a,b) => b.localeCompare(a));
+    let activeMonth = 'all';
+
+    const renderGallery = () => {
+      const f = activeMonth === 'all' ? withPhoto : withPhoto.filter(m => m.date.startsWith(activeMonth));
+      grid.innerHTML = f.map(m => `
+        <div class="gallery-thumb" onclick="viewPhoto('${m.photoUrl}','${esc(m.name)}','${esc(m.desc)}','${m.date}')">
+          <img src="${m.photoUrl}" loading="lazy" />
+          <div class="thumb-label">${esc(m.name)}<br>${formatDate(m.date)}</div>
+        </div>`).join('');
+    };
+
+    filterEl.innerHTML = ['all', ...months].map(mo => `
+      <button class="filter-chip ${mo === activeMonth ? 'active' : ''}" data-mo="${mo}" onclick="setMonthFilter('${mo}')">${mo === 'all' ? 'Tutte' : formatMonth(mo)}</button>
+    `).join('');
+
+    window.setMonthFilter = mo => {
+      activeMonth = mo;
+      document.querySelectorAll('#gallery-filter .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.mo === mo));
+      renderGallery();
+    };
+
+    renderGallery();
+  }
+
+  openModal('gallery-modal');
+};
+
+// EXPORT CSV
+window.exportCSV = () => {
+  if (movements.length === 0) { showToast('Nessun dato da esportare', 'error'); return; }
+
+  const rows = [
+    ['Data','Nome','Motivo','Categoria','Tipo','Importo (€)'],
+    ...movements.map(m => [
+      m.date, m.name, m.desc, m.cat || '',
+      m.tipo === 'in' ? 'Entrata' : 'Uscita',
+      (m.tipo === 'out' ? '-' : '+') + m.amount.toFixed(2)
+    ])
+  ];
+
+  const csv  = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), { href: url, download: `cassa-comune-${new Date().toISOString().slice(0,10)}.csv` });
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV scaricato ✓', 'success');
+};
+
+// DELETE
+window.askDelete = (id, url) => {
+  pendingDeleteId  = id;
+  pendingDeleteUrl = url;
+  document.getElementById('confirm-overlay').classList.add('open');
+};
+
+window.closeConfirm = () => {
+  pendingDeleteId = null; pendingDeleteUrl = null;
+  document.getElementById('confirm-overlay').classList.remove('open');
+};
+
+window.confirmDelete = async () => {
+  if (!pendingDeleteId) return;
+  try {
+    await deleteDoc(doc(db, 'movements', pendingDeleteId));
+    if (pendingDeleteUrl) {
+      try { await deleteObject(ref(storage, pendingDeleteUrl)); } catch(_) {}
+    }
+    if (editingId === pendingDeleteId) cancelEdit();
+    showToast('Movimento eliminato', 'success');
+  } catch(e) {
+    showToast('Errore eliminazione', 'error');
+  }
+  closeConfirm();
+};
+
+// UTILS
+function formatCurrency(n, withEuro = true) {
+  return (withEuro ? '€' : '') + n.toFixed(2).replace('.', ',');
+}
+
+function formatDate(dateStr) {
+  const [y,m,d] = dateStr.split('-');
+  const months = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+function formatMonth(ym) {
+  const [y,m] = ym.split('-');
+  const months = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  return months[parseInt(m)-1] + ' ' + y;
+}
+
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+window.openModal  = id => document.getElementById(id).classList.add('open');
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+
+document.querySelectorAll('.modal-overlay').forEach(el =>
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); })
+);
+
+window.showToast = (msg, type = '') => {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 2800);
+};
+</script>
+</body>
+</html>
