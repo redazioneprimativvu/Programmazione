@@ -481,7 +481,7 @@ function renderFilterBar(){
   var seen={},cats=["all"];
   mv().forEach(function(m){if(m.cat&&!seen[m.cat]){seen[m.cat]=true;cats.push(m.cat);}});
   document.getElementById("filter-bar").innerHTML=cats.map(function(cat){
-    return '<button class="cat-chip '+(activeFilter===cat?"active":"")+'" data-cat="'+cat+'" onclick="setFilter(\''+cat+'\')">'+(cat==="all"?"Tutti":cat)+'</button>';
+    return '<button class="cat-chip '+(activeFilter===cat?"active":"")+'" data-cat="'+cat+'" onclick="setFilter(\x27'+cat+'\x27)">'+(cat==="all"?"Tutti":cat)+'</button>';
   }).join("");
 }
 function renderList(){
@@ -606,7 +606,7 @@ function openGallery(){
     }).join("");
   }
   fe.innerHTML=["all"].concat(months).map(function(mo){
-    return '<button class="filter-chip '+(mo===am?"active":"")+'" data-mo="'+mo+'" onclick="setGMon(\''+mo+\')">'+(mo==="all"?"Tutte":fm(mo))+"</button>";
+    return '<button class="filter-chip '+(mo===am?"active":"")+'" data-mo="'+mo+'" onclick="setGMon(\x27'+mo+'\x27)">'+(mo==="all"?"Tutte":fm(mo))+"</button>";
   }).join("");
   window.setGMon=function(mo){
     am=mo;document.querySelectorAll("#gallery-filter .filter-chip").forEach(function(c){c.classList.toggle("active",c.dataset.mo===mo);});rg();
