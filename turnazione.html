@@ -141,11 +141,19 @@ const firebaseConfig = {
   appId: "1:940298778130:web:923caafd0596e861984acb",
   measurementId: "G-6G952ZHRP3"
 };
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
-const DB_DOC = doc(db, 'app', 'data');
-window._fbSave = async (data) => { await setDoc(DB_DOC, data); };
-window._fbLoad = async () => { const snap = await getDoc(DB_DOC); return snap.exists() ? snap.data() : null; };
+// Expose a promise so the main script can wait for Firebase to be ready
+window._fbReady = new Promise(resolve => {
+  try {
+    const fbApp = initializeApp(firebaseConfig);
+    const db = getFirestore(fbApp);
+    const DB_DOC = doc(db, 'app', 'data');
+    window._fbSave = async (data) => { await setDoc(DB_DOC, data); };
+    window._fbLoad = async () => { const snap = await getDoc(DB_DOC); return snap.exists() ? snap.data() : null; };
+  } catch(e) {
+    console.error('Firebase init error:', e);
+  }
+  resolve();
+});
 </script>
 <script>
 // ── CONSTANTS ──────────────────────────────────────────────────────────────
@@ -738,6 +746,9 @@ function bindDrag(){
 // ── INIT ────────────────────────────────────────────────────────────────────
 (async()=>{
   S.weekStart=getMonday(toISO(new Date()));
+  // Aspetta che Firebase sia pronto prima di caricare i dati
+  if(window._fbReady) await window._fbReady;
+  else await new Promise(r=>setTimeout(r,300)); // fallback attesa minima
   await load();
   render();
 })();
