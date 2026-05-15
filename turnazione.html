@@ -38,10 +38,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 .grid-wrap{padding:10px;overflow-x:auto}
 .grid{border-collapse:collapse;width:100%;min-width:900px;background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden;table-layout:fixed}
-.grid th{background:#f8fafc;padding:8px 6px;text-align:center;font-size:.78rem;font-weight:700;color:#475569;border:1px solid #e2e8f0}
-.grid th:first-child{text-align:left;padding-left:14px;width:180px;position:sticky;left:0;z-index:2;background:#f8fafc}
-.grid td{padding:0;border:1px solid #e2e8f0;vertical-align:top;height:62px}
-.grid td:first-child{padding:5px 14px;font-size:.83rem;font-weight:500;position:sticky;left:0;background:white;z-index:1;display:flex;flex-direction:column;justify-content:center}
+.grid th{background:#f8fafc;padding:6px 4px;text-align:center;font-size:.8rem;font-weight:700;color:#475569;border:1px solid #e2e8f0}
+.grid th:first-child{text-align:left;padding-left:10px;width:160px;position:sticky;left:0;z-index:2;background:#f8fafc}
+.grid td{padding:0;border:1px solid #e2e8f0;vertical-align:top;height:50px}
+.grid td:first-child{padding:4px 10px;font-size:.88rem;font-weight:600;position:sticky;left:0;background:white;z-index:1;display:flex;flex-direction:column;justify-content:center}
 .grid tr:hover td{background:#f8fafc}
 .grid tr:hover td:first-child{background:#f8fafc}
 
@@ -49,23 +49,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cell.drag-over{background:#dbeafe!important;outline:2px dashed #3b82f6;outline-offset:-2px}
 
 .cell-chip{
-  padding:3px 6px;
+  padding:2px 5px;
   border-radius:6px;
-  font-size:.75rem;
+  font-size:.82rem;
   font-weight:700;
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
-  line-height:1.1;
-  width:96%;
-  height:92%;
+  line-height:1.15;
+  width:98%;
+  height:94%;
   border:2px solid currentColor;
   text-align:center;
   color: #000 !important;
 }
-.chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
-.chip-time{font-size:.62rem;opacity:.9;font-weight:600;margin-top:1px}
+.chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;font-size:.83rem}
+.chip-time{font-size:.68rem;opacity:.9;font-weight:600;margin-top:1px}
 
 .conflict-dot{width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block;margin-left:3px}
 .day-today{background:#eff6ff}
@@ -158,7 +158,7 @@ window._fbReady = new Promise(resolve => {
 <script>
 // ── CONSTANTS ──────────────────────────────────────────────────────────────
 const BUILTINS=[
-  {id:'riposo',    nome:'Riposo',          colore:'#ef4444',oraInizio:'',     oraFine:''     },
+  {id:'riposo',    nome:'Assente',          colore:'#ef4444',oraInizio:'',     oraFine:''     },
   {id:'mattina',   nome:'Turno Mattina',   colore:'#94a3b8',oraInizio:'09:00',oraFine:'14:00'},
   {id:'pomeriggio',nome:'Turno Pomeriggio',colore:'#94a3b8',oraInizio:'13:00',oraFine:'20:00'},
   {id:'intero',    nome:'Turno Intero',    colore:'#475569',oraInizio:'09:00',oraFine:'20:00'},
@@ -342,9 +342,21 @@ function dropOnCell(pid,iso){
         setManual(pid,iso,{eventoId:bi.id,oraInizio:bi.oraInizio,oraFine:bi.oraFine,nota:'',manual:true});
       }
     }else{
-      // PROGRAMMI REALI: assegnazione solo per la data specifica (via setManual)
       const pg=byId(S.programmi,id); if(!pg) return;
-      setManual(pid, iso, {eventoId:pg.id, oraInizio:pg.oraInizio, oraFine:pg.oraFine, oraInizio2:pg.oraInizio2||'', oraFine2:pg.oraFine2||'', manual:true});
+      const isPrimaMattina = pg.nome && pg.nome.toLowerCase().includes('prima mattina');
+      if(isPrimaMattina){
+        // Prima Mattina: assegnazione solo per la data specifica
+        setManual(pid, iso, {eventoId:pg.id, oraInizio:pg.oraInizio, oraFine:pg.oraFine, oraInizio2:pg.oraInizio2||'', oraFine2:pg.oraFine2||'', manual:true});
+      } else {
+        // Programmi ricorrenti: aggiunge a fissi[dow] → si ripete ogni settimana (filtrato per mesi)
+        setManual(pid, iso, null); // rimuovi eventuale override manuale
+        if(!pg.fissi) pg.fissi = {};
+        if(!pg.fissi[dow]) pg.fissi[dow] = [];
+        if(!pg.fissi[dow].includes(pid)) pg.fissi[dow].push(pid);
+        // Assicura che il giorno sia nella lista giorni del programma
+        if(!pg.giorni) pg.giorni = [];
+        if(!pg.giorni.includes(dow)){pg.giorni.push(dow);pg.giorni.sort((a,b)=>a-b);}
+      }
     }
     save().catch(e=>console.error(e));
     render();
@@ -730,7 +742,39 @@ async function exportPDF() {
   const finalWidth = imgWidth * ratio;
   const finalHeight = imgHeight * ratio;
   pdf.addImage(imgData, 'PNG', (pdfWidth - finalWidth) / 2, 15, finalWidth, finalHeight);
-  pdf.save(`Turni_${S.cat}_${S.weekStart}.pdf`);
+
+  // Mostra anteprima in una nuova finestra con opzione stampa/scarica
+  const pdfBlob = pdf.output('blob');
+  const pdfUrl = URL.createObjectURL(pdfBlob);
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Anteprima Turni</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#374151;display:flex;flex-direction:column;align-items:center;min-height:100vh;font-family:-apple-system,sans-serif}
+    .toolbar{background:#1e293b;width:100%;padding:10px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
+    .toolbar h2{color:white;font-size:.95rem;margin-right:auto}
+    .tbtn{padding:7px 16px;border-radius:6px;border:none;cursor:pointer;font-size:.85rem;font-weight:600}
+    .tbtn-print{background:#3b82f6;color:white}
+    .tbtn-save{background:#22c55e;color:white}
+    .tbtn-close{background:#475569;color:white}
+    .tbtn:hover{opacity:.85}
+    iframe{margin:16px;border:none;box-shadow:0 4px 24px rgba(0,0,0,.4);border-radius:4px}
+  </style></head><body>
+  <div class="toolbar">
+    <h2>📄 Anteprima Turni – ${S.cat} – ${fmtWeekLabel()}</h2>
+    <button class="tbtn tbtn-print" onclick="document.getElementById('pdfFrame').contentWindow.print()">🖨️ Stampa</button>
+    <button class="tbtn tbtn-save" onclick="window._dl()">⬇️ Scarica PDF</button>
+    <button class="tbtn tbtn-close" onclick="window.close()">✕ Chiudi</button>
+  </div>
+  <iframe id="pdfFrame" src="${pdfUrl}" width="1060" height="780"></iframe>
+  <script>
+    window._dl = function(){
+      const a=document.createElement('a');a.href='${pdfUrl}';
+      a.download='Turni_${S.cat}_${S.weekStart}.pdf';a.click();
+    };
+  <\/script>
+  </body></html>`);
+  win.document.close();
 }
 
 function bindDrag(){
