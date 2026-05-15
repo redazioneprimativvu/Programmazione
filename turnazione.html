@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -129,6 +130,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div id="app"></div>
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyD8RyTJgSj5U8DA-T7nPzRIzfYqfzoRhn8",
+  authDomain: "turnazione-2722d.firebaseapp.com",
+  projectId: "turnazione-2722d",
+  storageBucket: "turnazione-2722d.firebasestorage.app",
+  messagingSenderId: "940298778130",
+  appId: "1:940298778130:web:923caafd0596e861984acb",
+  measurementId: "G-6G952ZHRP3"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const DB_DOC = doc(db, 'app', 'data');
+window._fbSave = async (data) => { await setDoc(DB_DOC, data); };
+window._fbLoad = async () => { const snap = await getDoc(DB_DOC); return snap.exists() ? snap.data() : null; };
+</script>
+<script>
 // ── CONSTANTS ──────────────────────────────────────────────────────────────
 const BUILTINS=[
   {id:'riposo',    nome:'Riposo',          colore:'#ef4444',oraInizio:'',     oraFine:''     },
@@ -157,51 +176,25 @@ const S={
   dragging:null,
 };
 
-// ── FIREBASE ───────────────────────────────────────────────────────────────
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyD8RyTJgSj5U8DA-T7nPzRIzfYqfzoRhn8",
-  authDomain: "turnazione-2722d.firebaseapp.com",
-  projectId: "turnazione-2722d",
-  storageBucket: "turnazione-2722d.firebasestorage.app",
-  messagingSenderId: "940298778130",
-  appId: "1:940298778130:web:923caafd0596e861984acb",
-  measurementId: "G-6G952ZHRP3"
-};
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
-const DB_DOC = doc(db, 'app', 'data');
-
-// ── PERSISTENCE ────────────────────────────────────────────────────────────
+// ── PERSISTENCE (Firebase via modulo separato) ────────────────────────────
 async function save(){
   try {
-    await setDoc(DB_DOC, {staff:S.staff, programmi:S.programmi, turni:S.turni});
-  } catch(e) {
-    console.error('Firebase save error:', e);
-    // fallback locale
-    localStorage.setItem('turni_v5_fb',JSON.stringify({staff:S.staff,programmi:S.programmi,turni:S.turni}));
-  }
+    if(window._fbSave) await window._fbSave({staff:S.staff,programmi:S.programmi,turni:S.turni});
+  } catch(e){ console.error('save error:',e); }
+  // fallback locale sempre
+  try{ localStorage.setItem('turni_v5_fb',JSON.stringify({staff:S.staff,programmi:S.programmi,turni:S.turni})); }catch{}
 }
 async function load(){
   try {
-    const snap = await getDoc(DB_DOC);
-    if(snap.exists()){
-      const d = snap.data();
-      S.staff=d.staff||[]; S.programmi=d.programmi||[]; S.turni=d.turni||{};
-    } else {
-      // primo avvio: prova a migrare da localStorage
-      const local = JSON.parse(localStorage.getItem('turni_v5')||localStorage.getItem('turni_v5_fb')||'{}');
-      S.staff=local.staff||[]; S.programmi=local.programmi||[]; S.turni=local.turni||{};
+    if(window._fbLoad){
+      const d = await window._fbLoad();
+      if(d){ S.staff=d.staff||[]; S.programmi=d.programmi||[]; S.turni=d.turni||{}; return; }
     }
-  } catch(e) {
-    console.error('Firebase load error:', e);
-    try {
-      const d=JSON.parse(localStorage.getItem('turni_v5')||localStorage.getItem('turni_v5_fb')||'{}');
-      S.staff=d.staff||[]; S.programmi=d.programmi||[]; S.turni=d.turni||{};
-    } catch { S.staff=[];S.programmi=[];S.turni={}; }
-  }
+  } catch(e){ console.error('load error:',e); }
+  try {
+    const d=JSON.parse(localStorage.getItem('turni_v5')||localStorage.getItem('turni_v5_fb')||'{}');
+    S.staff=d.staff||[]; S.programmi=d.programmi||[]; S.turni=d.turni||{};
+  } catch { S.staff=[];S.programmi=[];S.turni={}; }
 }
 
 // ── DATE UTILS ─────────────────────────────────────────────────────────────
