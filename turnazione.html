@@ -334,14 +334,9 @@ function dropOnCell(pid,iso){
         setManual(pid,iso,{eventoId:bi.id,oraInizio:bi.oraInizio,oraFine:bi.oraFine,nota:'',manual:true});
       }
     }else{
-      // LOGICA STANDARD PER TUTTI I PROGRAMMI (inclusa Prima Mattina)
+      // PROGRAMMI REALI: assegnazione solo per la data specifica (via setManual)
       const pg=byId(S.programmi,id); if(!pg) return;
-      setManual(pid, iso, null);
-      if(!pg.giorni) pg.giorni = [];
-      if(!pg.giorni.includes(dow)){pg.giorni.push(dow);pg.giorni.sort((a,b)=>a-b);}
-      if(!pg.fissi) pg.fissi = {};
-      if(!pg.fissi[dow]) pg.fissi[dow] = [];
-      if(!pg.fissi[dow].includes(pid)) pg.fissi[dow].push(pid);
+      setManual(pid, iso, {eventoId:pg.id, oraInizio:pg.oraInizio, oraFine:pg.oraFine, oraInizio2:pg.oraInizio2||'', oraFine2:pg.oraFine2||'', manual:true});
     }
     save().catch(e=>console.error(e));
     render();
@@ -532,10 +527,6 @@ function modalProg(){
   </div>
   <div class="form-row"><label>Giorni della settimana</label><div class="toggle-group">${dayToggs}</div></div>
   <div class="form-row"><label>Mesi attivi <span style="font-weight:400;color:#94a3b8;font-size:.72rem">(vuoto = tutto l'anno)</span></label><div class="toggle-group">${monToggs}</div></div>
-  <div class="switch-row">
-    <div class="sw-label"><span>Turnazione settimanale</span><small id="sw-desc">${pg.turnazione?'Attiva':'Disattiva'}</small></div>
-    <label class="sw"><input type="checkbox" id="pg-turn" ${pg.turnazione?'checked':''} onchange="togTurn()"><span class="sw-track"></span></label>
-  </div>
   <div class="modal-footer"><button class="btn btn-secondary" onclick="S.editProg='list';render()">Annulla</button><button class="btn btn-primary" onclick="saveProg()">Salva</button></div>
 </div></div>`;
 }
@@ -648,11 +639,6 @@ function togMese(i){
   const a=S.editProg.mesi,ix=a.indexOf(i);
   if(ix>=0)a.splice(ix,1);else{a.push(i);a.sort((x,y)=>x-y);}
   render();
-}
-function togTurn(){
-  readProgForm();
-  const desc=document.getElementById('sw-desc');
-  if(desc)desc.textContent=S.editProg.turnazione?'Attiva':'Disattiva';
 }
 function removeProg(id){
   if(!confirm('Eliminare questo programma?'))return;
