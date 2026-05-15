@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestione Turni</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+
+.topbar{background:#1e293b;color:white;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.topbar h1{font-size:1.1rem;font-weight:700;margin-right:auto}
+.week-nav{display:flex;align-items:center;gap:6px}
+.week-nav button{background:#334155;color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:.85rem}
+.week-nav button:hover{background:#475569}
+.week-label{font-size:.85rem;white-space:nowrap;min-width:185px;text-align:center}
+.tab-btns{display:flex;gap:4px}
+.tab-btn{background:#334155;color:#94a3b8;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.82rem}
+.tab-btn.active{background:#3b82f6;color:white}
+.action-btns{display:flex;gap:6px}
+.btn{padding:5px 12px;border-radius:6px;border:none;cursor:pointer;font-size:.82rem;font-weight:500}
+.btn-primary{background:#3b82f6;color:white}
+.btn-secondary{background:#475569;color:white}
+.btn-danger{background:#ef4444;color:white}
+.btn-success{background:#22c55e;color:white}
+.btn-export{background:#8b5cf6;color:white}
+.btn:hover{opacity:.85}
+
+.strip{background:white;border-bottom:1px solid #e2e8f0;padding:8px 14px;display:flex;align-items:center;gap:7px;overflow-x:auto;min-height:46px;flex-wrap:wrap}
+.strip-label{font-size:.72rem;color:#64748b;white-space:nowrap;font-weight:700;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0}
+.pill{padding:5px 13px;border-radius:20px;font-size:.78rem;font-weight:700;cursor:grab;user-select:none;white-space:nowrap;color:white;text-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .1s,box-shadow .1s;flex-shrink:0}
+.pill:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.15)}
+.pill:active{cursor:grabbing}
+.strip-sep{width:1px;height:26px;background:#e2e8f0;margin:0 2px;flex-shrink:0}
+
+.grid-wrap{padding:10px;overflow-x:auto}
+.grid{border-collapse:collapse;width:100%;min-width:900px;background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden;table-layout:fixed}
+.grid th{background:#f8fafc;padding:8px 6px;text-align:center;font-size:.78rem;font-weight:700;color:#475569;border:1px solid #e2e8f0}
+.grid th:first-child{text-align:left;padding-left:14px;width:180px;position:sticky;left:0;z-index:2;background:#f8fafc}
+.grid td{padding:0;border:1px solid #e2e8f0;vertical-align:top;height:62px}
+.grid td:first-child{padding:5px 14px;font-size:.83rem;font-weight:500;position:sticky;left:0;background:white;z-index:1;display:flex;flex-direction:column;justify-content:center}
+.grid tr:hover td{background:#f8fafc}
+.grid tr:hover td:first-child{background:#f8fafc}
+
+.cell{height:100%;width:100%;padding:2px;transition:background .12s;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;overflow:hidden}
+.cell.drag-over{background:#dbeafe!important;outline:2px dashed #3b82f6;outline-offset:-2px}
+
+.cell-chip{
+  padding:3px 6px;
+  border-radius:6px;
+  font-size:.75rem;
+  font-weight:700;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  line-height:1.1;
+  width:96%;
+  height:92%;
+  border:2px solid currentColor;
+  text-align:center;
+  color: #000 !important;
+}
+.chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
+.chip-time{font-size:.62rem;opacity:.9;font-weight:600;margin-top:1px}
+
+.conflict-dot{width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block;margin-left:3px}
+.day-today{background:#eff6ff}
+.th-today{background:#3b82f6!important;color:white!important;border-color:#2563eb!important}
+.role-badge{font-size:.65rem;color:#94a3b8;font-weight:400;margin-top:1px}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal{background:white;border-radius:14px;padding:22px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto}
+.modal h2{font-size:1.05rem;font-weight:700;margin-bottom:14px}
+.modal-footer{display:flex;justify-content:flex-end;gap:7px;margin-top:18px;flex-wrap:wrap}
+
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:.78rem;font-weight:700;color:#475569;margin-bottom:4px}
+.form-row input[type=text],.form-row input[type=time],.form-row select{width:100%;padding:7px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:.88rem;outline:none;font-family:inherit}
+.form-row input:focus,.form-row select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.toggle-group{display:flex;flex-wrap:wrap;gap:5px}
+.tog{padding:4px 9px;border-radius:20px;font-size:.76rem;font-weight:600;border:2px solid #e2e8f0;background:white;color:#64748b;cursor:pointer;transition:all .12s}
+.tog.on{border-color:#3b82f6;background:#3b82f6;color:white}
+.switch-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid #f1f5f9;margin-top:6px}
+.sw-label span{font-size:.88rem;font-weight:600}
+.sw-label small{display:block;font-size:.72rem;color:#94a3b8;margin-top:2px}
+.sw{position:relative;width:42px;height:22px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0}
+.sw-track{position:absolute;inset:0;background:#cbd5e1;border-radius:22px;cursor:pointer;transition:background .2s}
+.sw-track:before{content:'';position:absolute;width:16px;height:16px;background:white;border-radius:50%;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw input:checked+.sw-track{background:#3b82f6}
+.sw input:checked+.sw-track:before{transform:translateX(20px)}
+
+.staff-list,.prog-list{border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
+.staff-list{max-height:220px;overflow-y:auto}
+.prog-list{max-height:250px;overflow-y:auto;margin-bottom:10px}
+.list-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid #f1f5f9;font-size:.83rem}
+.list-item:last-child{border-bottom:none}
+.list-item .info{flex:1}
+.list-item .meta{font-size:.72rem;color:#64748b}
+.list-item .del{background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:.88rem;padding:2px 5px}
+.list-item .del:hover{color:#ef4444}
+.dot12{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+
+.assigned-box{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f8fafc;border-radius:8px;margin-bottom:10px}
+.assigned-chip{padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:700;color:white}
+.conflict-warn{background:#fef3c7;border:1px solid #f59e0b;border-radius:7px;padding:7px 11px;font-size:.78rem;color:#92400e;margin-bottom:8px}
+.empty-cell-box{padding:10px;background:#f8fafc;border-radius:8px;margin-bottom:10px;font-size:.83rem;color:#94a3b8;text-align:center}
+.empty-state{text-align:center;padding:40px 20px;color:#94a3b8;font-size:.88rem}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+
+/* STILE PDF */
+#pdf-header { display: none; margin-bottom: 20px; text-align: center; }
+#pdf-header h2 { font-size: 24px; margin-bottom: 5px; color: #1e293b; }
+#pdf-header p { font-size: 16px; color: #64748b; }
+
+@media print {
+  .topbar, .strip, .modal-overlay, .action-btns, .week-nav button:not(.week-label) { display: none !important; }
+  body { background: white; padding: 0; }
+  .grid-wrap { padding: 0; overflow: visible; }
+  .grid { box-shadow: none; border-radius: 0; min-width: 100%; }
+  .grid th:first-child, .grid td:first-child { position: static; background: white !important; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+// ── CONSTANTS ──────────────────────────────────────────────────────────────
+const BUILTINS=[
+  {id:'riposo',    nome:'Riposo',          colore:'#ef4444',oraInizio:'',     oraFine:''     },
+  {id:'mattina',   nome:'Turno Mattina',   colore:'#94a3b8',oraInizio:'09:00',oraFine:'14:00'},
+  {id:'pomeriggio',nome:'Turno Pomeriggio',colore:'#94a3b8',oraInizio:'13:00',oraFine:'20:00'},
+  {id:'intero',    nome:'Turno Intero',    colore:'#475569',oraInizio:'09:00',oraFine:'20:00'},
+  {id:'trasferta', nome:'Trasferta',       colore:'#b45309',oraInizio:'',     oraFine:''     },
+];
+const GN=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+const GF=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
+const MN=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+const BUILTIN_IDS=new Set(BUILTINS.map(b=>b.id));
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+const S={
+  cat:'tecnici',
+  weekStart:null,
+  staff:[],
+  programmi:[],
+  turni:{},
+  modalStaff:false,
+  modalProg:false,
+  editProg:null,
+  cellModal:null,
+  removePrompt:null,
+  dragging:null,
+};
+
+// ── FIREBASE ───────────────────────────────────────────────────────────────
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD8RyTJgSj5U8DA-T7nPzRIzfYqfzoRhn8",
+  authDomain: "turnazione-2722d.firebaseapp.com",
+  projectId: "turnazione-2722d",
+  storageBucket: "turnazione-2722d.firebasestorage.app",
+  messagingSenderId: "940298778130",
+  appId: "1:940298778130:web:923caafd0596e861984acb",
+  measurementId: "G-6G952ZHRP3"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const DB_DOC = doc(db, 'app', 'data');
+
+// ── PERSISTENCE ────────────────────────────────────────────────────────────
+async function save(){
+  try {
+    await setDoc(DB_DOC, {staff:S.staff, programmi:S.programmi, turni:S.turni});
+  } catch(e) {
+    console.error('Firebase save error:', e);
+    // fallback locale
+    localStorage.setItem('turni_v5_fb',JSON.stringify({staff:S.staff,programmi:S.programmi,turni:S.turni}));
+  }
+}
+async function load(){
+  try {
+    const snap = await getDoc(DB_DOC);
+    if(snap.exists()){
+      const d = snap.data();
+      S.staff=d.staff||[]; S.programmi=d.programmi||[]; S.turni=d.turni||{};
+    } else {
+      // primo avvio: prova a migrare da localStorage
+      const local = JSON.parse(localStorage.getItem('turni_v5')||localStorage.getItem('turni_v5_fb')||'{}');
+      S.staff=local.staff||[]; S.programmi=local.programmi||[]; S.turni=local.turni||{};
+    }
+  } catch(e) {
+    console.error('Firebase load error:', e);
+    try {
+      const d=JSON.parse(localStorage.getItem('turni_v5')||localStorage.getItem('turni_v5_fb')||'{}');
+      S.staff=d.staff||[]; S.programmi=d.programmi||[]; S.turni=d.turni||{};
+    } catch { S.staff=[];S.programmi=[];S.turni={}; }
+  }
+}
+
+// ── DATE UTILS ─────────────────────────────────────────────────────────────
+function toISO(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function fromISO(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
+function addDays(iso,n){const d=fromISO(iso);d.setDate(d.getDate()+n);return toISO(d)}
+function getMonday(iso){
+  const d=fromISO(iso),day=d.getDay(),diff=day===0?-6:1-day;
+  d.setDate(d.getDate()+diff);return toISO(d);
+}
+function getDow(iso){const day=fromISO(iso).getDay();return day===0?6:day-1}
+function getMonth(iso){return fromISO(iso).getMonth()}
+function fmtDate(iso){const d=fromISO(iso);return`${d.getDate()}/${d.getMonth()+1}`}
+function isToday(iso){return iso===toISO(new Date())}
+function weekOffset(iso,baseISO){
+  const d=fromISO(getMonday(iso)),b=fromISO(getMonday(baseISO));
+  return Math.round((d-b)/(7*86400*1000));
+}
+function weekDates(){return Array.from({length:7},(_,i)=>addDays(S.weekStart,i))}
+function fmtWeekLabel(){
+  const dd=weekDates(),s=fromISO(dd[0]),e=fromISO(dd[6]);
+  return`${s.getDate()} ${MN[s.getMonth()]} – ${e.getDate()} ${MN[e.getMonth()]} ${e.getFullYear()}`;
+}
+function easter(y){
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,
+    f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,
+    i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,
+    m=Math.floor((a+11*h+22*l)/451),
+    mo=Math.floor((h+l-7*m+114)/31),dy=((h+l-7*m+114)%31)+1;
+  return new Date(y,mo-1,dy);
+}
+function isHoliday(iso){
+  const d=fromISO(iso),y=d.getFullYear();
+  const md=`${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  if(['01-01','01-06','04-25','05-01','06-02','08-15','11-01','12-08','12-25','12-26'].includes(md))return true;
+  const ea=easter(y),em=new Date(ea);em.setDate(em.getDate()+1);
+  return toISO(ea)===iso||toISO(em)===iso;
+}
+
+// ── DATA HELPERS ───────────────────────────────────────────────────────────
+function uid(){return Math.random().toString(36).slice(2,10)}
+function byId(arr,id){return arr.find(x=>x.id===id)}
+function staffSorted(cat){
+  return S.staff.filter(s=>s.cat===cat).sort((a,b)=>a.cognome.localeCompare(b.cognome)||a.nome.localeCompare(b.nome));
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function hexToRgba(hex, alpha) {
+  if(!hex || hex.length < 7) return `rgba(0,0,0,${alpha})`;
+  let r = parseInt(hex.slice(1, 3), 16),
+      g = parseInt(hex.slice(3, 5), 16),
+      b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ── SHIFT LOGIC ────────────────────────────────────────────────────────────
+function getAuto(pid,iso){
+  const dow=getDow(iso),mon=getMonth(iso);
+  const person = byId(S.staff, pid);
+  if(!person) return null;
+
+  for(const pg of S.programmi){
+    if(!pg.giorni || !pg.giorni.includes(dow))continue;
+    if(pg.mesi&&pg.mesi.length&&!pg.mesi.includes(mon))continue;
+    
+    if(pg.turnazione){
+      const roleRot = (pg.rotazioni && pg.rotazioni[person.ruolo]) || (pg.rotazione ? pg.rotazione : []);
+      if(!roleRot.length) continue;
+      const di=pg.giorni.indexOf(dow),wo=weekOffset(iso,pg.baseDate||iso),len=roleRot.length;
+      if(roleRot[((di+wo)%len+len)%len]===pid)
+        return{eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2,oraFine2:pg.oraFine2};
+    }else{
+      if(((pg.fissi||{})[dow]||[]).includes(pid))
+        return{eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2,oraFine2:pg.oraFine2};
+    }
+  }
+  return null;
+}
+function getManual(pid,iso){return S.turni[`${pid}|${iso}|${S.cat}`]??null}
+function getShift(pid,iso){
+  const m=getManual(pid,iso);
+  if(m!==null)return m.blocked?null:m;
+  return getAuto(pid,iso);
+}
+function setManual(pid,iso,val){
+  const k=`${pid}|${iso}|${S.cat}`;
+  if(val===null)delete S.turni[k];else S.turni[k]=val;
+  save().catch(e=>console.error(e));
+}
+function conflictCheck(pid,iso){
+  const cur=getShift(pid,iso);
+  if(!cur?.eventoId||BUILTIN_IDS.has(cur.eventoId))return null;
+  const pg=byId(S.programmi,cur.eventoId);
+  if(!pg || !pg.nome) return null;
+
+  // REGOLA PRIMA MATTINA: chi ha lavorato il lunedì in Prima Mattina
+  // non può essere assegnato il lunedì della settimana successiva
+  const isPrimaMattina = pg.nome.toLowerCase().includes('prima mattina');
+  if(isPrimaMattina){
+    const dow = getDow(iso); // 0 = lunedì
+    if(dow === 0){
+      const prevMonday = addDays(iso, -7);
+      const prev = getShift(pid, prevMonday);
+      if(prev?.eventoId === cur.eventoId) return pg.nome;
+    }
+  }
+
+  return null;
+}
+
+// ── DROP ───────────────────────────────────────────────────────────────────
+function dropOnCell(pid,iso){
+  if(!S.dragging) return;
+  const{type,id}=S.dragging;
+  const dow=getDow(iso);
+  const person = byId(S.staff, pid);
+  if(!person) return;
+
+  try {
+    if(type==='builtin'){
+      setManual(pid, iso, null);
+      const bi=BUILTINS.find(b=>b.id===id); if(!bi)return;
+      
+      if(['mattina', 'pomeriggio', 'intero'].includes(bi.id)){
+        let pg = S.programmi.find(p => p.nome === bi.nome && !p.isRealProg);
+        if(!pg){
+          pg = {
+            id: uid(), nome: bi.nome, colore: bi.colore, oraInizio: bi.oraInizio, oraFine: bi.oraFine,
+            giorni: [0,1,2,3,4,5,6], mesi: [], turnazione: false, fissi: {}, isRealProg: false
+          };
+          S.programmi.push(pg);
+        }
+        if(!pg.fissi) pg.fissi = {};
+        if(!pg.fissi[dow]) pg.fissi[dow] = [];
+        if(!pg.fissi[dow].includes(pid)) pg.fissi[dow].push(pid);
+      } else {
+        setManual(pid,iso,{eventoId:bi.id,oraInizio:bi.oraInizio,oraFine:bi.oraFine,nota:'',manual:true});
+      }
+    }else{
+      // LOGICA STANDARD PER TUTTI I PROGRAMMI (inclusa Prima Mattina)
+      const pg=byId(S.programmi,id); if(!pg) return;
+      setManual(pid, iso, null);
+      if(!pg.giorni) pg.giorni = [];
+      if(!pg.giorni.includes(dow)){pg.giorni.push(dow);pg.giorni.sort((a,b)=>a-b);}
+      if(!pg.fissi) pg.fissi = {};
+      if(!pg.fissi[dow]) pg.fissi[dow] = [];
+      if(!pg.fissi[dow].includes(pid)) pg.fissi[dow].push(pid);
+    }
+    save().catch(e=>console.error(e));
+    render();
+  } catch(e) {
+    console.error(e);
+    alert("Errore nel trascinamento: " + e.message);
+  }
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function render(){
+  document.getElementById('app').innerHTML=buildHTML();
+  bindDrag();
+}
+
+function buildHTML(){
+  return topBar()+strip()+gridSection()+
+    (S.modalStaff?modalStaff():'')+
+    (S.modalProg?modalProg():'')+
+    (S.cellModal?cellModal():'')+
+    (S.removePrompt?removePrompt():'');
+}
+
+function topBar(){
+  return`<div class="topbar">
+  <h1>📺 Gestione Turni</h1>
+  <div class="week-nav">
+    <button onclick="prevWeek()">‹</button>
+    <span class="week-label">${fmtWeekLabel()}</span>
+    <button onclick="nextWeek()">›</button>
+    <button onclick="goToday()" style="font-size:.72rem;padding:3px 7px">Oggi</button>
+  </div>
+  <div class="tab-btns">
+    <button class="tab-btn ${S.cat==='tecnici'?'active':''}" onclick="setTab('tecnici')">Tecnici</button>
+    <button class="tab-btn ${S.cat==='giornalisti'?'active':''}" onclick="setTab('giornalisti')">Giornalisti</button>
+  </div>
+  <div class="action-btns">
+    <button class="btn btn-export" onclick="exportPDF()">PDF</button>
+    <button class="btn btn-secondary" onclick="openStaff()">👥 Personale</button>
+    <button class="btn btn-primary" onclick="openProg()">📋 Programmi</button>
+  </div>
+</div>`;
+}
+
+function strip(){
+  const bPills=BUILTINS.map(b=>`<div class="pill" style="background:${b.colore}" draggable="true" data-dtype="builtin" data-did="${b.id}">${b.nome}</div>`).join('');
+  const pPills=S.programmi.filter(p => p.isRealProg !== false).map(pg=>`<div class="pill" style="background:${pg.colore||'#6366f1'}" draggable="true" data-dtype="prog" data-did="${pg.id}">${esc(pg.nome)}</div>`).join('');
+  return`<div class="strip">
+  <span class="strip-label">Trascina:</span>
+  ${bPills}
+  ${pPills.length?'<div class="strip-sep"></div>'+pPills:''}
+  ${!S.programmi.filter(p => p.isRealProg !== false).length?'<span style="font-size:.78rem;color:#94a3b8">Nessun programma</span>':''}
+</div>`;
+}
+
+function gridSection(){
+  const list=staffSorted(S.cat);
+  const dates=weekDates();
+  if(!list.length)return`<div class="empty-state">Nessun personale in questa categoria.</div>`;
+  const headers=dates.map((d,i)=>{
+    const tc=isToday(d)?'th-today':'';
+    const hol=isHoliday(d)?` <span style="color:${tc?'rgba(255,255,255,.7)':'#ef4444'}">✦</span>`:'';
+    return`<th class="${tc}"><div>${GN[i]}</div><div style="font-size:.7rem;opacity:.8">${fmtDate(d)}${hol}</div></th>`;
+  }).join('');
+  const rows=list.map(s=>{
+    const cells=dates.map(d=>buildCell(s.id,d)).join('');
+    return`<tr><td><div style="font-weight:700">${esc(s.cognome)} ${esc(s.nome)}</div><div class="role-badge">${esc(s.ruolo)}</div></td>${cells}</tr>`;
+  }).join('');
+  return`<div class="grid-wrap" id="capture-area">
+    <div id="pdf-header">
+      <h2>Programmazione Turni - ${S.cat.toUpperCase()}</h2>
+      <p>Settimana dal ${fmtWeekLabel()}</p>
+    </div>
+    <table class="grid">
+      <thead><tr><th style="width:180px">Nome</th>${headers}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function buildCell(pid,iso){
+  const sh=getShift(pid,iso);
+  const today=isToday(iso)?' day-today':'';
+  let inner='';
+  if(sh){
+    const bi=BUILTINS.find(b=>b.id===sh.eventoId);
+    const pg=!bi?byId(S.programmi,sh.eventoId):null;
+    const isImpro = sh && !sh.eventoId;
+    const col = isImpro ? '#e2e8f0' : (bi?.colore || pg?.colore || '#6366f1');
+    const nom = bi?.nome || pg?.nome || sh.nomeImprovvisato || '?';
+    let t = '';
+    if(sh.oraInizio && sh.oraFine) {
+      t = `${sh.oraInizio}–${sh.oraFine}`;
+      if(sh.oraInizio2 && sh.oraFine2) t += ` / ${sh.oraInizio2}–${sh.oraFine2}`;
+    }
+    const cfl=conflictCheck(pid,iso);
+    const bgCol = isImpro ? '#ffffff' : hexToRgba(col, 0.12);
+    const borderCol = isImpro ? '#cbd5e1' : col;
+    inner=`<div class="cell-chip" style="border-color:${borderCol}; background-color:${bgCol}">
+      <div class="chip-name">${esc(nom)}${cfl?`<span class="conflict-dot" title="Conflitto ruolo o cadenza"></span>`:''}</div>
+      ${t?`<div class="chip-time">${t}</div>`:''}
+    </div>`;
+  }
+  return`<td><div class="cell${today}"
+    ondragover="event.preventDefault();this.classList.add('drag-over')"
+    ondragleave="this.classList.remove('drag-over')"
+    ondrop="this.classList.remove('drag-over');dropOnCell('${pid}','${iso}')"
+    onclick="openCell('${pid}','${iso}')"
+  >${inner}</div></td>`;
+}
+
+// ── MODALS ─────────────────────────────────────────────────────────────────
+function modalStaff(){
+  const tec=staffSorted('tecnici'),gio=staffSorted('giornalisti');
+  const listHTML=arr=>arr.length
+    ?arr.map(s=>`<div class="list-item"><div class="info">${esc(s.cognome)} ${esc(s.nome)}<span class="role-badge">${esc(s.ruolo)}</span></div><button class="del" onclick="removeStaff('${s.id}')">✕</button></div>`).join('')
+    :`<div style="padding:8px 12px;font-size:.78rem;color:#94a3b8">Nessuno</div>`;
+  return`<div class="modal-overlay" onclick="if(event.target===this){S.modalStaff=false;render()}">
+<div class="modal" onclick="event.stopPropagation()">
+  <h2>Gestione Personale</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+    <div>
+      <div style="font-size:.75rem;font-weight:700;color:#475569;margin-bottom:5px">TECNICI</div>
+      <div class="staff-list">${listHTML(tec)}</div>
+    </div>
+    <div>
+      <div style="font-size:.75rem;font-weight:700;color:#475569;margin-bottom:5px">GIORNALISTI</div>
+      <div class="staff-list">${listHTML(gio)}</div>
+    </div>
+  </div>
+  <div style="border-top:1px solid #e2e8f0;padding-top:12px">
+    <div style="font-size:.82rem;font-weight:700;margin-bottom:8px">Aggiungi Persona</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div class="form-row" style="margin:0"><label>Cognome</label><input type="text" id="s-cognome" placeholder="Cognome"></div>
+      <div class="form-row" style="margin:0"><label>Nome</label><input type="text" id="s-nome" placeholder="Nome"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div class="form-row" style="margin:0"><label>Categoria</label><select id="s-cat" onchange="updateRuoloOpts()"><option value="tecnici">Tecnici</option><option value="giornalisti">Giornalisti</option></select></div>
+      <div class="form-row" style="margin:0"><label>Ruolo</label><select id="s-ruolo"><option>Cameraman</option><option>Montatore</option><option>Regista</option></select></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="addStaff()">Aggiungi</button>
+  </div>
+  <div class="modal-footer"><button class="btn btn-secondary" onclick="S.modalStaff=false;render()">Chiudi</button></div>
+</div></div>`;
+}
+
+function modalProg(){
+  const progs = S.programmi.filter(p => p.isRealProg !== false);
+  if(S.editProg==='list'||S.editProg===null){
+    return`<div class="modal-overlay" onclick="if(event.target===this){S.modalProg=false;render()}">
+<div class="modal" onclick="event.stopPropagation()">
+  <h2>Gestione Programmi</h2>
+  <div class="prog-list">
+    ${progs.length
+      ?progs.map(pg=>`<div class="list-item">
+        <div class="dot12" style="background:${pg.colore||'#6366f1'}"></div>
+        <div class="info">
+          <div style="font-weight:600">${esc(pg.nome)}</div>
+          <div class="meta">${pg.giorni.map(d=>GN[d]).join(', ')}${pg.oraInizio?` · ${pg.oraInizio}–${pg.oraFine}`:''}${pg.oraInizio2?` / ${pg.oraInizio2}–${pg.oraFine2}`:''}</div>
+        </div>
+        <button class="del" style="color:#94a3b8;margin-right:2px" onclick="startEditProg('${pg.id}')">✎</button>
+        <button class="del" onclick="removeProg('${pg.id}')">✕</button>
+      </div>`).join('')
+      :`<div style="padding:14px;font-size:.83rem;color:#94a3b8;text-align:center">Nessun programma</div>`
+    }
+  </div>
+  <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="startNewProg()">+ Nuovo Programma</button>
+  <div class="modal-footer"><button class="btn btn-secondary" onclick="S.modalProg=false;render()">Chiudi</button></div>
+</div></div>`;
+  }
+  const pg=S.editProg;
+  const isNew=!S.programmi.find(p=>p.id===pg.id);
+  const dayToggs=GN.map((n,i)=>`<button class="tog${pg.giorni.includes(i)?' on':''}" onclick="togGiorno(${i})">${n}</button>`).join('');
+  const monToggs=MN.map((n,i)=>`<button class="tog${(pg.mesi||[]).includes(i)?' on':''}" onclick="togMese(${i})">${n}</button>`).join('');
+  return`<div class="modal-overlay">
+<div class="modal" onclick="event.stopPropagation()">
+  <h2>${isNew?'Nuovo Programma':'Modifica Programma'}</h2>
+  <div class="form-row"><label>Nome Programma</label><input type="text" id="pg-nome" value="${esc(pg.nome)}" placeholder="Es. Prima Mattina"></div>
+  <div style="display:grid;grid-template-columns:52px 1fr 1fr;gap:8px;margin-bottom:12px">
+    <div class="form-row" style="margin:0"><label>Colore</label><input type="color" id="pg-col" value="${pg.colore||'#6366f1'}" style="width:44px;height:34px;border:none;border-radius:6px;cursor:pointer;padding:2px"></div>
+    <div class="form-row" style="margin:0"><label>Inizio 1</label><input type="time" id="pg-ini" value="${pg.oraInizio||''}"></div>
+    <div class="form-row" style="margin:0"><label>Fine 1</label><input type="time" id="pg-fin" value="${pg.oraFine||''}"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:52px 1fr 1fr;gap:8px;margin-bottom:12px">
+    <div></div>
+    <div class="form-row" style="margin:0"><label>Inizio 2 (opz)</label><input type="time" id="pg-ini2" value="${pg.oraInizio2||''}"></div>
+    <div class="form-row" style="margin:0"><label>Fine 2 (opz)</label><input type="time" id="pg-fin2" value="${pg.oraFine2||''}"></div>
+  </div>
+  <div class="form-row"><label>Giorni della settimana</label><div class="toggle-group">${dayToggs}</div></div>
+  <div class="form-row"><label>Mesi attivi <span style="font-weight:400;color:#94a3b8;font-size:.72rem">(vuoto = tutto l'anno)</span></label><div class="toggle-group">${monToggs}</div></div>
+  <div class="switch-row">
+    <div class="sw-label"><span>Turnazione settimanale</span><small id="sw-desc">${pg.turnazione?'Attiva':'Disattiva'}</small></div>
+    <label class="sw"><input type="checkbox" id="pg-turn" ${pg.turnazione?'checked':''} onchange="togTurn()"><span class="sw-track"></span></label>
+  </div>
+  <div class="modal-footer"><button class="btn btn-secondary" onclick="S.editProg='list';render()">Annulla</button><button class="btn btn-primary" onclick="saveProg()">Salva</button></div>
+</div></div>`;
+}
+
+function cellModal(){
+  const{pid,date}=S.cellModal;
+  const person=byId(S.staff,pid);
+  const sh=getShift(pid,date);
+  const d=fromISO(date);
+  const dstr=`${GF[getDow(date)]}, ${d.getDate()} ${MN[d.getMonth()]} ${d.getFullYear()}`;
+  const isImpro = sh && !sh.eventoId;
+  return`<div class="modal-overlay" onclick="if(event.target===this){S.cellModal=null;render()}">
+<div class="modal" onclick="event.stopPropagation()" style="max-width:380px">
+  <h2>${person?esc(person.cognome+' '+person.nome):''}</h2>
+  <div style="font-size:.78rem;color:#64748b;margin-top:-10px;margin-bottom:16px">${dstr}</div>
+  <div style="background:#f8fafc; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #e2e8f0">
+    <div class="form-row"><label>Nome Evento Singolo</label><input type="text" id="im-nome" value="${isImpro?esc(sh.nomeImprovvisato):''}" placeholder="Esempio: Intervista Speciale"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div class="form-row" style="margin:0"><label>Inizio 1</label><input type="time" id="im-ini" value="${sh?sh.oraInizio:''}"></div>
+      <div class="form-row" style="margin:0"><label>Fine 1</label><input type="time" id="im-fin" value="${sh?sh.oraFine:''}"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="form-row" style="margin:0"><label>Inizio 2</label><input type="time" id="im-ini2" value="${sh?sh.oraInizio2:''}"></div>
+      <div class="form-row" style="margin:0"><label>Fine 2</label><input type="time" id="im-fin2" value="${sh?sh.oraFine2:''}"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="saveImpro('${pid}','${date}')">Salva Evento Singolo</button>
+  </div>
+  <div class="modal-footer" style="justify-content:space-between">
+    <div>${sh?`<button class="btn btn-danger" onclick="clearCellPrompt('${pid}','${date}')">Rimuovi</button>`:''}</div>
+    <button class="btn btn-secondary" onclick="S.cellModal=null;render()">Chiudi</button>
+  </div>
+</div></div>`;
+}
+
+function removePrompt(){
+  const{pid,date,progName}=S.removePrompt;
+  return`<div class="modal-overlay">
+<div class="modal" style="max-width:320px; text-align:center">
+  <h2>Rimuovi Programma</h2>
+  <p style="font-size:.85rem; color:#64748b; margin-bottom:20px">Vuoi rimuovere <b>${esc(progName)}</b> solo per oggi o per tutte le settimane?</p>
+  <div style="display:flex; flex-direction:column; gap:8px">
+    <button class="btn btn-primary" onclick="confirmRemove('day')">Questo Giorno</button>
+    <button class="btn btn-danger" onclick="confirmRemove('all')">Tutti i Giorni</button>
+    <button class="btn btn-secondary" onclick="S.removePrompt=null;render()">Annulla</button>
+  </div>
+</div></div>`;
+}
+
+// ── ACTIONS ─────────────────────────────────────────────────────────────────
+function prevWeek(){S.weekStart=addDays(S.weekStart,-7);render()}
+function nextWeek(){S.weekStart=addDays(S.weekStart,7);render()}
+function goToday(){S.weekStart=getMonday(toISO(new Date()));render()}
+function setTab(cat){S.cat=cat;render()}
+function openStaff(){S.modalStaff=true;render()}
+function openProg(){S.modalProg=true;S.editProg='list';render()}
+function openCell(pid,date){S.cellModal={pid,date};render()}
+
+function updateRuoloOpts(){
+  const cat=document.getElementById('s-cat').value;
+  document.getElementById('s-ruolo').innerHTML=cat==='giornalisti'?'<option>Giornalista</option>':'<option>Cameraman</option><option>Montatore</option><option>Regista</option>';
+}
+function addStaff(){
+  const nome=(document.getElementById('s-nome').value||'').trim(),cognome=(document.getElementById('s-cognome').value||'').trim();
+  if(!nome||!cognome){alert('Inserisci nome e cognome');return}
+  S.staff.push({id:uid(),nome,cognome,ruolo:document.getElementById('s-ruolo').value,cat:document.getElementById('s-cat').value});
+  save().catch(e=>console.error(e));render();
+}
+function removeStaff(id){
+  if(!confirm('Rimuovere questa persona?'))return;
+  S.staff=S.staff.filter(s=>s.id!==id);
+  S.programmi.forEach(pg=>{
+    if(pg.rotazioni) Object.values(pg.rotazioni).forEach(arr => {
+      const idx = arr.indexOf(id); if(idx >= 0) arr.splice(idx, 1);
+    });
+    if(pg.rotazione)pg.rotazione=pg.rotazione.filter(p=>p!==id);
+    if(pg.fissi)Object.keys(pg.fissi).forEach(d=>{pg.fissi[d]=(pg.fissi[d]||[]).filter(p=>p!==id)});
+  });
+  save().catch(e=>console.error(e));render();
+}
+
+function readProgForm(){
+  if(!S.editProg||typeof S.editProg!=='object')return;
+  const f=id=>document.getElementById(id);
+  if(f('pg-nome'))S.editProg.nome=f('pg-nome').value;
+  if(f('pg-col'))S.editProg.colore=f('pg-col').value;
+  if(f('pg-ini'))S.editProg.oraInizio=f('pg-ini').value;
+  if(f('pg-fin'))S.editProg.oraFine=f('pg-fin').value;
+  if(f('pg-ini2'))S.editProg.oraInizio2=f('pg-ini2').value;
+  if(f('pg-fin2'))S.editProg.oraFine2=f('pg-fin2').value;
+  if(f('pg-turn'))S.editProg.turnazione=f('pg-turn').checked;
+}
+function startNewProg(){
+  S.editProg={id:uid(),nome:'',colore:'#6366f1',oraInizio:'',oraFine:'',oraInizio2:'',oraFine2:'',giorni:[],mesi:[],turnazione:false,rotazioni:{},fissi:{},baseDate:getMonday(toISO(new Date())),isRealProg:true};
+  render();
+}
+function startEditProg(id){
+  S.editProg=JSON.parse(JSON.stringify(byId(S.programmi,id)));
+  if(!S.editProg.mesi) S.editProg.mesi = [];
+  render();
+}
+function togGiorno(i){
+  readProgForm();
+  const a=S.editProg.giorni,ix=a.indexOf(i);
+  if(ix>=0)a.splice(ix,1);else{a.push(i);a.sort((x,y)=>x-y);}
+  render();
+}
+function togMese(i){
+  readProgForm();
+  if(!S.editProg.mesi) S.editProg.mesi = [];
+  const a=S.editProg.mesi,ix=a.indexOf(i);
+  if(ix>=0)a.splice(ix,1);else{a.push(i);a.sort((x,y)=>x-y);}
+  render();
+}
+function togTurn(){
+  readProgForm();
+  const desc=document.getElementById('sw-desc');
+  if(desc)desc.textContent=S.editProg.turnazione?'Attiva':'Disattiva';
+}
+function removeProg(id){
+  if(!confirm('Eliminare questo programma?'))return;
+  S.programmi=S.programmi.filter(p=>p.id!==id);
+  save().catch(e=>console.error(e));render();
+}
+function saveProg(){
+  readProgForm();
+  if(!S.editProg.nome.trim()){alert('Inserisci il nome');return}
+  if(!S.editProg.giorni.length){alert('Seleziona almeno un giorno');return}
+  const ix=S.programmi.findIndex(p=>p.id===S.editProg.id);
+  if(ix>=0)S.programmi[ix]=S.editProg;else S.programmi.push(S.editProg);
+  save().catch(e=>console.error(e));S.editProg='list';render();
+}
+
+function saveImpro(pid,date){
+  const nome = document.getElementById('im-nome').value.trim();
+  const ini = document.getElementById('im-ini').value;
+  const fin = document.getElementById('im-fin').value;
+  const ini2 = document.getElementById('im-ini2').value;
+  const fin2 = document.getElementById('im-fin2').value;
+  if(!nome && !ini) { alert('Inserisci almeno un nome o un orario'); return; }
+  setManual(pid, date, {nomeImprovvisato: nome, oraInizio: ini, oraFine: fin, oraInizio2: ini2, oraFine2: fin2, colore: '#e2e8f0', manual: true});
+  S.cellModal = null; render();
+}
+
+function clearCellPrompt(pid, date) {
+  const sh = getShift(pid, date);
+  if (sh && sh.eventoId && !BUILTIN_IDS.has(sh.eventoId)) {
+    const pg = byId(S.programmi, sh.eventoId);
+    if (pg) {
+      S.cellModal = null;
+      S.removePrompt = { pid, date, progName: pg.nome };
+      render();
+    }
+  } else {
+    if (getAuto(pid, date)) setManual(pid, date, {blocked: true});
+    else setManual(pid, date, null);
+    S.cellModal = null; render();
+  }
+}
+
+function confirmRemove(type) {
+  const { pid, date } = S.removePrompt;
+  const sh = getShift(pid, date);
+  const pg = byId(S.programmi, sh.eventoId);
+  const person = byId(S.staff, pid);
+  if (type === 'day') {
+    setManual(pid, date, {blocked: true});
+  } else {
+    if (pg.turnazione) {
+      if(pg.rotazioni && person && pg.rotazioni[person.ruolo]) {
+        pg.rotazioni[person.ruolo] = pg.rotazioni[person.ruolo].filter(id => id !== pid);
+      }
+      if(pg.rotazione) pg.rotazione = pg.rotazione.filter(id => id !== pid);
+    } else {
+      const dow = getDow(date);
+      if (pg.fissi && pg.fissi[dow]) pg.fissi[dow] = pg.fissi[dow].filter(id => id !== pid);
+    }
+    setManual(pid, date, null);
+    save().catch(e=>console.error(e));
+  }
+  S.removePrompt = null;
+  render();
+}
+
+async function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const header = document.getElementById('pdf-header');
+  header.style.display = 'block';
+  const element = document.getElementById('capture-area');
+  const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+  header.style.display = 'none';
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF('l', 'mm', 'a4');
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = pdf.internal.pageSize.getHeight();
+  const imgWidth = canvas.width;
+  const imgHeight = canvas.height;
+  const ratio = Math.min((pdfWidth - 20) / imgWidth, (pdfHeight - 30) / imgHeight);
+  const finalWidth = imgWidth * ratio;
+  const finalHeight = imgHeight * ratio;
+  pdf.addImage(imgData, 'PNG', (pdfWidth - finalWidth) / 2, 15, finalWidth, finalHeight);
+  pdf.save(`Turni_${S.cat}_${S.weekStart}.pdf`);
+}
+
+function bindDrag(){
+  document.querySelectorAll('.pill[draggable]').forEach(el=>{
+    el.addEventListener('dragstart',e=>{
+      S.dragging={type:e.currentTarget.dataset.dtype,id:e.currentTarget.dataset.did};
+      e.dataTransfer.effectAllowed='copy';
+    });
+    el.addEventListener('dragend',()=>{S.dragging=null});
+  });
+}
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+(async()=>{
+  S.weekStart=getMonday(toISO(new Date()));
+  await load();
+  render();
+})();
+</script>
+</body>
+</html>
