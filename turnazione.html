@@ -35,13 +35,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .pill:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.15)}
 .pill:active{cursor:grabbing}
 .strip-sep{width:1px;height:26px;background:#e2e8f0;margin:0 2px;flex-shrink:0}
+.strip-hint{font-size:.7rem;color:#94a3b8;margin-left:auto;flex-shrink:0;white-space:nowrap}
 
 .grid-wrap{padding:10px;overflow-x:auto}
-.grid{border-collapse:collapse;width:100%;min-width:900px;background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden;table-layout:fixed}
-.grid th{background:#f8fafc;padding:6px 4px;text-align:center;font-size:.8rem;font-weight:700;color:#475569;border:1px solid #e2e8f0}
-.grid th:first-child{text-align:left;padding-left:10px;width:160px;position:sticky;left:0;z-index:2;background:#f8fafc}
-.grid td{padding:0;border:1px solid #e2e8f0;vertical-align:top;height:50px}
-.grid td:first-child{padding:4px 10px;font-size:.88rem;font-weight:600;position:sticky;left:0;background:white;z-index:1;display:flex;flex-direction:column;justify-content:center}
+/* Griglia più compatta per il PDF */
+.grid{border-collapse:collapse;width:100%;min-width:700px;background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden;table-layout:fixed}
+.grid th{background:#f8fafc;padding:5px 3px;text-align:center;font-size:.75rem;font-weight:700;color:#475569;border:1px solid #e2e8f0}
+.grid th:first-child{text-align:left;padding-left:8px;width:130px;position:sticky;left:0;z-index:2;background:#f8fafc}
+.grid td{padding:0;border:1px solid #e2e8f0;vertical-align:top;height:48px}
+.grid td:first-child{padding:3px 8px;font-size:.82rem;font-weight:600;position:sticky;left:0;background:white;z-index:1;display:flex;flex-direction:column;justify-content:center}
 .grid tr:hover td{background:#f8fafc}
 .grid tr:hover td:first-child{background:#f8fafc}
 
@@ -49,9 +51,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cell.drag-over{background:#dbeafe!important;outline:2px dashed #3b82f6;outline-offset:-2px}
 
 .cell-chip{
-  padding:2px 5px;
-  border-radius:6px;
-  font-size:.82rem;
+  padding:2px 4px;
+  border-radius:5px;
+  font-size:.76rem;
   font-weight:700;
   display:flex;
   flex-direction:column;
@@ -62,15 +64,43 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   height:94%;
   border:2px solid currentColor;
   text-align:center;
-  color: #000 !important;
+  color:#000!important;
+  cursor:grab;
+  user-select:none;
+  transition:opacity .15s, transform .1s;
 }
-.chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;font-size:.83rem}
-.chip-time{font-size:.68rem;opacity:.9;font-weight:600;margin-top:1px}
+.cell-chip:hover{transform:scale(1.03)}
+.cell-chip:active{cursor:grabbing;opacity:.7}
+.cell-chip.is-dragging{opacity:.35;transform:scale(.97)}
+
+.chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;font-size:.78rem}
+.chip-time{font-size:.64rem;opacity:.9;font-weight:600;margin-top:1px}
 
 .conflict-dot{width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block;margin-left:3px}
 .day-today{background:#eff6ff}
 .th-today{background:#3b82f6!important;color:white!important;border-color:#2563eb!important}
-.role-badge{font-size:.65rem;color:#94a3b8;font-weight:400;margin-top:1px}
+.role-badge{font-size:.62rem;color:#94a3b8;font-weight:400;margin-top:1px}
+
+/* ── PDF overlay a finestra centrata ── */
+.pdf-overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,.65);
+  z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.pdf-window{
+  background:white;border-radius:14px;overflow:hidden;
+  width:min(96vw,1100px);height:min(92vh,780px);
+  display:flex;flex-direction:column;
+  box-shadow:0 24px 80px rgba(0,0,0,.45);
+}
+.pdf-toolbar{background:#1e293b;padding:10px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid #334155}
+.pdf-toolbar h2{color:white;font-size:.88rem;margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbtn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;white-space:nowrap}
+.tbtn-print{background:#3b82f6;color:white}
+.tbtn-save{background:#22c55e;color:white}
+.tbtn-close{background:#475569;color:white}
+.tbtn:hover{opacity:.85}
+.pdf-frame-wrap{flex:1;overflow:hidden;display:flex;align-items:stretch}
+.pdf-frame-wrap iframe{width:100%;height:100%;border:none}
 
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
 .modal{background:white;border-radius:14px;padding:22px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto}
@@ -84,15 +114,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .toggle-group{display:flex;flex-wrap:wrap;gap:5px}
 .tog{padding:4px 9px;border-radius:20px;font-size:.76rem;font-weight:600;border:2px solid #e2e8f0;background:white;color:#64748b;cursor:pointer;transition:all .12s}
 .tog.on{border-color:#3b82f6;background:#3b82f6;color:white}
-.switch-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid #f1f5f9;margin-top:6px}
-.sw-label span{font-size:.88rem;font-weight:600}
-.sw-label small{display:block;font-size:.72rem;color:#94a3b8;margin-top:2px}
-.sw{position:relative;width:42px;height:22px;flex-shrink:0}
-.sw input{opacity:0;width:0;height:0}
-.sw-track{position:absolute;inset:0;background:#cbd5e1;border-radius:22px;cursor:pointer;transition:background .2s}
-.sw-track:before{content:'';position:absolute;width:16px;height:16px;background:white;border-radius:50%;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.sw input:checked+.sw-track{background:#3b82f6}
-.sw input:checked+.sw-track:before{transform:translateX(20px)}
 
 .staff-list,.prog-list{border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
 .staff-list{max-height:220px;overflow-y:auto}
@@ -105,30 +126,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .list-item .del:hover{color:#ef4444}
 .dot12{width:12px;height:12px;border-radius:50%;flex-shrink:0}
 
-.assigned-box{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f8fafc;border-radius:8px;margin-bottom:10px}
-.assigned-chip{padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:700;color:white}
-.conflict-warn{background:#fef3c7;border:1px solid #f59e0b;border-radius:7px;padding:7px 11px;font-size:.78rem;color:#92400e;margin-bottom:8px}
-.empty-cell-box{padding:10px;background:#f8fafc;border-radius:8px;margin-bottom:10px;font-size:.83rem;color:#94a3b8;text-align:center}
 .empty-state{text-align:center;padding:40px 20px;color:#94a3b8;font-size:.88rem}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
 
-/* STILE PDF */
-#pdf-header { display: none; margin-bottom: 20px; text-align: center; }
-#pdf-header h2 { font-size: 24px; margin-bottom: 5px; color: #1e293b; }
-#pdf-header p { font-size: 16px; color: #64748b; }
+/* Color swatches per nota */
+.color-swatches{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.cswatch{width:24px;height:24px;border-radius:5px;cursor:pointer;border:3px solid transparent;transition:transform .12s,border-color .12s;flex-shrink:0}
+.cswatch:hover{transform:scale(1.18)}
+.cswatch.sel{border-color:#1e293b;transform:scale(1.18)}
 
-@media print {
-  .topbar, .strip, .modal-overlay, .action-btns, .week-nav button:not(.week-label) { display: none !important; }
-  body { background: white; padding: 0; }
-  .grid-wrap { padding: 0; overflow: visible; }
-  .grid { box-shadow: none; border-radius: 0; min-width: 100%; }
-  .grid th:first-child, .grid td:first-child { position: static; background: white !important; }
-}
+/* PDF print area (nascosto, usato per cattura) */
+#pdf-capture{display:none}
+#pdf-header{display:none;margin-bottom:16px;text-align:center}
+#pdf-header h2{font-size:20px;margin-bottom:3px;color:#1e293b}
+#pdf-header p{font-size:13px;color:#64748b}
 </style>
 </head>
 <body>
 <div id="app"></div>
+<div id="pdf-ui" style="display:none">
+  <div class="pdf-overlay" id="pdf-overlay" onclick="if(event.target===this)closePdfOverlay()">
+    <div class="pdf-window">
+      <div class="pdf-toolbar">
+        <h2 id="pdf-title">📄 Anteprima PDF</h2>
+        <button class="tbtn tbtn-print" id="pdf-print-btn">🖨️ Stampa</button>
+        <button class="tbtn tbtn-save" id="pdf-save-btn">⬇️ Scarica PDF</button>
+        <button class="tbtn tbtn-close" onclick="closePdfOverlay()">✕ Chiudi</button>
+      </div>
+      <div class="pdf-frame-wrap">
+        <iframe id="pdf-iframe" src=""></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -141,7 +173,6 @@ const firebaseConfig = {
   appId: "1:940298778130:web:923caafd0596e861984acb",
   measurementId: "G-6G952ZHRP3"
 };
-// Expose a promise so the main script can wait for Firebase to be ready
 window._fbReady = new Promise(resolve => {
   try {
     const fbApp = initializeApp(firebaseConfig);
@@ -149,14 +180,12 @@ window._fbReady = new Promise(resolve => {
     const DB_DOC = doc(db, 'app', 'data');
     window._fbSave = async (data) => { await setDoc(DB_DOC, data); };
     window._fbLoad = async () => { const snap = await getDoc(DB_DOC); return snap.exists() ? snap.data() : null; };
-  } catch(e) {
-    console.error('Firebase init error:', e);
-  }
+  } catch(e) { console.error('Firebase init error:', e); }
   resolve();
 });
 </script>
 <script>
-// ── CONSTANTS ──────────────────────────────────────────────────────────────
+// ── CONSTANTS ──
 const BUILTINS=[
   {id:'riposo',    nome:'Assente',          colore:'#ef4444',oraInizio:'',     oraFine:''     },
   {id:'mattina',   nome:'Turno Mattina',   colore:'#94a3b8',oraInizio:'09:00',oraFine:'14:00'},
@@ -169,204 +198,127 @@ const GF=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Dome
 const MN=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 const BUILTIN_IDS=new Set(BUILTINS.map(b=>b.id));
 
-// ── STATE ──────────────────────────────────────────────────────────────────
+// Palette colori nota singola
+const NOTE_COLORS=['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#f59e0b','#22c55e','#10b981','#06b6d4','#3b82f6','#64748b','#b45309','#be185d','#0369a1','#1e293b'];
+
+// ── STATE ──
 const S={
-  cat:'tecnici',
-  weekStart:null,
-  staff:[],
-  programmi:[],
-  turni:{},
-  modalStaff:false,
-  modalProg:false,
-  editProg:null,
-  cellModal:null,
-  removePrompt:null,
+  cat:'tecnici', weekStart:null,
+  staff:[], programmi:[], turni:{},
+  modalStaff:false, modalProg:false, editProg:null,
+  cellModal:null, removePrompt:null,
   dragging:null,
+  noteColor:'#6366f1',
+  _pdfUrl:null,
 };
 
-// ── PERSISTENCE (Firebase via modulo separato) ────────────────────────────
+// ── PERSISTENCE ──
 async function save(){
-  try {
-    if(window._fbSave) await window._fbSave({staff:S.staff,programmi:S.programmi,turni:S.turni});
-  } catch(e){ console.error('save error:',e); }
-  // fallback locale sempre
+  try{ if(window._fbSave) await window._fbSave({staff:S.staff,programmi:S.programmi,turni:S.turni}); }catch(e){console.error('save:',e);}
   try{ localStorage.setItem('turni_v5_fb',JSON.stringify({staff:S.staff,programmi:S.programmi,turni:S.turni})); }catch{}
 }
 async function load(){
-  try {
-    if(window._fbLoad){
-      const d = await window._fbLoad();
-      if(d){ S.staff=d.staff||[]; S.programmi=d.programmi||[]; S.turni=d.turni||{}; return; }
-    }
-  } catch(e){ console.error('load error:',e); }
-  try {
-    const d=JSON.parse(localStorage.getItem('turni_v5')||localStorage.getItem('turni_v5_fb')||'{}');
-    S.staff=d.staff||[]; S.programmi=d.programmi||[]; S.turni=d.turni||{};
-  } catch { S.staff=[];S.programmi=[];S.turni={}; }
+  try{
+    if(window._fbLoad){ const d=await window._fbLoad(); if(d){S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};return;} }
+  }catch(e){console.error('load:',e);}
+  try{ const d=JSON.parse(localStorage.getItem('turni_v5')||localStorage.getItem('turni_v5_fb')||'{}');S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{}; }catch{S.staff=[];S.programmi=[];S.turni={};}
 }
 
-// ── DATE UTILS ─────────────────────────────────────────────────────────────
+// ── DATE UTILS ──
 function toISO(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function fromISO(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
 function addDays(iso,n){const d=fromISO(iso);d.setDate(d.getDate()+n);return toISO(d)}
-function getMonday(iso){
-  const d=fromISO(iso),day=d.getDay(),diff=day===0?-6:1-day;
-  d.setDate(d.getDate()+diff);return toISO(d);
-}
+function getMonday(iso){const d=fromISO(iso),day=d.getDay(),diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return toISO(d)}
 function getDow(iso){const day=fromISO(iso).getDay();return day===0?6:day-1}
 function getMonth(iso){return fromISO(iso).getMonth()}
 function fmtDate(iso){const d=fromISO(iso);return`${d.getDate()}/${d.getMonth()+1}`}
 function isToday(iso){return iso===toISO(new Date())}
-function weekOffset(iso,baseISO){
-  const d=fromISO(getMonday(iso)),b=fromISO(getMonday(baseISO));
-  return Math.round((d-b)/(7*86400*1000));
-}
+function weekOffset(iso,baseISO){const d=fromISO(getMonday(iso)),b=fromISO(getMonday(baseISO));return Math.round((d-b)/(7*86400*1000))}
 function weekDates(){return Array.from({length:7},(_,i)=>addDays(S.weekStart,i))}
-function fmtWeekLabel(){
-  const dd=weekDates(),s=fromISO(dd[0]),e=fromISO(dd[6]);
-  return`${s.getDate()} ${MN[s.getMonth()]} – ${e.getDate()} ${MN[e.getMonth()]} ${e.getFullYear()}`;
-}
-function easter(y){
-  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,
-    f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,
-    i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,
-    m=Math.floor((a+11*h+22*l)/451),
-    mo=Math.floor((h+l-7*m+114)/31),dy=((h+l-7*m+114)%31)+1;
-  return new Date(y,mo-1,dy);
-}
-function isHoliday(iso){
-  const d=fromISO(iso),y=d.getFullYear();
-  const md=`${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  if(['01-01','01-06','04-25','05-01','06-02','08-15','11-01','12-08','12-25','12-26'].includes(md))return true;
-  const ea=easter(y),em=new Date(ea);em.setDate(em.getDate()+1);
-  return toISO(ea)===iso||toISO(em)===iso;
-}
+function fmtWeekLabel(){const dd=weekDates(),s=fromISO(dd[0]),e=fromISO(dd[6]);return`${s.getDate()} ${MN[s.getMonth()]} – ${e.getDate()} ${MN[e.getMonth()]} ${e.getFullYear()}`}
+function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),dy=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,dy)}
+function isHoliday(iso){const d=fromISO(iso),y=d.getFullYear();const md=`${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;if(['01-01','01-06','04-25','05-01','06-02','08-15','11-01','12-08','12-25','12-26'].includes(md))return true;const ea=easter(y),em=new Date(ea);em.setDate(em.getDate()+1);return toISO(ea)===iso||toISO(em)===iso}
 
-// ── DATA HELPERS ───────────────────────────────────────────────────────────
+// ── DATA HELPERS ──
 function uid(){return Math.random().toString(36).slice(2,10)}
 function byId(arr,id){return arr.find(x=>x.id===id)}
-function staffSorted(cat){
-  return S.staff.filter(s=>s.cat===cat).sort((a,b)=>a.cognome.localeCompare(b.cognome)||a.nome.localeCompare(b.nome));
-}
+function staffSorted(cat){return S.staff.filter(s=>s.cat===cat).sort((a,b)=>a.cognome.localeCompare(b.cognome)||a.nome.localeCompare(b.nome))}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function hexToRgba(hex,alpha){if(!hex||hex.length<7)return`rgba(0,0,0,${alpha})`;let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${alpha})`}
 
-function hexToRgba(hex, alpha) {
-  if(!hex || hex.length < 7) return `rgba(0,0,0,${alpha})`;
-  let r = parseInt(hex.slice(1, 3), 16),
-      g = parseInt(hex.slice(3, 5), 16),
-      b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
-// ── SHIFT LOGIC ────────────────────────────────────────────────────────────
+// ── SHIFT LOGIC ──
 function getAuto(pid,iso){
   const dow=getDow(iso),mon=getMonth(iso);
-  const person = byId(S.staff, pid);
-  if(!person) return null;
-
+  const person=byId(S.staff,pid);if(!person)return null;
   for(const pg of S.programmi){
-    if(!pg.giorni || !pg.giorni.includes(dow))continue;
+    if(!pg.giorni||!pg.giorni.includes(dow))continue;
     if(pg.mesi&&pg.mesi.length&&!pg.mesi.includes(mon))continue;
-    
     if(pg.turnazione){
-      const roleRot = (pg.rotazioni && pg.rotazioni[person.ruolo]) || (pg.rotazione ? pg.rotazione : []);
-      if(!roleRot.length) continue;
+      const roleRot=(pg.rotazioni&&pg.rotazioni[person.ruolo])||(pg.rotazione?pg.rotazione:[]);
+      if(!roleRot.length)continue;
       const di=pg.giorni.indexOf(dow),wo=weekOffset(iso,pg.baseDate||iso),len=roleRot.length;
-      if(roleRot[((di+wo)%len+len)%len]===pid)
-        return{eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2,oraFine2:pg.oraFine2};
+      if(roleRot[((di+wo)%len+len)%len]===pid) return{eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2,oraFine2:pg.oraFine2};
     }else{
-      if(((pg.fissi||{})[dow]||[]).includes(pid))
-        return{eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2,oraFine2:pg.oraFine2};
+      if(((pg.fissi||{})[dow]||[]).includes(pid)) return{eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2,oraFine2:pg.oraFine2};
     }
   }
   return null;
 }
 function getManual(pid,iso){return S.turni[`${pid}|${iso}|${S.cat}`]??null}
-function getShift(pid,iso){
-  const m=getManual(pid,iso);
-  if(m!==null)return m.blocked?null:m;
-  return getAuto(pid,iso);
-}
-function setManual(pid,iso,val){
-  const k=`${pid}|${iso}|${S.cat}`;
-  if(val===null)delete S.turni[k];else S.turni[k]=val;
-  save().catch(e=>console.error(e));
-}
+function getShift(pid,iso){const m=getManual(pid,iso);if(m!==null)return m.blocked?null:m;return getAuto(pid,iso)}
+function setManual(pid,iso,val){const k=`${pid}|${iso}|${S.cat}`;if(val===null)delete S.turni[k];else S.turni[k]=val;save().catch(e=>console.error(e))}
 function conflictCheck(pid,iso){
-  const cur=getShift(pid,iso);
-  if(!cur?.eventoId||BUILTIN_IDS.has(cur.eventoId))return null;
-  const pg=byId(S.programmi,cur.eventoId);
-  if(!pg || !pg.nome) return null;
-
-  // REGOLA PRIMA MATTINA: chi ha lavorato il lunedì in Prima Mattina
-  // non può essere assegnato il lunedì della settimana successiva
-  const isPrimaMattina = pg.nome.toLowerCase().includes('prima mattina');
-  if(isPrimaMattina){
-    const dow = getDow(iso); // 0 = lunedì
-    if(dow === 0){
-      const prevMonday = addDays(iso, -7);
-      const prev = getShift(pid, prevMonday);
-      if(prev?.eventoId === cur.eventoId) return pg.nome;
-    }
+  const cur=getShift(pid,iso);if(!cur?.eventoId||BUILTIN_IDS.has(cur.eventoId))return null;
+  const pg=byId(S.programmi,cur.eventoId);if(!pg||!pg.nome)return null;
+  if(pg.nome.toLowerCase().includes('prima mattina')){
+    const dow=getDow(iso);if(dow===0){const prev=getShift(pid,addDays(iso,-7));if(prev?.eventoId===cur.eventoId)return pg.nome;}
   }
-
   return null;
 }
 
-// ── DROP ───────────────────────────────────────────────────────────────────
+// ── DROP (strip pill → cella, oppure cella → cella) ──
 function dropOnCell(pid,iso){
-  if(!S.dragging) return;
-  const{type,id}=S.dragging;
+  if(!S.dragging)return;
+  const{type,id,cellShift}=S.dragging;
   const dow=getDow(iso);
-  const person = byId(S.staff, pid);
-  if(!person) return;
-
-  try {
+  const person=byId(S.staff,pid);if(!person)return;
+  try{
+    if(type==='cell'){
+      // Copia diretta del turno nella cella destinazione come manuale
+      if(cellShift) setManual(pid,iso,{...cellShift,manual:true});
+      save().catch(e=>console.error(e));
+      render();return;
+    }
     if(type==='builtin'){
-      setManual(pid, iso, null);
-      const bi=BUILTINS.find(b=>b.id===id); if(!bi)return;
-      
-      if(['mattina', 'pomeriggio', 'intero'].includes(bi.id)){
-        let pg = S.programmi.find(p => p.nome === bi.nome && !p.isRealProg);
-        if(!pg){
-          pg = {
-            id: uid(), nome: bi.nome, colore: bi.colore, oraInizio: bi.oraInizio, oraFine: bi.oraFine,
-            giorni: [0,1,2,3,4,5,6], mesi: [], turnazione: false, fissi: {}, isRealProg: false
-          };
-          S.programmi.push(pg);
-        }
-        if(!pg.fissi) pg.fissi = {};
-        if(!pg.fissi[dow]) pg.fissi[dow] = [];
-        if(!pg.fissi[dow].includes(pid)) pg.fissi[dow].push(pid);
-      } else {
+      setManual(pid,iso,null);
+      const bi=BUILTINS.find(b=>b.id===id);if(!bi)return;
+      if(['mattina','pomeriggio','intero'].includes(bi.id)){
+        let pg=S.programmi.find(p=>p.nome===bi.nome&&!p.isRealProg);
+        if(!pg){pg={id:uid(),nome:bi.nome,colore:bi.colore,oraInizio:bi.oraInizio,oraFine:bi.oraFine,giorni:[0,1,2,3,4,5,6],mesi:[],turnazione:false,fissi:{},isRealProg:false};S.programmi.push(pg);}
+        if(!pg.fissi)pg.fissi={};
+        if(!pg.fissi[dow])pg.fissi[dow]=[];
+        if(!pg.fissi[dow].includes(pid))pg.fissi[dow].push(pid);
+      }else{
         setManual(pid,iso,{eventoId:bi.id,oraInizio:bi.oraInizio,oraFine:bi.oraFine,nota:'',manual:true});
       }
     }else{
-      const pg=byId(S.programmi,id); if(!pg) return;
-      const isPrimaMattina = pg.nome && pg.nome.toLowerCase().includes('prima mattina');
-      if(isPrimaMattina){
-        // Prima Mattina: assegnazione solo per la data specifica
-        setManual(pid, iso, {eventoId:pg.id, oraInizio:pg.oraInizio, oraFine:pg.oraFine, oraInizio2:pg.oraInizio2||'', oraFine2:pg.oraFine2||'', manual:true});
-      } else {
-        // Programmi ricorrenti: aggiunge a fissi[dow] → si ripete ogni settimana (filtrato per mesi)
-        setManual(pid, iso, null); // rimuovi eventuale override manuale
-        if(!pg.fissi) pg.fissi = {};
-        if(!pg.fissi[dow]) pg.fissi[dow] = [];
-        if(!pg.fissi[dow].includes(pid)) pg.fissi[dow].push(pid);
-        // Assicura che il giorno sia nella lista giorni del programma
-        if(!pg.giorni) pg.giorni = [];
+      const pg=byId(S.programmi,id);if(!pg)return;
+      if(pg.nome&&pg.nome.toLowerCase().includes('prima mattina')){
+        setManual(pid,iso,{eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2||'',oraFine2:pg.oraFine2||'',manual:true});
+      }else{
+        setManual(pid,iso,null);
+        if(!pg.fissi)pg.fissi={};
+        if(!pg.fissi[dow])pg.fissi[dow]=[];
+        if(!pg.fissi[dow].includes(pid))pg.fissi[dow].push(pid);
+        if(!pg.giorni)pg.giorni=[];
         if(!pg.giorni.includes(dow)){pg.giorni.push(dow);pg.giorni.sort((a,b)=>a-b);}
       }
     }
-    save().catch(e=>console.error(e));
-    render();
-  } catch(e) {
-    console.error(e);
-    alert("Errore nel trascinamento: " + e.message);
-  }
+    save().catch(e=>console.error(e));render();
+  }catch(e){console.error(e);alert('Errore nel trascinamento: '+e.message);}
 }
 
-// ── RENDER ─────────────────────────────────────────────────────────────────
+// ── RENDER ──
 function render(){
   document.getElementById('app').innerHTML=buildHTML();
   bindDrag();
@@ -403,12 +355,13 @@ function topBar(){
 
 function strip(){
   const bPills=BUILTINS.map(b=>`<div class="pill" style="background:${b.colore}" draggable="true" data-dtype="builtin" data-did="${b.id}">${b.nome}</div>`).join('');
-  const pPills=S.programmi.filter(p => p.isRealProg !== false).map(pg=>`<div class="pill" style="background:${pg.colore||'#6366f1'}" draggable="true" data-dtype="prog" data-did="${pg.id}">${esc(pg.nome)}</div>`).join('');
+  const pPills=S.programmi.filter(p=>p.isRealProg!==false).map(pg=>`<div class="pill" style="background:${pg.colore||'#6366f1'}" draggable="true" data-dtype="prog" data-did="${pg.id}">${esc(pg.nome)}</div>`).join('');
   return`<div class="strip">
   <span class="strip-label">Trascina:</span>
   ${bPills}
   ${pPills.length?'<div class="strip-sep"></div>'+pPills:''}
-  ${!S.programmi.filter(p => p.isRealProg !== false).length?'<span style="font-size:.78rem;color:#94a3b8">Nessun programma</span>':''}
+  ${!S.programmi.filter(p=>p.isRealProg!==false).length?'<span style="font-size:.78rem;color:#94a3b8">Nessun programma</span>':''}
+  <span class="strip-hint">💡 Puoi trascinare anche le celle già assegnate</span>
 </div>`;
 }
 
@@ -419,19 +372,19 @@ function gridSection(){
   const headers=dates.map((d,i)=>{
     const tc=isToday(d)?'th-today':'';
     const hol=isHoliday(d)?` <span style="color:${tc?'rgba(255,255,255,.7)':'#ef4444'}">✦</span>`:'';
-    return`<th class="${tc}"><div>${GN[i]}</div><div style="font-size:.7rem;opacity:.8">${fmtDate(d)}${hol}</div></th>`;
+    return`<th class="${tc}"><div>${GN[i]}</div><div style="font-size:.68rem;opacity:.8">${fmtDate(d)}${hol}</div></th>`;
   }).join('');
   const rows=list.map(s=>{
     const cells=dates.map(d=>buildCell(s.id,d)).join('');
-    return`<tr><td><div style="font-weight:700">${esc(s.cognome)} ${esc(s.nome)}</div><div class="role-badge">${esc(s.ruolo)}</div></td>${cells}</tr>`;
+    return`<tr><td><div style="font-weight:700;font-size:.82rem">${esc(s.cognome)} ${esc(s.nome)}</div><div class="role-badge">${esc(s.ruolo)}</div></td>${cells}</tr>`;
   }).join('');
   return`<div class="grid-wrap" id="capture-area">
     <div id="pdf-header">
-      <h2>Programmazione Turni - ${S.cat.toUpperCase()}</h2>
+      <h2>Programmazione Turni — ${S.cat.toUpperCase()}</h2>
       <p>Settimana dal ${fmtWeekLabel()}</p>
     </div>
     <table class="grid">
-      <thead><tr><th style="width:180px">Nome</th>${headers}</tr></thead>
+      <thead><tr><th>Nome</th>${headers}</tr></thead>
       <tbody>${rows}</tbody>
     </table>
   </div>`;
@@ -444,48 +397,49 @@ function buildCell(pid,iso){
   if(sh){
     const bi=BUILTINS.find(b=>b.id===sh.eventoId);
     const pg=!bi?byId(S.programmi,sh.eventoId):null;
-    const isImpro = sh && !sh.eventoId;
-    const col = isImpro ? '#e2e8f0' : (bi?.colore || pg?.colore || '#6366f1');
-    const nom = bi?.nome || pg?.nome || sh.nomeImprovvisato || '?';
-    let t = '';
-    if(sh.oraInizio && sh.oraFine) {
-      t = `${sh.oraInizio}–${sh.oraFine}`;
-      if(sh.oraInizio2 && sh.oraFine2) t += ` / ${sh.oraInizio2}–${sh.oraFine2}`;
-    }
+    const isImpro=sh&&!sh.eventoId;
+    const col=isImpro?(sh.coloreNota||'#6366f1'):(bi?.colore||pg?.colore||'#6366f1');
+    const nom=bi?.nome||pg?.nome||sh.nomeImprovvisato||'?';
+    let t='';
+    if(sh.oraInizio&&sh.oraFine){t=`${sh.oraInizio}–${sh.oraFine}`;if(sh.oraInizio2&&sh.oraFine2)t+=` / ${sh.oraInizio2}–${sh.oraFine2}`;}
     const cfl=conflictCheck(pid,iso);
-    const bgCol = isImpro ? '#ffffff' : hexToRgba(col, 0.12);
-    const borderCol = isImpro ? '#cbd5e1' : col;
-    inner=`<div class="cell-chip" style="border-color:${borderCol}; background-color:${bgCol}">
-      <div class="chip-name">${esc(nom)}${cfl?`<span class="conflict-dot" title="Conflitto ruolo o cadenza"></span>`:''}</div>
-      ${t?`<div class="chip-time">${t}</div>`:''}
-    </div>`;
+    const bgCol=isImpro?hexToRgba(col,.15):hexToRgba(col,.12);
+    const borderCol=col;
+    // Serializziamo i dati del turno per il drag cella→cella
+    const shiftEnc=encodeURIComponent(JSON.stringify(sh));
+    inner=`<div class="cell-chip"
+      style="border-color:${borderCol};background-color:${bgCol}"
+      draggable="true"
+      data-cpid="${pid}" data-ciso="${iso}" data-cshift="${shiftEnc}"
+    ><div class="chip-name">${esc(nom)}${cfl?`<span class="conflict-dot" title="Conflitto"></span>`:''}</div>${t?`<div class="chip-time">${t}</div>`:''}</div>`;
   }
   return`<td><div class="cell${today}"
     ondragover="event.preventDefault();this.classList.add('drag-over')"
     ondragleave="this.classList.remove('drag-over')"
     ondrop="this.classList.remove('drag-over');dropOnCell('${pid}','${iso}')"
-    onclick="openCell('${pid}','${iso}')"
+    onclick="onCellClick(event,'${pid}','${iso}')"
   >${inner}</div></td>`;
 }
 
-// ── MODALS ─────────────────────────────────────────────────────────────────
+// click sulla cella: ignora se appena finito un drag
+window._wasDragging=false;
+function onCellClick(e,pid,iso){
+  if(window._wasDragging){window._wasDragging=false;return;}
+  openCell(pid,iso);
+}
+
+// ── MODALS ──
 function modalStaff(){
   const tec=staffSorted('tecnici'),gio=staffSorted('giornalisti');
   const listHTML=arr=>arr.length
-    ?arr.map(s=>`<div class="list-item"><div class="info">${esc(s.cognome)} ${esc(s.nome)}<span class="role-badge">${esc(s.ruolo)}</span></div><button class="del" onclick="removeStaff('${s.id}')">✕</button></div>`).join('')
+    ?arr.map(s=>`<div class="list-item"><div class="info">${esc(s.cognome)} ${esc(s.nome)}<span class="role-badge"> ${esc(s.ruolo)}</span></div><button class="del" onclick="removeStaff('${s.id}')">✕</button></div>`).join('')
     :`<div style="padding:8px 12px;font-size:.78rem;color:#94a3b8">Nessuno</div>`;
   return`<div class="modal-overlay" onclick="if(event.target===this){S.modalStaff=false;render()}">
 <div class="modal" onclick="event.stopPropagation()">
   <h2>Gestione Personale</h2>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-    <div>
-      <div style="font-size:.75rem;font-weight:700;color:#475569;margin-bottom:5px">TECNICI</div>
-      <div class="staff-list">${listHTML(tec)}</div>
-    </div>
-    <div>
-      <div style="font-size:.75rem;font-weight:700;color:#475569;margin-bottom:5px">GIORNALISTI</div>
-      <div class="staff-list">${listHTML(gio)}</div>
-    </div>
+    <div><div style="font-size:.75rem;font-weight:700;color:#475569;margin-bottom:5px">TECNICI</div><div class="staff-list">${listHTML(tec)}</div></div>
+    <div><div style="font-size:.75rem;font-weight:700;color:#475569;margin-bottom:5px">GIORNALISTI</div><div class="staff-list">${listHTML(gio)}</div></div>
   </div>
   <div style="border-top:1px solid #e2e8f0;padding-top:12px">
     <div style="font-size:.82rem;font-weight:700;margin-bottom:8px">Aggiungi Persona</div>
@@ -504,7 +458,7 @@ function modalStaff(){
 }
 
 function modalProg(){
-  const progs = S.programmi.filter(p => p.isRealProg !== false);
+  const progs=S.programmi.filter(p=>p.isRealProg!==false);
   if(S.editProg==='list'||S.editProg===null){
     return`<div class="modal-overlay" onclick="if(event.target===this){S.modalProg=false;render()}">
 <div class="modal" onclick="event.stopPropagation()">
@@ -513,15 +467,12 @@ function modalProg(){
     ${progs.length
       ?progs.map(pg=>`<div class="list-item">
         <div class="dot12" style="background:${pg.colore||'#6366f1'}"></div>
-        <div class="info">
-          <div style="font-weight:600">${esc(pg.nome)}</div>
-          <div class="meta">${pg.giorni.map(d=>GN[d]).join(', ')}${pg.oraInizio?` · ${pg.oraInizio}–${pg.oraFine}`:''}${pg.oraInizio2?` / ${pg.oraInizio2}–${pg.oraFine2}`:''}</div>
-        </div>
+        <div class="info"><div style="font-weight:600">${esc(pg.nome)}</div>
+        <div class="meta">${pg.giorni.map(d=>GN[d]).join(', ')}${pg.oraInizio?` · ${pg.oraInizio}–${pg.oraFine}`:''}${pg.oraInizio2?` / ${pg.oraInizio2}–${pg.oraFine2}`:''}</div></div>
         <button class="del" style="color:#94a3b8;margin-right:2px" onclick="startEditProg('${pg.id}')">✎</button>
         <button class="del" onclick="removeProg('${pg.id}')">✕</button>
       </div>`).join('')
-      :`<div style="padding:14px;font-size:.83rem;color:#94a3b8;text-align:center">Nessun programma</div>`
-    }
+      :`<div style="padding:14px;font-size:.83rem;color:#94a3b8;text-align:center">Nessun programma</div>`}
   </div>
   <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="startNewProg()">+ Nuovo Programma</button>
   <div class="modal-footer"><button class="btn btn-secondary" onclick="S.modalProg=false;render()">Chiudi</button></div>
@@ -557,20 +508,39 @@ function cellModal(){
   const sh=getShift(pid,date);
   const d=fromISO(date);
   const dstr=`${GF[getDow(date)]}, ${d.getDate()} ${MN[d.getMonth()]} ${d.getFullYear()}`;
-  const isImpro = sh && !sh.eventoId;
+  const isImpro=sh&&!sh.eventoId;
+  const curColor=isImpro&&sh.coloreNota?sh.coloreNota:S.noteColor;
+
+  const swatches=NOTE_COLORS.map(c=>`<div class="cswatch${c===curColor?' sel':''}"
+    style="background:${c}" title="${c}"
+    onclick="pickNoteColor('${c}')"></div>`).join('');
+
   return`<div class="modal-overlay" onclick="if(event.target===this){S.cellModal=null;render()}">
-<div class="modal" onclick="event.stopPropagation()" style="max-width:380px">
+<div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
   <h2>${person?esc(person.cognome+' '+person.nome):''}</h2>
   <div style="font-size:.78rem;color:#64748b;margin-top:-10px;margin-bottom:16px">${dstr}</div>
-  <div style="background:#f8fafc; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #e2e8f0">
-    <div class="form-row"><label>Nome Evento Singolo</label><input type="text" id="im-nome" value="${isImpro?esc(sh.nomeImprovvisato):''}" placeholder="Esempio: Intervista Speciale"></div>
+  <div style="background:#f8fafc;padding:15px;border-radius:10px;margin-bottom:15px;border:1px solid #e2e8f0">
+    <div class="form-row"><label>Nome Evento Singolo</label><input type="text" id="im-nome" value="${isImpro?esc(sh.nomeImprovvisato||''):''}" placeholder="Esempio: Intervista Speciale"></div>
+
+    <div class="form-row" style="margin-bottom:10px">
+      <label>Colore etichetta</label>
+      <div class="color-swatches">${swatches}</div>
+      <div style="margin-top:7px;display:flex;align-items:center;gap:8px">
+        <div id="color-preview" style="width:26px;height:26px;border-radius:6px;background:${curColor};border:2px solid #e2e8f0;flex-shrink:0"></div>
+        <input type="color" id="im-color-custom" value="${curColor.length===7?curColor:'#6366f1'}"
+          oninput="pickNoteColor(this.value)"
+          style="width:32px;height:26px;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;padding:1px;background:white">
+        <span style="font-size:.72rem;color:#94a3b8">o scegli colore custom</span>
+      </div>
+    </div>
+
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-      <div class="form-row" style="margin:0"><label>Inizio 1</label><input type="time" id="im-ini" value="${sh?sh.oraInizio:''}"></div>
-      <div class="form-row" style="margin:0"><label>Fine 1</label><input type="time" id="im-fin" value="${sh?sh.oraFine:''}"></div>
+      <div class="form-row" style="margin:0"><label>Inizio 1</label><input type="time" id="im-ini" value="${sh?sh.oraInizio||'':''}"></div>
+      <div class="form-row" style="margin:0"><label>Fine 1</label><input type="time" id="im-fin" value="${sh?sh.oraFine||'':''}"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div class="form-row" style="margin:0"><label>Inizio 2</label><input type="time" id="im-ini2" value="${sh?sh.oraInizio2:''}"></div>
-      <div class="form-row" style="margin:0"><label>Fine 2</label><input type="time" id="im-fin2" value="${sh?sh.oraFine2:''}"></div>
+      <div class="form-row" style="margin:0"><label>Inizio 2</label><input type="time" id="im-ini2" value="${sh?sh.oraInizio2||'':''}"></div>
+      <div class="form-row" style="margin:0"><label>Fine 2</label><input type="time" id="im-fin2" value="${sh?sh.oraFine2||'':''}"></div>
     </div>
     <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="saveImpro('${pid}','${date}')">Salva Evento Singolo</button>
   </div>
@@ -581,13 +551,22 @@ function cellModal(){
 </div></div>`;
 }
 
+// Aggiorna colore senza full-render
+function pickNoteColor(col){
+  S.noteColor=col;
+  document.querySelectorAll('.cswatch').forEach(el=>el.classList.toggle('sel',el.title===col));
+  const prev=document.getElementById('color-preview');if(prev)prev.style.background=col;
+  const cp=document.getElementById('im-color-custom');if(cp&&col.length===7)cp.value=col;
+}
+window.pickNoteColor=pickNoteColor;
+
 function removePrompt(){
   const{pid,date,progName}=S.removePrompt;
   return`<div class="modal-overlay">
-<div class="modal" style="max-width:320px; text-align:center">
+<div class="modal" style="max-width:320px;text-align:center">
   <h2>Rimuovi Programma</h2>
-  <p style="font-size:.85rem; color:#64748b; margin-bottom:20px">Vuoi rimuovere <b>${esc(progName)}</b> solo per oggi o per tutte le settimane?</p>
-  <div style="display:flex; flex-direction:column; gap:8px">
+  <p style="font-size:.85rem;color:#64748b;margin-bottom:20px">Vuoi rimuovere <b>${esc(progName)}</b> solo per oggi o per tutte le settimane?</p>
+  <div style="display:flex;flex-direction:column;gap:8px">
     <button class="btn btn-primary" onclick="confirmRemove('day')">Questo Giorno</button>
     <button class="btn btn-danger" onclick="confirmRemove('all')">Tutti i Giorni</button>
     <button class="btn btn-secondary" onclick="S.removePrompt=null;render()">Annulla</button>
@@ -595,14 +574,18 @@ function removePrompt(){
 </div></div>`;
 }
 
-// ── ACTIONS ─────────────────────────────────────────────────────────────────
+// ── ACTIONS ──
 function prevWeek(){S.weekStart=addDays(S.weekStart,-7);render()}
 function nextWeek(){S.weekStart=addDays(S.weekStart,7);render()}
 function goToday(){S.weekStart=getMonday(toISO(new Date()));render()}
 function setTab(cat){S.cat=cat;render()}
 function openStaff(){S.modalStaff=true;render()}
 function openProg(){S.modalProg=true;S.editProg='list';render()}
-function openCell(pid,date){S.cellModal={pid,date};render()}
+function openCell(pid,date){
+  const sh=getShift(pid,date);
+  if(sh&&!sh.eventoId&&sh.coloreNota) S.noteColor=sh.coloreNota;
+  S.cellModal={pid,date};render();
+}
 
 function updateRuoloOpts(){
   const cat=document.getElementById('s-cat').value;
@@ -618,9 +601,7 @@ function removeStaff(id){
   if(!confirm('Rimuovere questa persona?'))return;
   S.staff=S.staff.filter(s=>s.id!==id);
   S.programmi.forEach(pg=>{
-    if(pg.rotazioni) Object.values(pg.rotazioni).forEach(arr => {
-      const idx = arr.indexOf(id); if(idx >= 0) arr.splice(idx, 1);
-    });
+    if(pg.rotazioni)Object.values(pg.rotazioni).forEach(arr=>{const ix=arr.indexOf(id);if(ix>=0)arr.splice(ix,1)});
     if(pg.rotazione)pg.rotazione=pg.rotazione.filter(p=>p!==id);
     if(pg.fissi)Object.keys(pg.fissi).forEach(d=>{pg.fissi[d]=(pg.fissi[d]||[]).filter(p=>p!==id)});
   });
@@ -636,35 +617,15 @@ function readProgForm(){
   if(f('pg-fin'))S.editProg.oraFine=f('pg-fin').value;
   if(f('pg-ini2'))S.editProg.oraInizio2=f('pg-ini2').value;
   if(f('pg-fin2'))S.editProg.oraFine2=f('pg-fin2').value;
-  if(f('pg-turn'))S.editProg.turnazione=f('pg-turn').checked;
 }
 function startNewProg(){
   S.editProg={id:uid(),nome:'',colore:'#6366f1',oraInizio:'',oraFine:'',oraInizio2:'',oraFine2:'',giorni:[],mesi:[],turnazione:false,rotazioni:{},fissi:{},baseDate:getMonday(toISO(new Date())),isRealProg:true};
   render();
 }
-function startEditProg(id){
-  S.editProg=JSON.parse(JSON.stringify(byId(S.programmi,id)));
-  if(!S.editProg.mesi) S.editProg.mesi = [];
-  render();
-}
-function togGiorno(i){
-  readProgForm();
-  const a=S.editProg.giorni,ix=a.indexOf(i);
-  if(ix>=0)a.splice(ix,1);else{a.push(i);a.sort((x,y)=>x-y);}
-  render();
-}
-function togMese(i){
-  readProgForm();
-  if(!S.editProg.mesi) S.editProg.mesi = [];
-  const a=S.editProg.mesi,ix=a.indexOf(i);
-  if(ix>=0)a.splice(ix,1);else{a.push(i);a.sort((x,y)=>x-y);}
-  render();
-}
-function removeProg(id){
-  if(!confirm('Eliminare questo programma?'))return;
-  S.programmi=S.programmi.filter(p=>p.id!==id);
-  save().catch(e=>console.error(e));render();
-}
+function startEditProg(id){S.editProg=JSON.parse(JSON.stringify(byId(S.programmi,id)));if(!S.editProg.mesi)S.editProg.mesi=[];render()}
+function togGiorno(i){readProgForm();const a=S.editProg.giorni,ix=a.indexOf(i);if(ix>=0)a.splice(ix,1);else{a.push(i);a.sort((x,y)=>x-y);}render()}
+function togMese(i){readProgForm();if(!S.editProg.mesi)S.editProg.mesi=[];const a=S.editProg.mesi,ix=a.indexOf(i);if(ix>=0)a.splice(ix,1);else{a.push(i);a.sort((x,y)=>x-y);}render()}
+function removeProg(id){if(!confirm('Eliminare questo programma?'))return;S.programmi=S.programmi.filter(p=>p.id!==id);save().catch(e=>console.error(e));render()}
 function saveProg(){
   readProgForm();
   if(!S.editProg.nome.trim()){alert('Inserisci il nome');return}
@@ -675,109 +636,200 @@ function saveProg(){
 }
 
 function saveImpro(pid,date){
-  const nome = document.getElementById('im-nome').value.trim();
-  const ini = document.getElementById('im-ini').value;
-  const fin = document.getElementById('im-fin').value;
-  const ini2 = document.getElementById('im-ini2').value;
-  const fin2 = document.getElementById('im-fin2').value;
-  if(!nome && !ini) { alert('Inserisci almeno un nome o un orario'); return; }
-  setManual(pid, date, {nomeImprovvisato: nome, oraInizio: ini, oraFine: fin, oraInizio2: ini2, oraFine2: fin2, colore: '#e2e8f0', manual: true});
-  S.cellModal = null; render();
+  const nome=document.getElementById('im-nome').value.trim();
+  const ini=document.getElementById('im-ini').value;
+  const fin=document.getElementById('im-fin').value;
+  const ini2=document.getElementById('im-ini2').value;
+  const fin2=document.getElementById('im-fin2').value;
+  const coloreNota=S.noteColor||'#6366f1';
+  if(!nome&&!ini){alert('Inserisci almeno un nome o un orario');return;}
+  setManual(pid,date,{nomeImprovvisato:nome,oraInizio:ini,oraFine:fin,oraInizio2:ini2,oraFine2:fin2,coloreNota,manual:true});
+  S.cellModal=null;render();
 }
 
-function clearCellPrompt(pid, date) {
-  const sh = getShift(pid, date);
-  if (sh && sh.eventoId && !BUILTIN_IDS.has(sh.eventoId)) {
-    const pg = byId(S.programmi, sh.eventoId);
-    if (pg) {
-      S.cellModal = null;
-      S.removePrompt = { pid, date, progName: pg.nome };
-      render();
-    }
-  } else {
-    if (getAuto(pid, date)) setManual(pid, date, {blocked: true});
-    else setManual(pid, date, null);
-    S.cellModal = null; render();
+function clearCellPrompt(pid,date){
+  const sh=getShift(pid,date);
+  if(sh&&sh.eventoId&&!BUILTIN_IDS.has(sh.eventoId)){
+    const pg=byId(S.programmi,sh.eventoId);
+    if(pg){S.cellModal=null;S.removePrompt={pid,date,progName:pg.nome};render();}
+  }else{
+    if(getAuto(pid,date))setManual(pid,date,{blocked:true});
+    else setManual(pid,date,null);
+    S.cellModal=null;render();
   }
 }
 
-function confirmRemove(type) {
-  const { pid, date } = S.removePrompt;
-  const sh = getShift(pid, date);
-  const pg = byId(S.programmi, sh.eventoId);
-  const person = byId(S.staff, pid);
-  if (type === 'day') {
-    setManual(pid, date, {blocked: true});
-  } else {
-    if (pg.turnazione) {
-      if(pg.rotazioni && person && pg.rotazioni[person.ruolo]) {
-        pg.rotazioni[person.ruolo] = pg.rotazioni[person.ruolo].filter(id => id !== pid);
+function confirmRemove(type){
+  const{pid,date}=S.removePrompt;
+  const sh=getShift(pid,date);
+  const pg=byId(S.programmi,sh.eventoId);
+  const person=byId(S.staff,pid);
+  if(type==='day'){
+    setManual(pid,date,{blocked:true});
+  }else{
+    if(pg.turnazione){
+      if(pg.rotazioni&&person&&pg.rotazioni[person.ruolo])pg.rotazioni[person.ruolo]=pg.rotazioni[person.ruolo].filter(id=>id!==pid);
+      if(pg.rotazione)pg.rotazione=pg.rotazione.filter(id=>id!==pid);
+    }else{
+      const dow=getDow(date);
+      if(pg.fissi&&pg.fissi[dow])pg.fissi[dow]=pg.fissi[dow].filter(id=>id!==pid);
+    }
+    setManual(pid,date,null);save().catch(e=>console.error(e));
+  }
+  S.removePrompt=null;render();
+}
+
+// ── PDF INLINE ──
+async function exportPDF(){
+  const{jsPDF}=window.jspdf;
+  const list=staffSorted(S.cat);
+  const dates=weekDates();
+
+  // A4 landscape in mm: 297 × 210
+  // Lavoriamo in mm direttamente con jsPDF, senza cattura canvas
+  const pdf=new jsPDF('l','mm','a4');
+  const PW=297, PH=210;
+  const ML=8, MR=8, MT=18, MB=6; // margini mm
+  const usableW=PW-ML-MR;  // 281 mm
+  const usableH=PH-MT-MB;  // 186 mm
+
+  // Intestazione testo
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(13);
+  pdf.setTextColor(30,41,59);
+  pdf.text(`Programmazione Turni — ${S.cat.toUpperCase()}`,PW/2,10,{align:'center'});
+  pdf.setFont('helvetica','normal');
+  pdf.setFontSize(8);
+  pdf.setTextColor(100,116,139);
+  pdf.text(`Settimana dal ${fmtWeekLabel()}`,PW/2,15,{align:'center'});
+
+  // Larghezze colonne: nome fisso, 7 giorni uguali
+  const nameColW=30; // mm
+  const dayColW=(usableW-nameColW)/7; // ~35.8 mm
+  const headerH=9; // mm intestazione colonne
+  const nRows=list.length;
+  const rowH=Math.min(22, Math.max(10, (usableH-headerH)/nRows));
+
+  // Helper mm→pt già gestito da jsPDF
+
+  // ── Header colonne ──
+  const hdrY=MT;
+  // Colonna Nome
+  pdf.setFillColor(241,245,249);
+  pdf.setDrawColor(203,213,225);
+  pdf.rect(ML, hdrY, nameColW, headerH, 'FD');
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(7.5);
+  pdf.setTextColor(71,85,105);
+  pdf.text('Nome', ML+2, hdrY+6);
+
+  dates.forEach((d,i)=>{
+    const x=ML+nameColW+i*dayColW;
+    const isTod=isToday(d), isHol=isHoliday(d);
+    if(isTod){ pdf.setFillColor(59,130,246); pdf.setDrawColor(37,99,235); }
+    else      { pdf.setFillColor(241,245,249); pdf.setDrawColor(203,213,225); }
+    pdf.rect(x, hdrY, dayColW, headerH, 'FD');
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(8);
+    pdf.setTextColor(isTod?255:71, isTod?255:85, isTod?255:105);
+    pdf.text(GN[i]+(isHol?' ✦':''), x+dayColW/2, hdrY+4, {align:'center'});
+    pdf.setFontSize(6.5);
+    pdf.text(fmtDate(d), x+dayColW/2, hdrY+7.5, {align:'center'});
+  });
+
+  // ── Righe persone ──
+  pdf.setDrawColor(203,213,225);
+  list.forEach((s,ri)=>{
+    const rowY=hdrY+headerH+ri*rowH;
+    const bg=ri%2===0?[255,255,255]:[250,250,250];
+
+    // Cella nome
+    pdf.setFillColor(...bg);
+    pdf.setDrawColor(203,213,225);
+    pdf.setLineWidth(0.1);
+    pdf.rect(ML, rowY, nameColW, rowH, 'FD');
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(6.5);
+    pdf.setTextColor(30,41,59);
+    const fullName=`${s.cognome} ${s.nome}`;
+    // Tronca se troppo lungo
+    const maxChars=Math.floor(nameColW/2.1);
+    const nameStr=fullName.length>maxChars?fullName.slice(0,maxChars-1)+'…':fullName;
+    pdf.text(nameStr, ML+1.5, rowY+rowH/2-1.5);
+    pdf.setFont('helvetica','normal');
+    pdf.setFontSize(5.5);
+    pdf.setTextColor(148,163,184);
+    pdf.text(s.ruolo, ML+1.5, rowY+rowH/2+2.5);
+
+    // Celle giorni
+    dates.forEach((iso,i)=>{
+      const x=ML+nameColW+i*dayColW;
+      pdf.setFillColor(...bg);
+      pdf.setDrawColor(203,213,225);   // grigio bordo griglia
+      pdf.setLineWidth(0.1);
+      pdf.rect(x, rowY, dayColW, rowH, 'FD');
+
+      const sh=getShift(s.id,iso);
+      if(!sh) return;
+
+      const bi=BUILTINS.find(b=>b.id===sh.eventoId);
+      const pg=!bi?byId(S.programmi,sh.eventoId):null;
+      const col=!sh.eventoId?(sh.coloreNota||'#6366f1'):(bi?.colore||pg?.colore||'#6366f1');
+      const nom=bi?.nome||pg?.nome||sh.nomeImprovvisato||'?';
+      let t='';
+      if(sh.oraInizio&&sh.oraFine){ t=`${sh.oraInizio}–${sh.oraFine}`; if(sh.oraInizio2&&sh.oraFine2) t+=` / ${sh.oraInizio2}–${sh.oraFine2}`; }
+
+      // Chip colorato
+      const hr=parseInt(col.slice(1,3),16),hg=parseInt(col.slice(3,5),16),hb=parseInt(col.slice(5,7),16);
+      const pad=1.2;
+      pdf.setFillColor(hr,hg,hb,0.13);
+      // Rettangolo sfondo chip (jsPDF non supporta rgba per fill direttamente, usiamo colore chiaro)
+      const lightR=Math.round(hr*0.15+240*0.85), lightG=Math.round(hg*0.15+245*0.85), lightB=Math.round(hb*0.15+249*0.85);
+      pdf.setFillColor(lightR,lightG,lightB);
+      pdf.setDrawColor(hr,hg,hb);
+      pdf.setLineWidth(0.4);
+      pdf.roundedRect(x+pad, rowY+pad, dayColW-pad*2, rowH-pad*2, 1, 1, 'FD');
+      pdf.setLineWidth(0.1);
+
+      // Testo nome evento
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(6);
+      pdf.setTextColor(30,41,59);
+      const cx=x+dayColW/2;
+      const maxC=Math.floor((dayColW-3)/1.85);
+      const nomStr=nom.length>maxC?nom.slice(0,maxC-1)+'…':nom;
+      if(t){
+        pdf.text(nomStr, cx, rowY+rowH/2-1, {align:'center'});
+        pdf.setFont('helvetica','normal');
+        pdf.setFontSize(5.2);
+        pdf.setTextColor(55,65,81);
+        pdf.text(t, cx, rowY+rowH/2+2.8, {align:'center'});
+      } else {
+        pdf.text(nomStr, cx, rowY+rowH/2+1, {align:'center'});
       }
-      if(pg.rotazione) pg.rotazione = pg.rotazione.filter(id => id !== pid);
-    } else {
-      const dow = getDow(date);
-      if (pg.fissi && pg.fissi[dow]) pg.fissi[dow] = pg.fissi[dow].filter(id => id !== pid);
-    }
-    setManual(pid, date, null);
-    save().catch(e=>console.error(e));
-  }
-  S.removePrompt = null;
-  render();
+    });
+  });
+
+  const blob=pdf.output('blob');
+  if(S._pdfUrl)URL.revokeObjectURL(S._pdfUrl);
+  S._pdfUrl=URL.createObjectURL(blob);
+
+  const iframe=document.getElementById('pdf-iframe');
+  document.getElementById('pdf-title').textContent=`📄 Turni – ${S.cat} – ${fmtWeekLabel()}`;
+  document.getElementById('pdf-print-btn').onclick=()=>iframe.contentWindow&&iframe.contentWindow.print();
+  document.getElementById('pdf-save-btn').onclick=()=>{const a=document.createElement('a');a.href=S._pdfUrl;a.download=`Turni_${S.cat}_${S.weekStart}.pdf`;a.click();};
+
+  iframe.src=S._pdfUrl;
+  document.getElementById('pdf-ui').style.display='block';
 }
 
-async function exportPDF() {
-  const { jsPDF } = window.jspdf;
-  const header = document.getElementById('pdf-header');
-  header.style.display = 'block';
-  const element = document.getElementById('capture-area');
-  const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-  header.style.display = 'none';
-  const imgData = canvas.toDataURL('image/png');
-  const pdf = new jsPDF('l', 'mm', 'a4');
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = pdf.internal.pageSize.getHeight();
-  const imgWidth = canvas.width;
-  const imgHeight = canvas.height;
-  const ratio = Math.min((pdfWidth - 20) / imgWidth, (pdfHeight - 30) / imgHeight);
-  const finalWidth = imgWidth * ratio;
-  const finalHeight = imgHeight * ratio;
-  pdf.addImage(imgData, 'PNG', (pdfWidth - finalWidth) / 2, 15, finalWidth, finalHeight);
+window.closePdfOverlay=function(){
+  document.getElementById('pdf-ui').style.display='none';
+};
 
-  // Mostra anteprima in una nuova finestra con opzione stampa/scarica
-  const pdfBlob = pdf.output('blob');
-  const pdfUrl = URL.createObjectURL(pdfBlob);
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>Anteprima Turni</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{background:#374151;display:flex;flex-direction:column;align-items:center;min-height:100vh;font-family:-apple-system,sans-serif}
-    .toolbar{background:#1e293b;width:100%;padding:10px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
-    .toolbar h2{color:white;font-size:.95rem;margin-right:auto}
-    .tbtn{padding:7px 16px;border-radius:6px;border:none;cursor:pointer;font-size:.85rem;font-weight:600}
-    .tbtn-print{background:#3b82f6;color:white}
-    .tbtn-save{background:#22c55e;color:white}
-    .tbtn-close{background:#475569;color:white}
-    .tbtn:hover{opacity:.85}
-    iframe{margin:16px;border:none;box-shadow:0 4px 24px rgba(0,0,0,.4);border-radius:4px}
-  </style></head><body>
-  <div class="toolbar">
-    <h2>📄 Anteprima Turni – ${S.cat} – ${fmtWeekLabel()}</h2>
-    <button class="tbtn tbtn-print" onclick="document.getElementById('pdfFrame').contentWindow.print()">🖨️ Stampa</button>
-    <button class="tbtn tbtn-save" onclick="window._dl()">⬇️ Scarica PDF</button>
-    <button class="tbtn tbtn-close" onclick="window.close()">✕ Chiudi</button>
-  </div>
-  <iframe id="pdfFrame" src="${pdfUrl}" width="1060" height="780"></iframe>
-  <script>
-    window._dl = function(){
-      const a=document.createElement('a');a.href='${pdfUrl}';
-      a.download='Turni_${S.cat}_${S.weekStart}.pdf';a.click();
-    };
-  <\/script>
-  </body></html>`);
-  win.document.close();
-}
-
+// ── DRAG BINDING ──
 function bindDrag(){
+  // Pill dalla strip
   document.querySelectorAll('.pill[draggable]').forEach(el=>{
     el.addEventListener('dragstart',e=>{
       S.dragging={type:e.currentTarget.dataset.dtype,id:e.currentTarget.dataset.did};
@@ -785,14 +837,31 @@ function bindDrag(){
     });
     el.addEventListener('dragend',()=>{S.dragging=null});
   });
+
+  // ── NUOVO: Chip dalle celle ──
+  document.querySelectorAll('.cell-chip[draggable]').forEach(el=>{
+    el.addEventListener('dragstart',e=>{
+      e.stopPropagation();
+      let cellShift=null;
+      try{ cellShift=JSON.parse(decodeURIComponent(e.currentTarget.dataset.cshift||'')); }catch{}
+      S.dragging={type:'cell',id:null,cellShift};
+      e.currentTarget.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed='copy';
+    });
+    el.addEventListener('dragend',e=>{
+      e.currentTarget.classList.remove('is-dragging');
+      window._wasDragging=true;
+      S.dragging=null;
+      setTimeout(()=>{window._wasDragging=false;},150);
+    });
+  });
 }
 
-// ── INIT ────────────────────────────────────────────────────────────────────
+// ── INIT ──
 (async()=>{
   S.weekStart=getMonday(toISO(new Date()));
-  // Aspetta che Firebase sia pronto prima di caricare i dati
-  if(window._fbReady) await window._fbReady;
-  else await new Promise(r=>setTimeout(r,300)); // fallback attesa minima
+  if(window._fbReady)await window._fbReady;
+  else await new Promise(r=>setTimeout(r,300));
   await load();
   render();
 })();
