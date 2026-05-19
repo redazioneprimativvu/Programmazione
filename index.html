@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it"><head>
 <meta charset="UTF-8">
@@ -85,12 +86,34 @@
   .row { display: grid; grid-template-columns: 18px 50px 1fr 60px 50px; gap: 8px; align-items: center; padding: 4px 8px; font-size: 12.5px; margin-bottom: 2px; border-radius: 3px; background: #ffffff; }
   .row .chip { width: 16px; height: 12px; border-radius: 2px; border: 1px solid rgba(0,0,0,0.2); }
   .row .t { font-weight: 600; }
-  .row .n { overflow: hidden; text-overflow: ellipsis; }
+  .row .n { overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
   .row .d { font-size: 11.5px; color: var(--muted); text-align: right; }
   .row .act { display: flex; gap: 2px; justify-content: flex-end; }
   .row .act button { font: inherit; font-size: 12px; border: none; background: transparent; cursor: pointer; padding: 2px 6px; color: var(--muted); border-radius: 2px; }
   .row .act button.del:hover { background: #c62828; color: #fff; }
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-style: italic; }
+
+  /* ── PALLINO MODIFICA RECENTE ── */
+  .recent-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #e53935;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px rgba(229,57,53,.25);
+    animation: pulse-dot 2s ease-in-out infinite;
+    cursor: default;
+  }
+  @keyframes pulse-dot {
+    0%,100% { box-shadow: 0 0 0 2px rgba(229,57,53,.25); }
+    50%      { box-shadow: 0 0 0 4px rgba(229,57,53,.10); }
+  }
+  /* filtro modificati di recente attivo */
+  .filters button.recent-active {
+    background: #e53935;
+    color: #fff;
+    border-color: #e53935;
+  }
 
   /* Connessione status */
   #sync-status { font-size: 11px; color: #4CAF50; font-weight: bold; margin-bottom: 5px; display: inline-block;}
@@ -108,6 +131,7 @@
     .day-h { font-size: 9pt; padding: 3px 6px; margin: 6px 0 2px; border-left-width: 4px; }
     .row { grid-template-columns: 12px 32px 1fr 38px; gap: 4px; padding: 1px 5px; margin-bottom: 1px; font-size: 8.5pt; }
     .row .act { display: none; }
+    .recent-dot { display: none; }
   }
 </style>
 </head>
@@ -218,12 +242,9 @@
 </div>
 
 <script type="module">
-  // ============================================================
-  // CONFIGURAZIONE FIREBASE & IMPORT SDK MODULARI
-  // ============================================================
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-  import { 
-    getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, writeBatch, getDocs, query, where 
+  import {
+    getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, writeBatch, getDocs, query, where
   } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -239,10 +260,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // ============================================================
-  // VARIABILI DI STATO E DATI
-  // ============================================================
-  let events =[];
+  let events = [];
   let CATEGORIES = {
     prime_visioni: { label: "Prime Visioni", color: "#F9A825" },
     nuovi_film:    { label: "Nuovi Film",    color: "#1976D2" },
@@ -259,63 +277,57 @@
   let viewMode = "list";
   let statsOpen = false;
   let isFirstLoad = true;
+  // ── NUOVO: filtro modificati recenti ──
+  let filterRecent = false;
+  const RECENT_MS = 48 * 60 * 60 * 1000; // 48 ore in millisecondi
 
-  const DAYS_SHORT =["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
-  const DAYS_LONG  =["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
-  const MONTHS =["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-  
+  const DAYS_SHORT = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
+  const DAYS_LONG  = ["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+  const MONTHS     = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+
   const TIME_RANGES = {
     all:       { fn: () => true },
     morning:   { fn: t => { const m = timeToMin(t); return m >= 360 && m < 780; } },
     afternoon: { fn: t => { const m = timeToMin(t); return m >= 780 && m < 1200; } },
     evening:   { fn: t => { const m = timeToMin(t); return m >= 1200 || m < 360; } }
   };
-  
+
   const today = new Date();
   let viewYear = today.getFullYear();
   let viewMonth = today.getMonth();
 
-  // Inizializzazione select mese e anno
   const mSel = document.getElementById("m-sel");
   const ySel = document.getElementById("y-sel");
   MONTHS.forEach((name, i) => { mSel.appendChild(new Option(name, i)); });
   for (let y = viewYear - 5; y <= viewYear + 10; y++) { ySel.appendChild(new Option(y, y)); }
-  
   mSel.value = viewMonth;
   ySel.value = viewYear;
-  
   mSel.addEventListener("change", () => { viewMonth = parseInt(mSel.value, 10); render(); });
-  ySel.addEventListener("change", () => { viewYear = parseInt(ySel.value, 10); render(); });
+  ySel.addEventListener("change", () => { viewYear  = parseInt(ySel.value, 10); render(); });
 
-  // ============================================================
-  // SINCRONIZZAZIONE IN TEMPO REALE CON FIRESTORE
-  // ============================================================
-  
-  // Ascolta le categorie
+  // ── HELPER: è stato modificato nelle ultime 48h? ──
+  function isRecentlyModified(ev) {
+    if (!ev.updatedAt) return false;
+    return (Date.now() - ev.updatedAt) < RECENT_MS;
+  }
+
   onSnapshot(doc(db, "config", "categories"), (docSnap) => {
     if (docSnap.exists() && Object.keys(docSnap.data()).length > 0) {
       CATEGORIES = docSnap.data();
     } else {
-      // Se non esiste, crea il documento di default
       setDoc(doc(db, "config", "categories"), CATEGORIES);
     }
     rebuildCatSelect();
     renderCatPanel();
     render();
-  }, (error) => {
-    console.error("Errore lettura categorie:", error);
-  });
+  }, (error) => { console.error("Errore lettura categorie:", error); });
 
-  // Ascolta gli eventi
   onSnapshot(collection(db, "events"), (snapshot) => {
     const statusEl = document.getElementById("sync-status");
     statusEl.textContent = "● Sincronizzato";
     statusEl.className = "";
-    
-    events =[];
+    events = [];
     snapshot.forEach(doc => { events.push(doc.data()); });
-    
-    // Al primo caricamento, sposta la vista sul mese del primo evento
     if (isFirstLoad && events.length > 0) {
       isFirstLoad = false;
       const first = events.map(e => e.date).sort()[0];
@@ -328,23 +340,19 @@
     render();
   }, (error) => {
     const statusEl = document.getElementById("sync-status");
-    statusEl.textContent = "⚠ Disconnesso o Permesso Negato (Controlla le Regole di Firebase)";
+    statusEl.textContent = "⚠ Disconnesso o Permesso Negato";
     statusEl.className = "offline";
     console.error("Errore lettura eventi:", error);
   });
 
-  // ============================================================
-  // HELPER FUNZIONI
-  // ============================================================
+  // ── HELPERS ──
   function rebuildCatSelect() {
     const selCat = document.getElementById("f-cat");
     const prev = selCat.value;
     selCat.innerHTML = "";
-    Object.entries(CATEGORIES).forEach(([k, c]) => {
-      selCat.appendChild(new Option(c.label, k));
-    });
+    Object.entries(CATEGORIES).forEach(([k, c]) => { selCat.appendChild(new Option(c.label, k)); });
     if (CATEGORIES[prev]) selCat.value = prev;
-    else if(Object.keys(CATEGORIES).length > 0) selCat.value = Object.keys(CATEGORIES)[0];
+    else if (Object.keys(CATEGORIES).length > 0) selCat.value = Object.keys(CATEGORIES)[0];
   }
 
   function parseDuration(str) {
@@ -355,10 +363,7 @@
     const mMatch = s.match(/(\d+)\s*(?:m|min|')/);
     if (hMatch) h = parseInt(hMatch[1], 10) || 0;
     if (mMatch) m = parseInt(mMatch[1], 10) || 0;
-    if (!hMatch && !mMatch) {
-      const onlyNum = s.match(/^(\d+)$/);
-      if (onlyNum) m = parseInt(onlyNum[1], 10) || 0;
-    }
+    if (!hMatch && !mMatch) { const onlyNum = s.match(/^(\d+)$/); if (onlyNum) m = parseInt(onlyNum[1], 10) || 0; }
     return { h, m };
   }
 
@@ -387,58 +392,68 @@
     return events.filter(e => e.date && e.date.startsWith(ymPrefix));
   }
 
-  // ============================================================
-  // RENDER GRAFICO (LISTA E GRIGLIA)
-  // ============================================================
+  // ── RENDER ──
   function render() {
     mSel.value = viewMonth; ySel.value = viewYear;
     const inView = eventsInView();
-    document.getElementById("monthLabel").textContent = MONTHS[viewMonth] + " " + viewYear + " • " + inView.length + " programmi";
+    const recentCount = inView.filter(isRecentlyModified).length;
+    document.getElementById("monthLabel").textContent =
+      MONTHS[viewMonth] + " " + viewYear + " • " + inView.length + " programmi" +
+      (recentCount > 0 ? " • 🔴 " + recentCount + " modif. recenti" : "");
 
-    // Menu Filtri Categorie
+    // Filtri categorie
     const filtersDiv = document.getElementById("filters");
     filtersDiv.innerHTML = "";
     const counts = { tutte: inView.length };
     Object.keys(CATEGORIES).forEach(k => counts[k] = 0);
-    inView.forEach(e => {
-      const k = CATEGORIES[e.category] ? e.category : "nessuna";
-      counts[k]++;
-    });
+    inView.forEach(e => { const k = CATEGORIES[e.category] ? e.category : "nessuna"; counts[k]++; });
 
     const allBtn = document.createElement("button");
-    allBtn.className = filter === "tutte" ? "on" : "";
+    allBtn.className = filter === "tutte" && !filterRecent ? "on" : "";
     allBtn.textContent = "Tutte (" + counts.tutte + ")";
-    allBtn.onclick = () => { filter = "tutte"; render(); };
+    allBtn.onclick = () => { filter = "tutte"; filterRecent = false; render(); };
     filtersDiv.appendChild(allBtn);
 
     Object.entries(CATEGORIES).forEach(([k, c]) => {
       const b = document.createElement("button");
-      b.className = filter === k ? "on" : "";
+      b.className = filter === k && !filterRecent ? "on" : "";
       b.textContent = c.label + " (" + counts[k] + ")";
-      if (filter !== k) b.style.borderColor = c.color;
-      b.onclick = () => { filter = k; render(); };
+      if (filter !== k || filterRecent) b.style.borderColor = c.color;
+      b.onclick = () => { filter = k; filterRecent = false; render(); };
       filtersDiv.appendChild(b);
     });
 
-    let filtered = filter === "tutte" ? inView : inView.filter(e => (CATEGORIES[e.category] ? e.category : "nessuna") === filter);
-    
-    const sq = (searchQuery || "").trim().toLowerCase();
-    if (sq) {
-      filtered = filtered.filter(e => (e.name || "").toLowerCase().includes(sq) || (e.time || "").includes(sq));
+    // ── NUOVO: pulsante "Modificati di recente" ──
+    if (recentCount > 0 || filterRecent) {
+      const rb = document.createElement("button");
+      rb.className = filterRecent ? "recent-active" : "";
+      rb.innerHTML = '🔴 Modificati di recente (' + recentCount + ')';
+      rb.style.borderColor = filterRecent ? "#e53935" : "#e53935";
+      rb.style.color = filterRecent ? "" : "#e53935";
+      rb.onclick = () => { filterRecent = !filterRecent; filter = "tutte"; render(); };
+      filtersDiv.appendChild(rb);
     }
-    if (timeRange !== "all") {
-      filtered = filtered.filter(e => TIME_RANGES[timeRange].fn(e.time));
-    }["all","morning","afternoon","evening"].forEach(tr => {
+
+    let filtered = filter === "tutte" ? inView : inView.filter(e => (CATEGORIES[e.category] ? e.category : "nessuna") === filter);
+    // Applica filtro recenti
+    if (filterRecent) filtered = filtered.filter(isRecentlyModified);
+
+    const sq = (searchQuery || "").trim().toLowerCase();
+    if (sq) filtered = filtered.filter(e => (e.name || "").toLowerCase().includes(sq) || (e.time || "").includes(sq));
+    if (timeRange !== "all") filtered = filtered.filter(e => TIME_RANGES[timeRange].fn(e.time));
+
+    ["all","morning","afternoon","evening"].forEach(tr => {
       const b = document.getElementById("tf-" + tr);
       if (b) b.className = timeRange === tr ? "on" : "";
-    });["list","grid"].forEach(vm => {
+    });
+    ["list","grid"].forEach(vm => {
       const b = document.getElementById("vm-" + vm);
       if (b) b.className = viewMode === vm ? "on" : "";
     });
 
     if (statsOpen) renderStats();
 
-    // Legenda colori
+    // Legenda
     const legend = document.getElementById("legend");
     legend.innerHTML = "";
     Object.entries(CATEGORIES).forEach(([k, c]) => {
@@ -450,28 +465,25 @@
 
     if (viewMode === "grid") { renderGrid(filtered); return; }
 
-    // RENDER LISTA
+    // Lista
     const groups = {};
-    filtered.forEach(e => {
-      if (!groups[e.date]) groups[e.date] =[];
-      groups[e.date].push(e);
-    });
+    filtered.forEach(e => { if (!groups[e.date]) groups[e.date] = []; groups[e.date].push(e); });
     Object.values(groups).forEach(arr => arr.sort((a, b) => a.time.localeCompare(b.time)));
 
     const list = document.getElementById("list");
     list.innerHTML = "";
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-    
+
     for (let d = 1; d <= daysInMonth; d++) {
       const dateKey = viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
-      const items = groups[dateKey] ||[];
+      const items = groups[dateKey] || [];
       const dt = new Date(viewYear, viewMonth, d);
       const dayName = DAYS_LONG[dt.getDay()];
       const dateLabel = dayName + " " + String(d).padStart(2, "0") + "/" + String(viewMonth + 1).padStart(2, "0") + "/" + viewYear;
 
       const dayDiv = document.createElement("div");
       dayDiv.className = "day" + (items.length === 0 ? " empty-day" : "");
-      
+
       const h = document.createElement("div");
       h.className = "day-h"; h.textContent = dateLabel;
       dayDiv.appendChild(h);
@@ -490,15 +502,12 @@
         const { h: dh, m: dm } = parseDuration(items[i].duration);
         const aEnd = timeToMin(items[i].time) + dh * 60 + dm;
         const bStart = timeToMin(items[i + 1].time);
-        if (aEnd > 0 && bStart >= 0 && aEnd > bStart) {
-          overlapIds.add(items[i].id);
-          overlapIds.add(items[i + 1].id);
-        }
+        if (aEnd > 0 && bStart >= 0 && aEnd > bStart) { overlapIds.add(items[i].id); overlapIds.add(items[i + 1].id); }
       }
 
       items.forEach(ev => {
         const catKey = CATEGORIES[ev.category] ? ev.category : "nessuna";
-        const cat = CATEGORIES[catKey] || {color:"#ccc", label:"?"};
+        const cat = CATEGORIES[catKey] || { color: "#ccc", label: "?" };
         const row = document.createElement("div");
         row.className = "row" + (overlapIds.has(ev.id) ? " has-overlap" : "");
 
@@ -511,7 +520,21 @@
         row.appendChild(t);
 
         const n = document.createElement("div");
-        n.className = "n"; n.textContent = ev.name;
+        n.className = "n";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = ev.name;
+        n.appendChild(nameSpan);
+
+        // ── NUOVO: pallino rosso se modificato di recente ──
+        if (isRecentlyModified(ev)) {
+          const dot = document.createElement("span");
+          dot.className = "recent-dot no-print";
+          // Calcola quante ore fa è stata fatta la modifica
+          const hoursAgo = Math.round((Date.now() - ev.updatedAt) / (1000 * 60 * 60));
+          dot.title = "Modificato " + (hoursAgo < 1 ? "meno di 1 ora fa" : hoursAgo + "h fa");
+          n.appendChild(dot);
+        }
+
         if (overlapIds.has(ev.id)) {
           const badge = document.createElement("span");
           badge.className = "overlap-badge no-print"; badge.textContent = "⚠ sovrapposizione";
@@ -526,7 +549,7 @@
         const act = document.createElement("div");
         act.className = "act no-print";
         const editBtn = document.createElement("button"); editBtn.textContent = "✎"; editBtn.onclick = () => window.editEvent(ev.id);
-        const delBtn = document.createElement("button"); delBtn.textContent = "×"; delBtn.className = "del"; delBtn.onclick = () => window.deleteEvent(ev.id);
+        const delBtn  = document.createElement("button"); delBtn.textContent  = "×"; delBtn.className = "del"; delBtn.onclick = () => window.deleteEvent(ev.id);
         act.appendChild(editBtn); act.appendChild(delBtn);
         row.appendChild(act);
         dayDiv.appendChild(row);
@@ -535,37 +558,32 @@
     }
   }
 
-  // ============================================================
-  // GESTIONE GRIGLIA
-  // ============================================================
+  // ── GRIGLIA ──
   function renderGrid(filtered) {
     const list = document.getElementById("list");
     list.innerHTML = "";
     const groups = {};
-    filtered.forEach(e => {
-      if (!groups[e.date]) groups[e.date] = [];
-      groups[e.date].push(e);
-    });
+    filtered.forEach(e => { if (!groups[e.date]) groups[e.date] = []; groups[e.date].push(e); });
     Object.values(groups).forEach(arr => arr.sort((a, b) => a.time.localeCompare(b.time)));
 
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     let hasAny = false;
     for (let d = 1; d <= daysInMonth; d++) {
       const dateKey = viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
-      const items = groups[dateKey] ||[];
+      const items = groups[dateKey] || [];
       if (items.length === 0) continue;
       hasAny = true;
       const dt = new Date(viewYear, viewMonth, d);
       const dayDiv = document.createElement("div");
       dayDiv.className = "grid-day";
-
       const header = document.createElement("div");
       header.className = "grid-day-header";
       header.textContent = DAYS_SHORT[dt.getDay()] + " " + String(d).padStart(2, "0") + "/" + String(viewMonth + 1).padStart(2, "0");
       dayDiv.appendChild(header);
 
       const timeline = document.createElement("div");
-      timeline.className = "grid-timeline";[0, 4, 8, 12, 16, 20].forEach(h => {
+      timeline.className = "grid-timeline";
+      [0, 4, 8, 12, 16, 20].forEach(h => {
         const tick = document.createElement("div"); tick.className = "grid-tick"; tick.style.left = (h / 24 * 100) + "%";
         timeline.appendChild(tick);
       });
@@ -578,13 +596,15 @@
         const block = document.createElement("div");
         block.className = "grid-block";
         const catKey = CATEGORIES[ev.category] ? ev.category : "nessuna";
-        const cat = CATEGORIES[catKey] || {color:"#ccc"};
+        const cat = CATEGORIES[catKey] || { color: "#ccc" };
         block.style.background = cat.color;
-        block.style.left = (startMin / 1440 * 100) + "%";
+        block.style.left  = (startMin / 1440 * 100) + "%";
         block.style.width = Math.max(durMin > 0 ? durMin / 1440 * 100 : 0.4, 0.4) + "%";
         block.style.color = isLightColor(cat.color) ? "#111" : "#fff";
         block.textContent = ev.name;
-        block.title = ev.time + " — " + ev.name + (ev.duration ? " (" + ev.duration + ")" : "");
+        block.title = ev.time + " — " + ev.name + (ev.duration ? " (" + ev.duration + ")" : "") + (isRecentlyModified(ev) ? " 🔴 modificato di recente" : "");
+        // Piccolo bordo rosso per i recenti anche in griglia
+        if (isRecentlyModified(ev)) block.style.outline = "2px solid #e53935";
         timeline.appendChild(block);
       });
       dayDiv.appendChild(timeline);
@@ -593,23 +613,16 @@
     if (!hasAny) list.innerHTML = '<div class="empty">Nessun programma trovato.</div>';
   }
 
-  // ============================================================
-  // STATISTICHE E GESTIONE PANNELLI
-  // ============================================================
+  // ── STATISTICHE ──
   function renderStats() {
     const panel = document.getElementById("stats-panel");
     const inView = eventsInView();
     let totalMin = 0;
     inView.forEach(e => { const { h, m } = parseDuration(e.duration); totalMin += h * 60 + m; });
     const totalH = Math.floor(totalMin / 60); const totalM = totalMin % 60;
-
     const catMin = {};
     Object.keys(CATEGORIES).forEach(k => catMin[k] = 0);
-    inView.forEach(e => {
-      const k = CATEGORIES[e.category] ? e.category : "nessuna";
-      const { h, m } = parseDuration(e.duration);
-      catMin[k] = (catMin[k] || 0) + h * 60 + m;
-    });
+    inView.forEach(e => { const k = CATEGORIES[e.category] ? e.category : "nessuna"; const { h, m } = parseDuration(e.duration); catMin[k] = (catMin[k] || 0) + h * 60 + m; });
 
     let html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
     html += '<span style="font-weight:700;color:var(--muted);text-transform:uppercase;">Statistiche — ' + MONTHS[viewMonth] + ' ' + viewYear + '</span>';
@@ -617,18 +630,20 @@
     html += '<div class="stats-grid">';
     html += '<div class="stats-card"><div class="val">' + inView.length + '</div><div class="lbl">Programmi nel mese</div></div>';
     html += '<div class="stats-card"><div class="val">' + totalH + 'h' + (totalM > 0 ? ' ' + totalM + 'm' : '') + '</div><div class="lbl">Ore programmate</div></div>';
+    const recentCount = inView.filter(isRecentlyModified).length;
+    html += '<div class="stats-card"><div class="val" style="color:#e53935">' + recentCount + '</div><div class="lbl">Modificati ultime 48h</div></div>';
     html += '</div>';
 
     const maxMin = Math.max(...Object.values(catMin).filter(v => v > 0), 1);
     Object.entries(CATEGORIES).sort((a, b) => (catMin[b[0]] || 0) - (catMin[a[0]] || 0)).forEach(([k, c]) => {
-        const min = catMin[k] || 0;
-        const ch = Math.floor(min / 60); const cm = min % 60;
-        const pct = (min / maxMin * 100).toFixed(0);
-        const lbl = ch > 0 ? ch + "h" + (cm > 0 ? " " + cm + "m" : "") : (cm > 0 ? cm + "m" : "—");
-        html += '<div class="stats-cat-bar">';
-        html += '<span style="width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + c.label + '</span>';
-        html += '<div class="stats-bar-bg"><div class="stats-bar-fill" style="width:' + pct + '%;background:' + c.color + '"></div></div>';
-        html += '<span style="width:55px;text-align:right;">' + lbl + '</span></div>';
+      const min = catMin[k] || 0;
+      const ch = Math.floor(min / 60); const cm = min % 60;
+      const pct = (min / maxMin * 100).toFixed(0);
+      const lbl = ch > 0 ? ch + "h" + (cm > 0 ? " " + cm + "m" : "") : (cm > 0 ? cm + "m" : "—");
+      html += '<div class="stats-cat-bar">';
+      html += '<span style="width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + c.label + '</span>';
+      html += '<div class="stats-bar-bg"><div class="stats-bar-fill" style="width:' + pct + '%;background:' + c.color + '"></div></div>';
+      html += '<span style="width:55px;text-align:right;">' + lbl + '</span></div>';
     });
     panel.innerHTML = html;
   }
@@ -640,49 +655,42 @@
       const row = document.createElement("div"); row.className = "cat-row";
       const colorPick = document.createElement("input"); colorPick.type = "color"; colorPick.value = c.color; colorPick.className = "cat-color-pick";
       colorPick.addEventListener("input", () => { CATEGORIES[k].color = colorPick.value; setDoc(doc(db, "config", "categories"), CATEGORIES); });
-
       const nameInput = document.createElement("input"); nameInput.type = "text"; nameInput.className = "cat-name-edit"; nameInput.value = c.label;
-      nameInput.addEventListener("change", () => {
-        if (nameInput.value.trim()) { CATEGORIES[k].label = nameInput.value.trim(); setDoc(doc(db, "config", "categories"), CATEGORIES); }
-      });
-
+      nameInput.addEventListener("change", () => { if (nameInput.value.trim()) { CATEGORIES[k].label = nameInput.value.trim(); setDoc(doc(db, "config", "categories"), CATEGORIES); } });
       const delBtn = document.createElement("button"); delBtn.className = "cat-del"; delBtn.textContent = "×";
-      delBtn.addEventListener("click", () => {
-        if (Object.keys(CATEGORIES).length <= 1) return alert("Deve esserci almeno una categoria.");
-        if (confirm("Eliminare \"" + c.label + "\"?")) { delete CATEGORIES[k]; setDoc(doc(db, "config", "categories"), CATEGORIES); }
-      });
-
+      delBtn.addEventListener("click", () => { if (Object.keys(CATEGORIES).length <= 1) return alert("Deve esserci almeno una categoria."); if (confirm('Eliminare "' + c.label + '"?')) { delete CATEGORIES[k]; setDoc(doc(db, "config", "categories"), CATEGORIES); } });
       row.appendChild(colorPick); row.appendChild(nameInput); row.appendChild(delBtn);
       list.appendChild(row);
     });
   }
 
-  // ============================================================
-  // FUNZIONI CRUD SU FIRESTORE
-  // ============================================================
+  // ── CRUD ──
+
+  // ── NUOVO: submitForm salva updatedAt solo in caso di modifica (editingId) ──
   window.submitForm = async function() {
-    const date = document.getElementById("f-date").value;
-    const time = document.getElementById("f-time").value;
-    const name = document.getElementById("f-name").value.trim();
-    const dh = document.getElementById("f-dur-h").value;
-    const dm = document.getElementById("f-dur-m").value;
+    const date     = document.getElementById("f-date").value;
+    const time     = document.getElementById("f-time").value;
+    const name     = document.getElementById("f-name").value.trim();
+    const dh       = document.getElementById("f-dur-h").value;
+    const dm       = document.getElementById("f-dur-m").value;
     const duration = formatDuration(dh, dm);
     const category = document.getElementById("f-cat").value;
 
     if (!date || !time || !name) return alert("Compila almeno data, orario e nome.");
-    
-    const selectedDows = getSelectedDows();
-    const[yy, mm, dd] = date.split("-").map(Number);
 
+    const selectedDows = getSelectedDows();
+    const [yy, mm, dd] = date.split("-").map(Number);
     const batch = writeBatch(db);
-    
-    if (editingId) {
-      batch.delete(doc(db, "events", editingId));
-    }
+    const isEdit = !!editingId;
+
+    if (editingId) batch.delete(doc(db, "events", editingId));
 
     if (selectedDows.length === 0) {
       const eId = editingId || ("e" + Date.now() + Math.random().toString(36).slice(2, 5));
-      batch.set(doc(db, "events", eId), { id: eId, date, time, name, duration, category });
+      const evData = { id: eId, date, time, name, duration, category };
+      // ── NUOVO: segna il timestamp di modifica solo se si sta modificando ──
+      if (isEdit) evData.updatedAt = Date.now();
+      batch.set(doc(db, "events", eId), evData);
     } else {
       const daysInMonth = new Date(yy, mm, 0).getDate();
       for (let d = dd; d <= daysInMonth; d++) {
@@ -690,10 +698,13 @@
         if (!selectedDows.includes(dt.getDay())) continue;
         const isoDate = yy + "-" + String(mm).padStart(2, "0") + "-" + String(d).padStart(2, "0");
         const eId = "e" + Date.now() + Math.random().toString(36).slice(2, 5) + "_" + d;
-        batch.set(doc(db, "events", eId), { id: eId, date: isoDate, time, name, duration, category });
+        const evData = { id: eId, date: isoDate, time, name, duration, category };
+        // Modifica su più giorni: marca tutti come modificati
+        if (isEdit) evData.updatedAt = Date.now();
+        batch.set(doc(db, "events", eId), evData);
       }
     }
-    
+
     await batch.commit();
     viewYear = yy; viewMonth = mm - 1;
     window.resetForm();
@@ -706,9 +717,9 @@
   };
 
   window.clearAll = async function() {
-    if (!confirm("Sei sicuro di voler eliminare TUTTI I PROGRAMMI DEL MESE VISIBILE dal database Cloud? Operazione irreversibile.")) return;
+    if (!confirm("Sei sicuro di voler eliminare TUTTI I PROGRAMMI DEL MESE VISIBILE? Operazione irreversibile.")) return;
     const inView = eventsInView();
-    if(inView.length === 0) return;
+    if (inView.length === 0) return;
     const batch = writeBatch(db);
     inView.forEach(ev => batch.delete(doc(db, "events", ev.id)));
     await batch.commit();
@@ -718,60 +729,44 @@
   window.copyToNextMonth = async function() {
     const evts = eventsInView();
     if (evts.length === 0) return alert("Nessun programma nel mese corrente da copiare.");
-    
     const nextMonth = viewMonth === 11 ? 0 : viewMonth + 1;
     const nextYear  = viewMonth === 11 ? viewYear + 1 : viewYear;
     const nextPrefix = nextYear + "-" + String(nextMonth + 1).padStart(2, "0");
-    const existing  = events.filter(e => e.date && e.date.startsWith(nextPrefix));
-
+    const existing   = events.filter(e => e.date && e.date.startsWith(nextPrefix));
     const batch = writeBatch(db);
     let copied = 0, skipped = 0;
     const daysInNext = new Date(nextYear, nextMonth + 1, 0).getDate();
-
     function weekOccurrence(y, m, d) {
       const wd = new Date(y, m - 1, d).getDay();
       let first = 1; while (new Date(y, m - 1, first).getDay() !== wd) first++;
       return Math.round((d - first) / 7) + 1;
     }
-
     evts.forEach(ev => {
       const [yy, mm, dd] = ev.date.split("-").map(Number);
       const wd  = new Date(yy, mm - 1, dd).getDay();
       const occ = weekOccurrence(yy, mm, dd);
-
       let count = 0, targetDay = null;
       for (let d = 1; d <= daysInNext; d++) {
-        if (new Date(nextYear, nextMonth, d).getDay() === wd) {
-          count++; if (count === occ) { targetDay = d; break; }
-        }
+        if (new Date(nextYear, nextMonth, d).getDay() === wd) { count++; if (count === occ) { targetDay = d; break; } }
       }
       if (!targetDay) { skipped++; return; }
-
       const targetDate = nextYear + "-" + String(nextMonth + 1).padStart(2, "0") + "-" + String(targetDay).padStart(2, "0");
       if (existing.some(e => e.date === targetDate && e.time === ev.time && e.name === ev.name)) { skipped++; return; }
-
       const eId = "e" + Date.now() + Math.random().toString(36).slice(2, 5) + "_cp" + targetDay;
+      // Copia senza updatedAt → non appare come "modificato"
       batch.set(doc(db, "events", eId), { id: eId, date: targetDate, time: ev.time, name: ev.name, duration: ev.duration, category: ev.category });
       copied++;
     });
-
-    if (copied > 0) {
-      await batch.commit();
-      viewYear = nextYear; viewMonth = nextMonth;
-      alert(`${copied} programmi copiati in ${MONTHS[nextMonth]} ${nextYear}.`);
-    } else {
-      alert("Nessun programma copiato (forse esistono già tutti o non c'è corrispondenza nel calendario).");
-    }
+    if (copied > 0) { await batch.commit(); viewYear = nextYear; viewMonth = nextMonth; alert(copied + " programmi copiati in " + MONTHS[nextMonth] + " " + nextYear + "."); }
+    else alert("Nessun programma copiato.");
   };
 
-  // ============================================================
-  // FUNZIONI UI / GLOBALI
-  // ============================================================
+  // ── UI ──
   window.editEvent = function(id) {
     const ev = events.find(e => e.id === id);
     if (!ev) return;
     editingId = id;
-    document.getElementById("f-cat").value = CATEGORIES[ev.category] ? ev.category : "nessuna";
+    document.getElementById("f-cat").value  = CATEGORIES[ev.category] ? ev.category : "nessuna";
     document.getElementById("f-date").value = ev.date;
     document.getElementById("f-time").value = ev.time;
     document.getElementById("f-name").value = ev.name;
@@ -786,9 +781,9 @@
 
   window.resetForm = function() {
     editingId = null;
-    document.getElementById("f-date").value = "";
-    document.getElementById("f-time").value = "";
-    document.getElementById("f-name").value = "";
+    document.getElementById("f-date").value  = "";
+    document.getElementById("f-time").value  = "";
+    document.getElementById("f-name").value  = "";
     document.getElementById("f-dur-h").value = "";
     document.getElementById("f-dur-m").value = "";
     document.getElementById("f-preset").value = "single";
@@ -810,60 +805,56 @@
 
   window.toggleCatPanel = function() {
     const panel = document.getElementById("cat-panel");
-    if (panel.style.display !== "none") { panel.style.display = "none"; }
+    if (panel.style.display !== "none") panel.style.display = "none";
     else { panel.style.display = "block"; renderCatPanel(); }
   };
 
-  window.toggleStats = function() { statsOpen = !statsOpen; document.getElementById("stats-panel").style.display = statsOpen ? "block" : "none"; if(statsOpen) renderStats(); };
-  window.setTimeRange = function(tr) { timeRange = tr; render(); };
-  window.setViewMode = function(vm) { viewMode = vm; render(); };
-  window.printPDF = function() { window.print(); };
-  
-  // Barra ricerca e Ricorrenza UI
-  document.getElementById("f-search").addEventListener("input", (e) => { searchQuery = e.target.value; render(); });["f-name", "f-dur-h", "f-dur-m"].forEach(id => { document.getElementById(id).addEventListener("keydown", (e) => { if (e.key === "Enter") window.submitForm(); }); });
+  window.toggleStats   = function() { statsOpen = !statsOpen; document.getElementById("stats-panel").style.display = statsOpen ? "block" : "none"; if (statsOpen) renderStats(); };
+  window.setTimeRange  = function(tr) { timeRange = tr; render(); };
+  window.setViewMode   = function(vm) { viewMode  = vm; render(); };
+  window.printPDF      = function() { window.print(); };
 
-  const PRESETS = { single: [], every: [1,2,3,4,5,6,0], no_sun: [1,2,3,4,5,6], weekdays:[1,2,3,4,5] };
+  document.getElementById("f-search").addEventListener("input", (e) => { searchQuery = e.target.value; render(); });
+  ["f-name","f-dur-h","f-dur-m"].forEach(id => { document.getElementById(id).addEventListener("keydown", (e) => { if (e.key === "Enter") window.submitForm(); }); });
+
+  const PRESETS = { single: [], every: [1,2,3,4,5,6,0], no_sun: [1,2,3,4,5,6], weekdays: [1,2,3,4,5] };
   function getSelectedDows() { return Array.from(document.querySelectorAll("#f-dow button.on")).map(b => parseInt(b.dataset.dow, 10)); }
   function setSelectedDows(dows) {
     document.querySelectorAll("#f-dow button").forEach(b => b.classList.toggle("on", dows.includes(parseInt(b.dataset.dow, 10))));
-    const names =[1,2,3,4,5,6,0].filter(d => dows.includes(d)).map(d => DAYS_SHORT[d]);
-    document.getElementById("f-hint").textContent = dows.length === 0 ? "Solo questo giorno" : (dows.length===7 ? "Tutti i giorni del mese" : "Ogni " + names.join(", ") + " dal giorno scelto");
+    const names = [1,2,3,4,5,6,0].filter(d => dows.includes(d)).map(d => DAYS_SHORT[d]);
+    document.getElementById("f-hint").textContent = dows.length === 0 ? "Solo questo giorno" : (dows.length === 7 ? "Tutti i giorni del mese" : "Ogni " + names.join(", ") + " dal giorno scelto");
   }
   document.querySelectorAll("#f-dow button").forEach(btn => {
     btn.addEventListener("click", () => { btn.classList.toggle("on"); document.getElementById("f-preset").value = "custom"; setSelectedDows(getSelectedDows()); });
   });
   document.getElementById("f-preset").addEventListener("change", (e) => {
     const p = e.target.value;
-    if (p === "same_dow") {
-      const dt = document.getElementById("f-date").value;
-      setSelectedDows(dt ?[new Date(dt).getDay()] : []);
-    } else if(PRESETS[p]) setSelectedDows(PRESETS[p]);
+    if (p === "same_dow") { const dt = document.getElementById("f-date").value; setSelectedDows(dt ? [new Date(dt).getDay()] : []); }
+    else if (PRESETS[p]) setSelectedDows(PRESETS[p]);
   });
 
-  // ============================================================
-  // BACKUP, ESPORTAZIONE E IMPORTAZIONE
-  // ============================================================
+  // ── BACKUP / EXPORT / IMPORT ──
   window.downloadBackup = function() {
-    const data = { events: events, categories: CATEGORIES };
+    const data = { events, categories: CATEGORIES };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `backup_programmazione_${new Date().toISOString().slice(0,10)}.json`;
+    a.download = "backup_programmazione_" + new Date().toISOString().slice(0,10) + ".json";
     a.click();
   };
 
   window.exportCSV = function() {
     const inView = eventsInView();
     if (inView.length === 0) return alert("Nessun programma.");
-    const rows = [["Data", "Giorno", "Orario", "Nome programma", "Durata", "Categoria"]];
+    const rows = [["Data","Giorno","Orario","Nome programma","Durata","Categoria","Modificato di recente"]];
     inView.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)).forEach(e => {
       const [yy, mm, dd] = e.date.split("-");
-      rows.push([`${dd}/${mm}/${yy}`, DAYS_LONG[new Date(e.date).getDay()], e.time, e.name, e.duration || "", (CATEGORIES[e.category]||{label:"Nessuna"}).label]);
+      rows.push([dd+"/"+mm+"/"+yy, DAYS_LONG[new Date(e.date).getDay()], e.time, e.name, e.duration || "", (CATEGORIES[e.category]||{label:"Nessuna"}).label, isRecentlyModified(e) ? "Sì" : ""]);
     });
     const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(",")).join("\r\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
-    a.download = `programmazione_${MONTHS[viewMonth]}_${viewYear}.csv`;
+    a.download = "programmazione_" + MONTHS[viewMonth] + "_" + viewYear + ".csv";
     a.click();
   };
 
@@ -874,36 +865,27 @@
     const reader = new FileReader();
     reader.onload = async function(ev) {
       try {
-        let importedEvents =[];
+        let importedEvents = [];
         if (file.name.endsWith(".json")) {
-           const parsed = JSON.parse(ev.target.result);
-           importedEvents = parsed.events || parsed;
+          const parsed = JSON.parse(ev.target.result);
+          importedEvents = parsed.events || parsed;
         } else {
-           const match = ev.target.result.match(/<script[^>]*id="events-data"[^>]*>([\s\S]*?)<\/script>/);
-           if (!match) return alert("Nessun dato trovato nel file HTML.");
-           importedEvents = JSON.parse(match[1].trim());
+          const match = ev.target.result.match(/<script[^>]*id="events-data"[^>]*>([\s\S]*?)<\/script>/);
+          if (!match) return alert("Nessun dato trovato nel file HTML.");
+          importedEvents = JSON.parse(match[1].trim());
         }
-        
-        if (!confirm(`Trovati ${importedEvents.length} eventi nel file. Procedo all'importazione su Firebase? (ci vorrà qualche secondo)`)) return;
-        
+        if (!confirm("Trovati " + importedEvents.length + " eventi nel file. Procedo all'importazione?")) return;
         const statusEl = document.getElementById("sync-status");
         statusEl.textContent = "Sincronizzazione massiva in corso...";
-        
-        // Firestore limita i batch a 500 operazioni
-        let batch = writeBatch(db);
-        let count = 0;
-        for (let i=0; i<importedEvents.length; i++) {
-            const evData = importedEvents[i];
-            batch.set(doc(db, "events", evData.id), evData);
-            count++;
-            if (count === 490) {
-               await batch.commit();
-               batch = writeBatch(db);
-               count = 0;
-            }
+        let batch = writeBatch(db); let count = 0;
+        for (let i = 0; i < importedEvents.length; i++) {
+          const evData = importedEvents[i];
+          batch.set(doc(db, "events", evData.id), evData);
+          count++;
+          if (count === 490) { await batch.commit(); batch = writeBatch(db); count = 0; }
         }
         if (count > 0) await batch.commit();
-        alert("Importazione su Firebase completata!");
+        alert("Importazione completata!");
       } catch (err) { alert("Errore importazione: " + err.message); }
     };
     reader.readAsText(file);
