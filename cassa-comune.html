@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -36,12 +37,18 @@
   /* BALANCE */
   .balance-card { background:linear-gradient(135deg,var(--gold-dim),transparent); border:1px solid var(--gold); border-radius:var(--radius); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; }
   .balance-card.trasferte-card { background:linear-gradient(135deg,var(--blue-dim),transparent); border-color:var(--blue); }
+  .balance-card.negative-card  { background:linear-gradient(135deg,var(--red-dim),transparent); border-color:var(--red); }
   .trasferte-card .balance-label, .trasferte-card .balance-amount { color:var(--blue); }
   .balance-label { font-size:11px; font-weight:500; color:var(--gold); text-transform:uppercase; letter-spacing:1px; }
-  .balance-amount { font-family:'DM Serif Display',serif; font-size:30px; color:var(--gold); line-height:1; }
+  .negative-card .balance-label { color:var(--red); }
+  .balance-amount { font-family:'DM Serif Display',serif; font-size:30px; color:var(--gold); line-height:1; transition:color 0.3s; }
+  .balance-amount.negative { color:var(--red) !important; }
   .balance-stats { display:flex; gap:14px; font-size:12px; margin-top:4px; flex-wrap:wrap; }
   .balance-stats .in  { color:var(--green); }
   .balance-stats .out { color:var(--red); }
+  .balance-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .set-cifra-btn { background:var(--surface2); border:1px solid var(--border); color:var(--text-muted); font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; padding:5px 10px; border-radius:999px; cursor:pointer; letter-spacing:0.3px; white-space:nowrap; transition:all 0.2s; }
+  .set-cifra-btn:hover { border-color:var(--gold); color:var(--gold); }
 
   /* MAIN */
   main { padding:20px; }
@@ -130,6 +137,15 @@
   .modal-close { background:var(--surface2); border:1px solid var(--border); color:var(--text); width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; }
   .photo-viewer-img { width:100%; border-radius:10px; display:block; }
 
+  /* MODAL CIFRA */
+  .cifra-modal-body { padding:4px 0 8px; }
+  .cifra-modal-body label { margin-bottom:8px; }
+  .cifra-modal-body input { font-size:22px; font-family:'DM Serif Display',serif; text-align:center; padding:14px; }
+  .cifra-current { font-size:12px; color:var(--text-muted); text-align:center; margin-bottom:16px; }
+  .cifra-current span { color:var(--gold); font-weight:600; }
+  .cifra-confirm-btn { width:100%; padding:14px; background:var(--gold); color:#0f0f0f; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-top:14px; }
+  .cifra-confirm-btn:hover { opacity:0.9; }
+
   /* GALLERY */
   .gallery-filter { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
   .filter-chip { padding:6px 13px; border-radius:999px; border:1px solid var(--border); background:var(--surface2); color:var(--text-muted); font-size:12px; font-weight:500; cursor:pointer; font-family:'DM Sans',sans-serif; }
@@ -169,12 +185,15 @@
   </div>
   <div class="balance-card" id="balance-card">
     <div>
-      <div class="balance-label" id="balance-label">Saldo mensile</div>
+      <div class="balance-label" id="balance-label">Saldo totale</div>
       <div class="balance-stats" id="balance-stats">
-        <span class="out">&#x2193; Uscite mese: <span id="stat-out">&#x20AC;0,00</span></span>
+        <span class="out">&#x2193; Uscite: <span id="stat-out">&#x20AC;0,00</span></span>
       </div>
     </div>
-    <div class="balance-amount" id="balance-display">&#x20AC;200,00</div>
+    <div class="balance-right">
+      <div class="balance-amount" id="balance-display">&#x20AC;0,00</div>
+      <button class="set-cifra-btn" id="set-cifra-btn" onclick="openCifraModal()">&#x270F;&#xFE0F; Inserisci Cifra</button>
+    </div>
   </div>
 </header>
 
@@ -283,6 +302,22 @@
   </div>
 </div>
 
+<!-- Modal inserisci cifra -->
+<div class="modal-overlay" id="cifra-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">&#x270F;&#xFE0F; Inserisci Cifra</div>
+      <button class="modal-close" onclick="closeModal('cifra-modal')">&#x2715;</button>
+    </div>
+    <div class="cifra-modal-body">
+      <div class="cifra-current">Cifra attuale: <span id="cifra-current-val">€0,00</span></div>
+      <label>Nuova cifra di partenza (€)</label>
+      <input type="number" id="inp-cifra" placeholder="0,00" step="0.01" min="0" />
+      <button class="cifra-confirm-btn" onclick="saveCifra()">&#x2713; Conferma</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Firebase Compat SDK -->
@@ -302,9 +337,37 @@ var db = firebase.firestore();
 
 /* ── CONFIG ────────────────────────────────────────────────────────────────── */
 var CASSE = {
-  comune:    {col:"movements", base:200, monthlyReset:true,  tipoToggle:false, label:"💰 Cassa Comune", balLabel:"Saldo mensile"},
-  trasferte: {col:"trasferte", base:0,   monthlyReset:false, tipoToggle:true,  label:"✈️ Trasferte",    balLabel:"Saldo totale"}
+  comune:    {col:"movements",  base:0,    monthlyReset:false, tipoToggle:false, label:"💰 Cassa Comune", balLabel:"Saldo totale"},
+  trasferte: {col:"trasferte",  base:0,    monthlyReset:false, tipoToggle:true,  label:"✈️ Trasferte",    balLabel:"Saldo totale"}
 };
+
+/* ── CIFRA BASE (da Firestore, persistente) ────────────────────────────────── */
+var baseCifra = {comune: 0, trasferte: 0};
+
+function loadCifra(cassa) {
+  return db.collection("config").doc("cifra_"+cassa).get().then(function(doc) {
+    if (doc.exists && typeof doc.data().value === "number") {
+      baseCifra[cassa] = doc.data().value;
+    }
+  }).catch(function(){});
+}
+
+function saveCifra() {
+  var val = parseFloat(document.getElementById("inp-cifra").value);
+  if (isNaN(val) || val < 0) { toast("Inserisci un importo valido", "error"); return; }
+  db.collection("config").doc("cifra_"+currentCassa).set({value: val}).then(function() {
+    baseCifra[currentCassa] = val;
+    updateBalance();
+    closeModal("cifra-modal");
+    toast("Cifra aggiornata ✓", "success");
+  }).catch(function() { toast("Errore nel salvataggio", "error"); });
+}
+
+function openCifraModal() {
+  document.getElementById("cifra-current-val").textContent = fc(baseCifra[currentCassa], true);
+  document.getElementById("inp-cifra").value = baseCifra[currentCassa] || "";
+  document.getElementById("cifra-modal").classList.add("open");
+}
 
 /* ── STATO ─────────────────────────────────────────────────────────────────── */
 var currentCassa  = "comune";
@@ -338,12 +401,13 @@ function switchCassa(c) {
   document.getElementById("sw-comune").className    = "sw-btn"+(c==="comune"?" active-comune":"");
   document.getElementById("sw-trasferte").className = "sw-btn"+(c==="trasferte"?" active-trasferte":"");
   document.getElementById("header-title").textContent = cfg.label;
-  document.getElementById("balance-card").className = "balance-card"+(c==="trasferte"?" trasferte-card":"");
   document.getElementById("balance-label").textContent = cfg.balLabel;
+  // mostra "Inserisci Cifra" solo nella cassa comune
+  document.getElementById("set-cifra-btn").style.display = c==="comune" ? "block" : "none";
   var st = document.getElementById("balance-stats");
   st.innerHTML = c==="trasferte"
     ? '<span class="in">↑ Entrate: <span id="stat-in">€0,00</span></span><span class="out" style="margin-left:12px">↓ Uscite: <span id="stat-out">€0,00</span></span>'
-    : '<span class="out">↓ Uscite mese: <span id="stat-out">€0,00</span></span>';
+    : '<span class="out">↓ Uscite: <span id="stat-out">€0,00</span></span>';
   document.getElementById("tipo-row").style.display = cfg.tipoToggle?"block":"none";
   currentTipo = "out"; activeFilter = "all";
   cancelEdit();
@@ -525,26 +589,64 @@ function renderList(){
 
 /* ── BALANCE ───────────────────────────────────────────────────────────────── */
 function updateBalance(){
-  var cfg=CASSE[currentCassa];
   var sub=mv();
-  if(cfg.monthlyReset){
-    var ym=currentDate?currentDate.slice(0,7):new Date().toISOString().slice(0,7);
-    sub=sub.filter(function(m){return m.date&&m.date.startsWith(ym);});
+  var base = baseCifra[currentCassa] || 0;
+  var bal=base, ti=0, to=0;
+  sub.forEach(function(m){
+    if(m.tipo==="in"){bal+=m.amount;ti+=m.amount;}
+    else{bal-=m.amount;to+=m.amount;}
+  });
+
+  var balEl   = document.getElementById("balance-display");
+  var cardEl  = document.getElementById("balance-card");
+  var labelEl = document.getElementById("balance-label");
+
+  balEl.textContent = fc(bal, true);
+
+  // rosso se sotto zero
+  if (bal < 0) {
+    balEl.classList.add("negative");
+    cardEl.classList.add("negative-card");
+    cardEl.classList.remove("trasferte-card");
+    if (currentCassa === "comune") labelEl.style.color = "var(--red)";
+  } else {
+    balEl.classList.remove("negative");
+    if (currentCassa === "trasferte") {
+      cardEl.classList.add("trasferte-card");
+      cardEl.classList.remove("negative-card");
+    } else {
+      cardEl.classList.remove("negative-card");
+      cardEl.classList.remove("trasferte-card");
+      labelEl.style.color = "";
+    }
   }
-  var bal=cfg.base,ti=0,to=0;
-  sub.forEach(function(m){if(m.tipo==="in"){bal+=m.amount;ti+=m.amount;}else{bal-=m.amount;to+=m.amount;}});
-  document.getElementById("balance-display").textContent=fc(bal,true);
+
   var oe=document.getElementById("stat-out"),ie=document.getElementById("stat-in");
   if(oe)oe.textContent=fc(to,true);
   if(ie)ie.textContent=fc(ti,true);
 }
 
-/* ── FIRESTORE ─────────────────────────────────────────────────────────────── */
+/* ── FIRESTORE LISTENER ────────────────────────────────────────────────────── */
 Object.keys(CASSE).forEach(function(key){
   db.collection(CASSE[key].col).orderBy("date","desc").onSnapshot(function(snap){
     mData[key]=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
     if(currentCassa===key){renderFilterBar();renderList();updateBalance();}
   },function(err){console.error("Firestore ["+key+"]:",err);});
+});
+
+/* ── CARICA CIFRE BASE ─────────────────────────────────────────────────────── */
+Promise.all([loadCifra("comune"), loadCifra("trasferte")]).then(function(){
+  updateBalance();
+});
+
+// Ascolta cambiamenti in tempo reale sulla cifra
+["comune","trasferte"].forEach(function(key){
+  db.collection("config").doc("cifra_"+key).onSnapshot(function(doc){
+    if(doc.exists && typeof doc.data().value === "number"){
+      baseCifra[key] = doc.data().value;
+      if(currentCassa===key) updateBalance();
+    }
+  });
 });
 
 /* ── DATA DA INTERNET ──────────────────────────────────────────────────────── */
