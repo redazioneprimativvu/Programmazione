@@ -822,7 +822,6 @@
   let timeRange = "all";
   let viewMode = "list";
   let statsOpen = false;
-  let isFirstLoad = true;
   let filterRecent = false;
   const RECENT_MS = 48 * 60 * 60 * 1000;
 
@@ -878,19 +877,6 @@
     if (mbStatusEl) { mbStatusEl.textContent = "● Sincronizzato"; mbStatusEl.className = "mb-status"; }
     events = [];
     snapshot.forEach(doc => { events.push(doc.data()); });
-    if (isFirstLoad && events.length > 0) {
-      isFirstLoad = false;
-      const first = events.map(e => e.date).sort()[0];
-      if (first) {
-        const [yy, mm] = first.split("-").map(Number);
-        viewYear = yy; viewMonth = mm - 1;
-        mSel.value = viewMonth; ySel.value = viewYear;
-        const mbM = document.getElementById("mb-m-sel");
-        const mbY = document.getElementById("mb-y-sel");
-        if (mbM) mbM.value = viewMonth;
-        if (mbY) mbY.value = viewYear;
-      }
-    }
     render();
   }, (error) => {
     const statusEl = document.getElementById("sync-status");
