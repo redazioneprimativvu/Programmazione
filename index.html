@@ -66,7 +66,6 @@
   .stats-cat-bar { display: flex; align-items: center; gap: 8px; margin-top: 5px; font-size: 11px; }
   .stats-bar-bg { flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
   .stats-bar-fill { height: 100%; border-radius: 4px; }
-  @media (max-width: 680px) { .form { grid-template-columns: 1fr 1fr; } .form > div:last-child { grid-column: 1 / -1; } .recurrence { gap: 6px; } }
   .form select, .form input { font: inherit; font-size: 13px; padding: 5px 7px; border: 1px solid #ccc; border-radius: 3px; background: #fff; width: 100%; }
   .form .dur-wrap { display: contents; }
   .form .dur-box { position: relative; }
@@ -92,32 +91,233 @@
   .row .act button { font: inherit; font-size: 12px; border: none; background: transparent; cursor: pointer; padding: 2px 6px; color: var(--muted); border-radius: 2px; }
   .row .act button.del:hover { background: #c62828; color: #fff; }
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-style: italic; }
-
-  /* ── PALLINO MODIFICA RECENTE ── */
-  .recent-dot {
-    display: inline-block;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #e53935;
-    flex-shrink: 0;
-    box-shadow: 0 0 0 2px rgba(229,57,53,.25);
-    animation: pulse-dot 2s ease-in-out infinite;
-    cursor: default;
-  }
-  @keyframes pulse-dot {
-    0%,100% { box-shadow: 0 0 0 2px rgba(229,57,53,.25); }
-    50%      { box-shadow: 0 0 0 4px rgba(229,57,53,.10); }
-  }
-  /* filtro modificati di recente attivo */
-  .filters button.recent-active {
-    background: #e53935;
-    color: #fff;
-    border-color: #e53935;
-  }
-
-  /* Connessione status */
+  .recent-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #e53935; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(229,57,53,.25); animation: pulse-dot 2s ease-in-out infinite; cursor: default; }
+  @keyframes pulse-dot { 0%,100% { box-shadow: 0 0 0 2px rgba(229,57,53,.25); } 50% { box-shadow: 0 0 0 4px rgba(229,57,53,.10); } }
+  .filters button.recent-active { background: #e53935; color: #fff; border-color: #e53935; }
   #sync-status { font-size: 11px; color: #4CAF50; font-weight: bold; margin-bottom: 5px; display: inline-block;}
   .offline { color: #F44336 !important; }
+
+  /* ═══════════════════════════════════════════════
+     OVERFLOW MENU (desktop)
+  ═══════════════════════════════════════════════ */
+  .overflow-wrap { position: relative; display: inline-block; }
+  .overflow-trigger { font: inherit; font-size: 12px; padding: 5px 10px; border: 1px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; border-radius: 3px; }
+  .overflow-trigger:hover { background: var(--ink); color: var(--paper); }
+  .overflow-menu { display: none; position: absolute; right: 0; top: calc(100% + 4px); background: var(--paper); border: 1px solid #ccc; border-radius: 6px; min-width: 180px; z-index: 200; box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 4px; }
+  .overflow-menu.open { display: block; }
+  .overflow-item { display: flex; align-items: center; gap: 8px; width: 100%; font: inherit; font-size: 12px; padding: 7px 12px; border: none; background: transparent; color: var(--ink); cursor: pointer; border-radius: 4px; text-align: left; }
+  .overflow-item:hover { background: var(--bg); }
+  .overflow-item.danger { color: #c62828; }
+  .overflow-item.danger:hover { background: #fde8e8; }
+
+  /* ═══════════════════════════════════════════════
+     MOBILE — drawer
+  ═══════════════════════════════════════════════ */
+  /* Nascosti di default (desktop) */
+  .mobile-topbar { display: none; }
+  .mb-drawer { display: none; }
+  .mb-drawer-overlay { display: none; }
+
+  @media (max-width: 680px) {
+    /* Nascondi elementi desktop nella sticky */
+    .sticky { padding-top: 0; padding-bottom: 0; border-bottom: none; margin-bottom: 0; }
+    .top { display: none; }
+    .form { display: none; }
+    .recurrence { display: none; }
+    .filter-row { display: none; }
+    .legend-row { display: none; }
+    .cat-panel { display: none !important; }
+    .stats-panel { display: none !important; }
+    .search-bar { display: none; }
+
+    /* Mostra elementi mobile */
+    .mb-drawer { display: block; }
+
+    /* Barra mobile fissa */
+    .mobile-topbar {
+      display: block;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+    }
+    .mb-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px 8px;
+    }
+    .mb-title-group {}
+    .mb-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+    .mb-status { font-size: 10px; color: #4CAF50; font-weight: 600; }
+    .mb-month { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .mb-controls { display: flex; gap: 6px; align-items: center; }
+    .mb-icon-btn {
+      width: 36px; height: 36px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: var(--paper);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--ink); font-size: 18px;
+      flex-shrink: 0;
+    }
+    .mb-icon-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+    /* Filtri orizzontali scorrevoli */
+    .mb-filters {
+      display: flex;
+      gap: 5px;
+      padding: 0 14px 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .mb-filters::-webkit-scrollbar { display: none; }
+    .mb-filter-chip {
+      flex-shrink: 0;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      background: var(--paper);
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .mb-filter-chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .mb-filter-chip.recent-chip { border-color: #e53935; color: #e53935; }
+    .mb-filter-chip.recent-chip.on { background: #e53935; color: #fff; border-color: #e53935; }
+
+    /* Drawer overlay */
+    .mb-drawer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 90;
+    }
+    .mb-drawer-overlay.open { display: block; }
+
+    /* Drawer panel */
+    .mb-drawer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 95;
+      background: var(--bg);
+      border-top: 1px solid var(--line);
+      border-radius: 14px 14px 0 0;
+      padding: 14px 14px 32px;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .mb-drawer.open { transform: translateY(0); }
+
+    .mb-drawer-handle {
+      width: 36px; height: 4px;
+      background: #ccc;
+      border-radius: 2px;
+      margin: 0 auto 14px;
+    }
+
+    .mb-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    /* Form nel drawer */
+    .mb-form { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .mb-form input, .mb-form select {
+      font: inherit;
+      font-size: 14px;
+      padding: 9px 11px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      width: 100%;
+    }
+    .mb-form-row { display: flex; gap: 8px; }
+    .mb-form-row input, .mb-form-row select { flex: 1; }
+    .mb-save-btn {
+      width: 100%;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px;
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .mb-cancel-btn {
+      width: 100%;
+      font: inherit;
+      font-size: 13px;
+      padding: 8px;
+      background: transparent;
+      border: 1px solid #ccc;
+      color: var(--muted);
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 4px;
+      display: none;
+    }
+
+    /* Azioni drawer */
+    .mb-drawer-sep { height: 1px; background: var(--line); margin: 14px 0; }
+    .mb-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .mb-action-btn {
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .mb-action-btn:hover { background: var(--bg); }
+    .mb-action-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .mb-action-btn.danger { color: #c62828; border-color: #e5a0a0; }
+
+    /* Ricadenza nel drawer */
+    .mb-recurrence { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .mb-recurrence select { font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid #ccc; border-radius: 8px; background: var(--paper); color: var(--ink); }
+    .mb-dow { display: flex; gap: 4px; }
+    .mb-dow button { font: inherit; font-size: 12px; font-weight: 600; flex: 1; height: 34px; border: 1px solid #ccc; background: var(--paper); color: var(--muted); cursor: pointer; border-radius: 6px; padding: 0; }
+    .mb-dow button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+    /* Selezione mese nel drawer */
+    .mb-month-row { display: flex; gap: 8px; }
+    .mb-month-row select { flex: 1; font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid #ccc; border-radius: 8px; background: var(--paper); color: var(--ink); }
+
+    /* Ricerca nel drawer */
+    .mb-search { font: inherit; font-size: 14px; padding: 9px 14px; border: 1px solid #ccc; border-radius: 20px; background: var(--paper); width: 100%; margin-bottom: 10px; color: var(--ink); }
+
+    /* Vista e fascia oraria nel drawer */
+    .mb-toggle-group { display: flex; gap: 4px; }
+    .mb-toggle-group button { font: inherit; font-size: 11px; flex: 1; padding: 7px 4px; border: 1px solid #ccc; background: var(--paper); border-radius: 6px; cursor: pointer; color: var(--muted); }
+    .mb-toggle-group button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+    /* Page padding mobile */
+    .page { padding: 0 12px 60px; }
+    #list { margin-top: 12px; }
+  }
 
   @media print {
     @page { size: A4; margin: 8mm 8mm; }
@@ -125,6 +325,7 @@
     .page { padding: 0; max-width: 100%; }
     .sticky { position: static; padding: 0; margin-bottom: 6px; border-bottom: none; }
     .no-print { display: none !important; }
+    .mobile-topbar { display: none !important; }
     .top { padding-bottom: 4px; margin-bottom: 6px; border-bottom: 1px solid #000; }
     .list { column-count: 2; column-gap: 8mm; column-rule: 1px dotted #ccc; }
     .day { break-inside: avoid; margin-bottom: 7px; }
@@ -137,6 +338,124 @@
 </head>
 <body>
 
+<!-- ═══════════════════════════════════
+     MOBILE TOPBAR (solo su mobile)
+═══════════════════════════════════ -->
+<div class="mobile-topbar" id="mobile-topbar">
+  <div class="mb-top">
+    <div class="mb-title-group">
+      <div class="mb-title">Programmazione</div>
+      <div id="mb-sync-status" class="mb-status">● Connessione...</div>
+      <div id="mb-month-label" class="mb-month">Caricamento...</div>
+    </div>
+    <div class="mb-controls">
+      <div class="mb-icon-btn" id="mb-search-btn" onclick="toggleMbSearch()" title="Cerca">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div class="mb-icon-btn" id="mb-menu-btn" onclick="toggleDrawer()" title="Menu">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </div>
+    </div>
+  </div>
+  <div class="mb-filters" id="mb-filters"></div>
+</div>
+
+<!-- Drawer overlay -->
+<div class="mb-drawer-overlay" id="mb-overlay" onclick="closeDrawer()"></div>
+
+<!-- Drawer panel -->
+<div class="mb-drawer" id="mb-drawer">
+  <div class="mb-drawer-handle"></div>
+
+  <!-- Ricerca (mostrata solo quando attiva) -->
+  <div id="mb-search-wrap" style="display:none;margin-bottom:10px;">
+    <input class="mb-search" id="mb-search-input" placeholder="Cerca nel mese…" oninput="onMbSearch(this.value)">
+  </div>
+
+  <!-- Mese -->
+  <div class="mb-section-label">Mese</div>
+  <div class="mb-month-row" style="margin-bottom:14px;">
+    <select id="mb-m-sel"></select>
+    <select id="mb-y-sel"></select>
+  </div>
+
+  <!-- Form aggiunta -->
+  <div class="mb-section-label" id="mb-form-label">Aggiungi programma</div>
+  <div class="mb-form">
+    <div class="mb-form-row">
+      <select id="mb-f-cat"></select>
+    </div>
+    <div class="mb-form-row">
+      <input type="date" id="mb-f-date">
+      <input type="time" id="mb-f-time">
+    </div>
+    <input type="text" id="mb-f-name" placeholder="Nome del programma">
+    <div class="mb-form-row">
+      <input type="number" id="mb-f-dur-h" min="0" max="23" placeholder="0h">
+      <input type="number" id="mb-f-dur-m" min="0" max="59" placeholder="0min">
+    </div>
+  </div>
+
+  <!-- Ricorrenza -->
+  <div class="mb-section-label">Cadenza</div>
+  <div class="mb-recurrence" style="margin-bottom:14px;">
+    <select id="mb-f-preset">
+      <option value="single">Solo questo giorno</option>
+      <option value="every">Tutti i giorni</option>
+      <option value="no_sun">Lun–Sab</option>
+      <option value="weekdays">Lun–Ven</option>
+      <option value="same_dow">Stesso giorno sett.</option>
+      <option value="custom">Personalizzato</option>
+    </select>
+    <div class="mb-dow" id="mb-f-dow">
+      <button data-dow="1">L</button>
+      <button data-dow="2">M</button>
+      <button data-dow="3">M</button>
+      <button data-dow="4">G</button>
+      <button data-dow="5">V</button>
+      <button data-dow="6">S</button>
+      <button data-dow="0">D</button>
+    </div>
+  </div>
+
+  <button class="mb-save-btn" id="mb-f-go" onclick="mbSubmitForm()">Salva programma</button>
+  <button class="mb-cancel-btn" id="mb-f-cancel" onclick="mbResetForm()">Annulla modifica</button>
+
+  <!-- Separatore -->
+  <div class="mb-drawer-sep"></div>
+
+  <!-- Vista e fascia -->
+  <div class="mb-section-label">Vista</div>
+  <div class="mb-toggle-group" style="margin-bottom:10px;">
+    <button id="mb-vm-list" class="on" onclick="window.setViewMode('list');syncMbViewBtns()">☰ Lista</button>
+    <button id="mb-vm-grid" onclick="window.setViewMode('grid');syncMbViewBtns()">▤ Griglia</button>
+  </div>
+  <div class="mb-section-label">Fascia oraria</div>
+  <div class="mb-toggle-group" style="margin-bottom:14px;">
+    <button id="mb-tf-all" class="on" onclick="window.setTimeRange('all');syncMbTimeBtns()">Tutte</button>
+    <button id="mb-tf-morning" onclick="window.setTimeRange('morning');syncMbTimeBtns()">🌅 Mattina</button>
+    <button id="mb-tf-afternoon" onclick="window.setTimeRange('afternoon');syncMbTimeBtns()">🌤 Pomerig.</button>
+    <button id="mb-tf-evening" onclick="window.setTimeRange('evening');syncMbTimeBtns()">🌙 Sera</button>
+  </div>
+
+  <!-- Separatore -->
+  <div class="mb-drawer-sep"></div>
+
+  <!-- Azioni -->
+  <div class="mb-section-label">Azioni</div>
+  <div class="mb-actions-grid">
+    <button class="mb-action-btn primary" onclick="window.printPDF();closeDrawer()">🖨 Stampa</button>
+    <button class="mb-action-btn" onclick="window.copyToNextMonth();closeDrawer()">📋 Copia mese →</button>
+    <button class="mb-action-btn" onclick="window.downloadBackup();closeDrawer()">⬇ Backup</button>
+    <button class="mb-action-btn" onclick="window.triggerImport();closeDrawer()">⬆ Importa</button>
+    <button class="mb-action-btn" onclick="window.exportCSV();closeDrawer()">📄 CSV</button>
+    <button class="mb-action-btn danger" onclick="closeDrawer();setTimeout(()=>window.clearAll(),200)">🗑 Svuota</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     DESKTOP (invariato, solo hidden su mobile via CSS)
+═══════════════════════════════════ -->
 <div class="page">
   <div class="sticky no-print-sticky">
     <div class="top">
@@ -151,14 +470,19 @@
         </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-        <div class="bar no-print">
-          <button class="primary" onclick="window.printPDF()">Stampa / PDF</button>
-          <button onclick="window.downloadBackup()" title="Scarica un file JSON con il backup del database">Backup Dati</button>
-          <button onclick="window.triggerImport()" title="Importa la programmazione da un file HTML salvato in precedenza">Importa HTML</button>
-          <input type="file" id="f-import" accept=".html,.json" style="display:none">
-          <button onclick="window.copyToNextMonth()" title="Copia tutti i programmi del mese visibile al mese successivo">Copia mese →</button>
-          <button class="danger" onclick="window.clearAll()">Svuota Mese</button>
-          <button onclick="window.exportCSV()">Esporta CSV</button>
+        <div class="bar no-print" style="flex-wrap:wrap;gap:6px;align-items:center;">
+          <button class="primary" onclick="window.printPDF()">🖨 Stampa / PDF</button>
+          <button onclick="window.copyToNextMonth()">📋 Copia mese →</button>
+          <!-- Overflow menu per azioni rare -->
+          <div class="overflow-wrap">
+            <button class="overflow-trigger" id="overflow-btn" onclick="toggleOverflow()">⋯ Altro</button>
+            <div class="overflow-menu" id="overflow-menu">
+              <button class="overflow-item" onclick="window.downloadBackup();closeOverflow()">⬇ Backup dati</button>
+              <button class="overflow-item" onclick="window.triggerImport();closeOverflow()">⬆ Importa HTML</button>
+              <button class="overflow-item" onclick="window.exportCSV();closeOverflow()">📄 Esporta CSV</button>
+              <button class="overflow-item danger" onclick="closeOverflow();setTimeout(()=>window.clearAll(),100)">🗑 Svuota mese</button>
+            </div>
+          </div>
         </div>
         <input type="search" id="f-search" class="search-bar no-print" placeholder="🔍 Cerca nel mese…">
       </div>
@@ -241,6 +565,228 @@
   <div class="list" id="list"></div>
 </div>
 
+<input type="file" id="f-import" accept=".html,.json" style="display:none">
+
+<script>
+  /* ═══════════════════════════════════════════════
+     OVERFLOW MENU — desktop
+  ═══════════════════════════════════════════════ */
+  function toggleOverflow() {
+    document.getElementById("overflow-menu").classList.toggle("open");
+  }
+  function closeOverflow() {
+    document.getElementById("overflow-menu").classList.remove("open");
+  }
+  document.addEventListener("click", function(e) {
+    const wrap = document.querySelector(".overflow-wrap");
+    if (wrap && !wrap.contains(e.target)) closeOverflow();
+  });
+
+  /* ═══════════════════════════════════════════════
+     DRAWER — mobile
+  ═══════════════════════════════════════════════ */
+  function toggleDrawer() {
+    const drawer = document.getElementById("mb-drawer");
+    const overlay = document.getElementById("mb-overlay");
+    const btn = document.getElementById("mb-menu-btn");
+    const isOpen = drawer.classList.contains("open");
+    if (isOpen) { closeDrawer(); } else {
+      drawer.classList.add("open");
+      overlay.classList.add("open");
+      btn.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+  }
+  function closeDrawer() {
+    document.getElementById("mb-drawer").classList.remove("open");
+    document.getElementById("mb-overlay").classList.remove("open");
+    document.getElementById("mb-menu-btn").classList.remove("active");
+    document.body.style.overflow = "";
+  }
+  function toggleMbSearch() {
+    const wrap = document.getElementById("mb-search-wrap");
+    const btn = document.getElementById("mb-search-btn");
+    const isVisible = wrap.style.display !== "none";
+    if (isVisible) {
+      wrap.style.display = "none";
+      btn.classList.remove("active");
+    } else {
+      wrap.style.display = "block";
+      btn.classList.add("active");
+      document.getElementById("mb-search-input").focus();
+    }
+  }
+  function onMbSearch(val) {
+    // Sincronizza col search desktop (che triggera il render)
+    document.getElementById("f-search").value = val;
+    document.getElementById("f-search").dispatchEvent(new Event("input"));
+  }
+  function syncMbViewBtns() {
+    ["list","grid"].forEach(v => {
+      const b = document.getElementById("mb-vm-" + v);
+      const bD = document.getElementById("vm-" + v);
+      if (b) b.className = bD && bD.className === "on" ? "on" : "";
+    });
+  }
+  function syncMbTimeBtns() {
+    ["all","morning","afternoon","evening"].forEach(t => {
+      const b = document.getElementById("mb-tf-" + t);
+      const bD = document.getElementById("tf-" + t);
+      if (b) b.className = bD && bD.className === "on" ? "on" : "";
+    });
+  }
+
+  /* Sincronizzazione selettori mese mobile ↔ desktop */
+  const MONTHS_IT = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+  const mbMSel = document.getElementById("mb-m-sel");
+  const mbYSel = document.getElementById("mb-y-sel");
+  const today2 = new Date();
+  MONTHS_IT.forEach((n,i) => mbMSel.appendChild(new Option(n,i)));
+  for (let y = today2.getFullYear()-5; y <= today2.getFullYear()+10; y++) mbYSel.appendChild(new Option(y,y));
+  mbMSel.value = today2.getMonth();
+  mbYSel.value = today2.getFullYear();
+
+  mbMSel.addEventListener("change", () => {
+    document.getElementById("m-sel").value = mbMSel.value;
+    document.getElementById("m-sel").dispatchEvent(new Event("change"));
+  });
+  mbYSel.addEventListener("change", () => {
+    document.getElementById("y-sel").value = mbYSel.value;
+    document.getElementById("y-sel").dispatchEvent(new Event("change"));
+  });
+
+  /* Mantieni selettori mobile sincronizzati quando cambia da desktop */
+  const origMSel = document.getElementById("m-sel");
+  const origYSel = document.getElementById("y-sel");
+  if (origMSel) origMSel.addEventListener("change", () => { mbMSel.value = origMSel.value; });
+  if (origYSel) origYSel.addEventListener("change", () => { mbYSel.value = origYSel.value; });
+
+  /* ─── Form mobile ─── */
+  let mbEditingId = null;
+
+  function mbSyncCatSelect() {
+    const desktop = document.getElementById("f-cat");
+    const mobile  = document.getElementById("mb-f-cat");
+    mobile.innerHTML = "";
+    Array.from(desktop.options).forEach(o => mobile.appendChild(new Option(o.text, o.value)));
+  }
+
+  window.mbSubmitForm = function() {
+    // Copia i valori nel form desktop e chiama submitForm()
+    document.getElementById("f-cat").value   = document.getElementById("mb-f-cat").value;
+    document.getElementById("f-date").value  = document.getElementById("mb-f-date").value;
+    document.getElementById("f-time").value  = document.getElementById("mb-f-time").value;
+    document.getElementById("f-name").value  = document.getElementById("mb-f-name").value;
+    document.getElementById("f-dur-h").value = document.getElementById("mb-f-dur-h").value;
+    document.getElementById("f-dur-m").value = document.getElementById("mb-f-dur-m").value;
+    document.getElementById("f-preset").value= document.getElementById("mb-f-preset").value;
+    // Sincronizza DOW
+    document.querySelectorAll("#mb-f-dow button").forEach(mbBtn => {
+      const desktopBtn = document.querySelector("#f-dow button[data-dow='" + mbBtn.dataset.dow + "']");
+      if (desktopBtn) {
+        desktopBtn.classList.toggle("on", mbBtn.classList.contains("on"));
+      }
+    });
+    window.submitForm().then(() => {
+      mbResetForm();
+      closeDrawer();
+    });
+  };
+
+  window.mbResetForm = function() {
+    mbEditingId = null;
+    document.getElementById("mb-f-date").value = "";
+    document.getElementById("mb-f-time").value = "";
+    document.getElementById("mb-f-name").value = "";
+    document.getElementById("mb-f-dur-h").value = "";
+    document.getElementById("mb-f-dur-m").value = "";
+    document.getElementById("mb-f-preset").value = "single";
+    document.querySelectorAll("#mb-f-dow button").forEach(b => b.classList.remove("on"));
+    document.getElementById("mb-f-go").textContent = "Salva programma";
+    document.getElementById("mb-f-cancel").style.display = "none";
+    document.getElementById("mb-form-label").textContent = "Aggiungi programma";
+  };
+
+  /* Preset DOW mobile */
+  const MB_PRESETS = { single: [], every: [1,2,3,4,5,6,0], no_sun: [1,2,3,4,5,6], weekdays: [1,2,3,4,5] };
+  function mbSetSelectedDows(dows) {
+    document.querySelectorAll("#mb-f-dow button").forEach(b => b.classList.toggle("on", dows.includes(parseInt(b.dataset.dow,10))));
+  }
+  document.querySelectorAll("#mb-f-dow button").forEach(btn => {
+    btn.addEventListener("click", () => { btn.classList.toggle("on"); document.getElementById("mb-f-preset").value = "custom"; });
+  });
+  document.getElementById("mb-f-preset").addEventListener("change", (e) => {
+    const p = e.target.value;
+    if (p === "same_dow") { const dt = document.getElementById("mb-f-date").value; mbSetSelectedDows(dt ? [new Date(dt).getDay()] : []); }
+    else if (MB_PRESETS[p]) mbSetSelectedDows(MB_PRESETS[p]);
+  });
+
+  /* Intercetta editEvent per popolare anche il form mobile */
+  const _origEditEvent = window.editEvent;
+  // verrà rimpiazzata dopo il caricamento del modulo Firebase (vedi sotto)
+  function patchMobileEdit() {
+    const originalEdit = window.editEvent;
+    window.editEvent = function(id) {
+      originalEdit(id);
+      // Copia i valori nel form mobile
+      setTimeout(() => {
+        document.getElementById("mb-f-cat").value   = document.getElementById("f-cat").value;
+        document.getElementById("mb-f-date").value  = document.getElementById("f-date").value;
+        document.getElementById("mb-f-time").value  = document.getElementById("f-time").value;
+        document.getElementById("mb-f-name").value  = document.getElementById("f-name").value;
+        document.getElementById("mb-f-dur-h").value = document.getElementById("f-dur-h").value;
+        document.getElementById("mb-f-dur-m").value = document.getElementById("f-dur-m").value;
+        document.getElementById("mb-f-go").textContent = "Aggiorna";
+        document.getElementById("mb-f-cancel").style.display = "block";
+        document.getElementById("mb-form-label").textContent = "Modifica programma";
+        toggleDrawer();
+      }, 50);
+    };
+  }
+
+  /* Aggiorna label mese nella topbar mobile */
+  function updateMbMonthLabel(text) {
+    document.getElementById("mb-month-label").textContent = text;
+    const parts = text.match(/(\d+)$/);
+    // Sync selettori se presenti
+  }
+
+  /* Aggiorna filtri mobile */
+  function renderMbFilters(inView, CATEGORIES, filter, filterRecent, recentCount) {
+    const container = document.getElementById("mb-filters");
+    container.innerHTML = "";
+
+    const counts = { tutte: inView.length };
+    Object.keys(CATEGORIES).forEach(k => counts[k] = 0);
+    inView.forEach(e => { const k = CATEGORIES[e.category] ? e.category : "nessuna"; counts[k]++; });
+
+    const allChip = document.createElement("button");
+    allChip.className = "mb-filter-chip" + (filter === "tutte" && !filterRecent ? " on" : "");
+    allChip.textContent = "Tutte (" + counts.tutte + ")";
+    allChip.onclick = () => { window._setFilter("tutte"); };
+    container.appendChild(allChip);
+
+    Object.entries(CATEGORIES).forEach(([k, c]) => {
+      const chip = document.createElement("button");
+      chip.className = "mb-filter-chip" + (filter === k && !filterRecent ? " on" : "");
+      chip.textContent = c.label + " (" + (counts[k] || 0) + ")";
+      if (filter !== k || filterRecent) chip.style.borderColor = c.color;
+      chip.onclick = () => { window._setFilter(k); };
+      container.appendChild(chip);
+    });
+
+    if (recentCount > 0 || filterRecent) {
+      const rChip = document.createElement("button");
+      rChip.className = "mb-filter-chip recent-chip" + (filterRecent ? " on" : "");
+      rChip.textContent = "🔴 Recenti (" + recentCount + ")";
+      rChip.onclick = () => { window._toggleFilterRecent(); };
+      container.appendChild(rChip);
+    }
+  }
+
+  window._renderMbFilters = renderMbFilters;
+</script>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
   import {
@@ -277,9 +823,8 @@
   let viewMode = "list";
   let statsOpen = false;
   let isFirstLoad = true;
-  // ── NUOVO: filtro modificati recenti ──
   let filterRecent = false;
-  const RECENT_MS = 48 * 60 * 60 * 1000; // 48 ore in millisecondi
+  const RECENT_MS = 48 * 60 * 60 * 1000;
 
   const DAYS_SHORT = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
   const DAYS_LONG  = ["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
@@ -305,7 +850,10 @@
   mSel.addEventListener("change", () => { viewMonth = parseInt(mSel.value, 10); render(); });
   ySel.addEventListener("change", () => { viewYear  = parseInt(ySel.value, 10); render(); });
 
-  // ── HELPER: è stato modificato nelle ultime 48h? ──
+  // Esponi setter filtri per mobile
+  window._setFilter = function(f) { filter = f; filterRecent = false; render(); };
+  window._toggleFilterRecent = function() { filterRecent = !filterRecent; filter = "tutte"; render(); };
+
   function isRecentlyModified(ev) {
     if (!ev.updatedAt) return false;
     return (Date.now() - ev.updatedAt) < RECENT_MS;
@@ -324,8 +872,10 @@
 
   onSnapshot(collection(db, "events"), (snapshot) => {
     const statusEl = document.getElementById("sync-status");
+    const mbStatusEl = document.getElementById("mb-sync-status");
     statusEl.textContent = "● Sincronizzato";
     statusEl.className = "";
+    if (mbStatusEl) { mbStatusEl.textContent = "● Sincronizzato"; mbStatusEl.className = "mb-status"; }
     events = [];
     snapshot.forEach(doc => { events.push(doc.data()); });
     if (isFirstLoad && events.length > 0) {
@@ -335,17 +885,22 @@
         const [yy, mm] = first.split("-").map(Number);
         viewYear = yy; viewMonth = mm - 1;
         mSel.value = viewMonth; ySel.value = viewYear;
+        const mbM = document.getElementById("mb-m-sel");
+        const mbY = document.getElementById("mb-y-sel");
+        if (mbM) mbM.value = viewMonth;
+        if (mbY) mbY.value = viewYear;
       }
     }
     render();
   }, (error) => {
     const statusEl = document.getElementById("sync-status");
-    statusEl.textContent = "⚠ Disconnesso o Permesso Negato";
+    const mbStatusEl = document.getElementById("mb-sync-status");
+    statusEl.textContent = "⚠ Disconnesso";
     statusEl.className = "offline";
+    if (mbStatusEl) { mbStatusEl.textContent = "⚠ Disconnesso"; mbStatusEl.className = "mb-status offline"; }
     console.error("Errore lettura eventi:", error);
   });
 
-  // ── HELPERS ──
   function rebuildCatSelect() {
     const selCat = document.getElementById("f-cat");
     const prev = selCat.value;
@@ -353,6 +908,15 @@
     Object.entries(CATEGORIES).forEach(([k, c]) => { selCat.appendChild(new Option(c.label, k)); });
     if (CATEGORIES[prev]) selCat.value = prev;
     else if (Object.keys(CATEGORIES).length > 0) selCat.value = Object.keys(CATEGORIES)[0];
+    // Sync mobile
+    if (typeof window.mbSyncCatSelect === "function") window.mbSyncCatSelect();
+    else {
+      const mbCat = document.getElementById("mb-f-cat");
+      if (mbCat) {
+        mbCat.innerHTML = "";
+        Object.entries(CATEGORIES).forEach(([k, c]) => { mbCat.appendChild(new Option(c.label, k)); });
+      }
+    }
   }
 
   function parseDuration(str) {
@@ -392,16 +956,24 @@
     return events.filter(e => e.date && e.date.startsWith(ymPrefix));
   }
 
-  // ── RENDER ──
   function render() {
     mSel.value = viewMonth; ySel.value = viewYear;
+    const mbM = document.getElementById("mb-m-sel");
+    const mbY = document.getElementById("mb-y-sel");
+    if (mbM) mbM.value = viewMonth;
+    if (mbY) mbY.value = viewYear;
+
     const inView = eventsInView();
     const recentCount = inView.filter(isRecentlyModified).length;
-    document.getElementById("monthLabel").textContent =
-      MONTHS[viewMonth] + " " + viewYear + " • " + inView.length + " programmi" +
-      (recentCount > 0 ? " • 🔴 " + recentCount + " modif. recenti" : "");
+    const labelText = MONTHS[viewMonth] + " " + viewYear + " • " + inView.length + " programmi" +
+      (recentCount > 0 ? " • 🔴 " + recentCount + " recenti" : "");
+    document.getElementById("monthLabel").textContent = labelText;
+    document.getElementById("mb-month-label").textContent = MONTHS[viewMonth] + " " + viewYear + " • " + inView.length + " prog.";
 
-    // Filtri categorie
+    // Render filtri mobile
+    if (window._renderMbFilters) window._renderMbFilters(inView, CATEGORIES, filter, filterRecent, recentCount);
+
+    // Filtri desktop
     const filtersDiv = document.getElementById("filters");
     filtersDiv.innerHTML = "";
     const counts = { tutte: inView.length };
@@ -417,25 +989,23 @@
     Object.entries(CATEGORIES).forEach(([k, c]) => {
       const b = document.createElement("button");
       b.className = filter === k && !filterRecent ? "on" : "";
-      b.textContent = c.label + " (" + counts[k] + ")";
+      b.textContent = c.label + " (" + (counts[k] || 0) + ")";
       if (filter !== k || filterRecent) b.style.borderColor = c.color;
       b.onclick = () => { filter = k; filterRecent = false; render(); };
       filtersDiv.appendChild(b);
     });
 
-    // ── NUOVO: pulsante "Modificati di recente" ──
     if (recentCount > 0 || filterRecent) {
       const rb = document.createElement("button");
       rb.className = filterRecent ? "recent-active" : "";
-      rb.innerHTML = '🔴 Modificati di recente (' + recentCount + ')';
-      rb.style.borderColor = filterRecent ? "#e53935" : "#e53935";
-      rb.style.color = filterRecent ? "" : "#e53935";
+      rb.innerHTML = "🔴 Modificati di recente (" + recentCount + ")";
+      rb.style.borderColor = "#e53935";
+      if (!filterRecent) rb.style.color = "#e53935";
       rb.onclick = () => { filterRecent = !filterRecent; filter = "tutte"; render(); };
       filtersDiv.appendChild(rb);
     }
 
     let filtered = filter === "tutte" ? inView : inView.filter(e => (CATEGORIES[e.category] ? e.category : "nessuna") === filter);
-    // Applica filtro recenti
     if (filterRecent) filtered = filtered.filter(isRecentlyModified);
 
     const sq = (searchQuery || "").trim().toLowerCase();
@@ -453,7 +1023,6 @@
 
     if (statsOpen) renderStats();
 
-    // Legenda
     const legend = document.getElementById("legend");
     legend.innerHTML = "";
     Object.entries(CATEGORIES).forEach(([k, c]) => {
@@ -465,7 +1034,6 @@
 
     if (viewMode === "grid") { renderGrid(filtered); return; }
 
-    // Lista
     const groups = {};
     filtered.forEach(e => { if (!groups[e.date]) groups[e.date] = []; groups[e.date].push(e); });
     Object.values(groups).forEach(arr => arr.sort((a, b) => a.time.localeCompare(b.time)));
@@ -496,7 +1064,6 @@
         continue;
       }
 
-      // Sovrapposizioni
       const overlapIds = new Set();
       for (let i = 0; i < items.length - 1; i++) {
         const { h: dh, m: dm } = parseDuration(items[i].duration);
@@ -525,11 +1092,9 @@
         nameSpan.textContent = ev.name;
         n.appendChild(nameSpan);
 
-        // ── NUOVO: pallino rosso se modificato di recente ──
         if (isRecentlyModified(ev)) {
           const dot = document.createElement("span");
           dot.className = "recent-dot no-print";
-          // Calcola quante ore fa è stata fatta la modifica
           const hoursAgo = Math.round((Date.now() - ev.updatedAt) / (1000 * 60 * 60));
           dot.title = "Modificato " + (hoursAgo < 1 ? "meno di 1 ora fa" : hoursAgo + "h fa");
           n.appendChild(dot);
@@ -558,7 +1123,6 @@
     }
   }
 
-  // ── GRIGLIA ──
   function renderGrid(filtered) {
     const list = document.getElementById("list");
     list.innerHTML = "";
@@ -603,7 +1167,6 @@
         block.style.color = isLightColor(cat.color) ? "#111" : "#fff";
         block.textContent = ev.name;
         block.title = ev.time + " — " + ev.name + (ev.duration ? " (" + ev.duration + ")" : "") + (isRecentlyModified(ev) ? " 🔴 modificato di recente" : "");
-        // Piccolo bordo rosso per i recenti anche in griglia
         if (isRecentlyModified(ev)) block.style.outline = "2px solid #e53935";
         timeline.appendChild(block);
       });
@@ -613,7 +1176,6 @@
     if (!hasAny) list.innerHTML = '<div class="empty">Nessun programma trovato.</div>';
   }
 
-  // ── STATISTICHE ──
   function renderStats() {
     const panel = document.getElementById("stats-panel");
     const inView = eventsInView();
@@ -664,9 +1226,6 @@
     });
   }
 
-  // ── CRUD ──
-
-  // ── NUOVO: submitForm salva updatedAt solo in caso di modifica (editingId) ──
   window.submitForm = async function() {
     const date     = document.getElementById("f-date").value;
     const time     = document.getElementById("f-time").value;
@@ -688,7 +1247,6 @@
     if (selectedDows.length === 0) {
       const eId = editingId || ("e" + Date.now() + Math.random().toString(36).slice(2, 5));
       const evData = { id: eId, date, time, name, duration, category };
-      // ── NUOVO: segna il timestamp di modifica solo se si sta modificando ──
       if (isEdit) evData.updatedAt = Date.now();
       batch.set(doc(db, "events", eId), evData);
     } else {
@@ -699,7 +1257,6 @@
         const isoDate = yy + "-" + String(mm).padStart(2, "0") + "-" + String(d).padStart(2, "0");
         const eId = "e" + Date.now() + Math.random().toString(36).slice(2, 5) + "_" + d;
         const evData = { id: eId, date: isoDate, time, name, duration, category };
-        // Modifica su più giorni: marca tutti come modificati
         if (isEdit) evData.updatedAt = Date.now();
         batch.set(doc(db, "events", eId), evData);
       }
@@ -753,7 +1310,6 @@
       const targetDate = nextYear + "-" + String(nextMonth + 1).padStart(2, "0") + "-" + String(targetDay).padStart(2, "0");
       if (existing.some(e => e.date === targetDate && e.time === ev.time && e.name === ev.name)) { skipped++; return; }
       const eId = "e" + Date.now() + Math.random().toString(36).slice(2, 5) + "_cp" + targetDay;
-      // Copia senza updatedAt → non appare come "modificato"
       batch.set(doc(db, "events", eId), { id: eId, date: targetDate, time: ev.time, name: ev.name, duration: ev.duration, category: ev.category });
       copied++;
     });
@@ -761,7 +1317,6 @@
     else alert("Nessun programma copiato.");
   };
 
-  // ── UI ──
   window.editEvent = function(id) {
     const ev = events.find(e => e.id === id);
     if (!ev) return;
@@ -777,6 +1332,25 @@
     setSelectedDows([]);
     document.getElementById("f-go").textContent = "Aggiorna";
     document.getElementById("f-cancel").style.display = "inline-block";
+    // Popola form mobile
+    const mbCat = document.getElementById("mb-f-cat");
+    if (mbCat) {
+      mbCat.value = CATEGORIES[ev.category] ? ev.category : "nessuna";
+      document.getElementById("mb-f-date").value = ev.date;
+      document.getElementById("mb-f-time").value = ev.time;
+      document.getElementById("mb-f-name").value = ev.name;
+      document.getElementById("mb-f-dur-h").value = h || "";
+      document.getElementById("mb-f-dur-m").value = m || "";
+      document.getElementById("mb-f-preset").value = "single";
+      document.querySelectorAll("#mb-f-dow button").forEach(b => b.classList.remove("on"));
+      document.getElementById("mb-f-go").textContent = "Aggiorna";
+      document.getElementById("mb-f-cancel").style.display = "block";
+      document.getElementById("mb-form-label").textContent = "Modifica programma";
+      // Apri il drawer su mobile
+      if (window.innerWidth <= 680) {
+        if (typeof toggleDrawer === "function") toggleDrawer();
+      }
+    }
   };
 
   window.resetForm = function() {
@@ -790,6 +1364,8 @@
     setSelectedDows([]);
     document.getElementById("f-go").textContent = "Salva";
     document.getElementById("f-cancel").style.display = "none";
+    // Reset form mobile
+    if (typeof window.mbResetForm === "function") window.mbResetForm();
   };
 
   window.addCategory = function() {
@@ -816,6 +1392,10 @@
 
   document.getElementById("f-search").addEventListener("input", (e) => { searchQuery = e.target.value; render(); });
   ["f-name","f-dur-h","f-dur-m"].forEach(id => { document.getElementById(id).addEventListener("keydown", (e) => { if (e.key === "Enter") window.submitForm(); }); });
+  ["mb-f-name","mb-f-dur-h","mb-f-dur-m"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("keydown", (e) => { if (e.key === "Enter") window.mbSubmitForm(); });
+  });
 
   const PRESETS = { single: [], every: [1,2,3,4,5,6,0], no_sun: [1,2,3,4,5,6], weekdays: [1,2,3,4,5] };
   function getSelectedDows() { return Array.from(document.querySelectorAll("#f-dow button.on")).map(b => parseInt(b.dataset.dow, 10)); }
@@ -833,7 +1413,6 @@
     else if (PRESETS[p]) setSelectedDows(PRESETS[p]);
   });
 
-  // ── BACKUP / EXPORT / IMPORT ──
   window.downloadBackup = function() {
     const data = { events, categories: CATEGORIES };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
