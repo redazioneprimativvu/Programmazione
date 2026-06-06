@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="it"><head>
 <meta charset="UTF-8">
@@ -48,24 +49,8 @@
   .cat-add button { font: inherit; font-size: 12px; font-weight: 600; padding: 5px 12px; background: var(--ink); color: var(--paper); border: none; border-radius: 3px; cursor: pointer; }
   .row.has-overlap { background: #fff8f0; }
   .overlap-badge { display: inline-block; background: #E65100; color: #fff; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 2px; margin-left: 6px; vertical-align: middle; white-space: nowrap; }
-  .grid-day { margin-bottom: 16px; }
-  .grid-day-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 3px; }
-  .grid-timeline { position: relative; height: 32px; background: #f0ede7; border-radius: 4px; overflow: hidden; }
-  .grid-tick { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(0,0,0,0.12); }
-  .grid-block { position: absolute; top: 2px; bottom: 2px; border-radius: 2px; overflow: hidden; cursor: default; min-width: 3px; display: flex; align-items: center; padding: 0 3px; font-size: 8.5px; font-weight: 600; white-space: nowrap; border: 1px solid rgba(0,0,0,0.18); }
-  .grid-hours { display: flex; justify-content: space-between; font-size: 8.5px; color: #aaa; margin-top: 2px; padding: 0 0 2px; }
   .filter-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; margin-bottom: 4px; flex-wrap: wrap; gap: 6px; }
-  .time-filter { display: flex; flex-wrap: wrap; gap: 3px; }
-  .time-filter button, .view-toggle button { font: inherit; font-size: 11px; padding: 3px 8px; border: 1px solid #ccc; background: transparent; border-radius: 2px; cursor: pointer; color: var(--muted); }
-  .time-filter button.on, .view-toggle button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .stats-panel { padding: 12px 14px 14px; border: 1px solid #e0ddd7; border-radius: 4px; background: var(--paper); margin-bottom: 8px; font-size: 12px; }
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 8px 0 10px; }
-  .stats-card { padding: 9px 11px; border: 1px solid #eee; border-radius: 4px; background: #fafaf8; }
-  .stats-card .val { font-size: 21px; font-weight: 700; color: var(--ink); line-height: 1; font-variant-numeric: tabular-nums; }
-  .stats-card .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
-  .stats-cat-bar { display: flex; align-items: center; gap: 8px; margin-top: 5px; font-size: 11px; }
-  .stats-bar-bg { flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
-  .stats-bar-fill { height: 100%; border-radius: 4px; }
   .form select, .form input { font: inherit; font-size: 13px; padding: 5px 7px; border: 1px solid #ccc; border-radius: 3px; background: #fff; width: 100%; }
   .form .dur-wrap { display: contents; }
   .form .dur-box { position: relative; }
@@ -81,7 +66,18 @@
   .legend .sw { display: inline-block; width: 16px; height: 12px; border-radius: 2px; border: 1px solid rgba(0,0,0,0.15); }
   .list { column-count: 1; }
   .day { break-inside: avoid; margin-bottom: 14px; }
-  .day-h { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #fff; background: #111; padding: 6px 10px; border-left: 5px solid #d4a017; border-radius: 3px; margin: 14px 0 5px; }
+  .day-h { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #fff; background: #111; padding: 6px 10px; border-left: 5px solid #d4a017; border-radius: 3px; margin: 14px 0 5px; display: flex; align-items: center; gap: 9px; }
+  .day-h .day-h-label { flex: 1; }
+  .day-check { flex-shrink: 0; width: 20px; height: 20px; border-radius: 4px; border: 1.5px solid rgba(255,255,255,0.5); background: transparent; color: #fff; cursor: pointer; font-size: 13px; font-weight: 700; line-height: 1; display: flex; align-items: center; justify-content: center; padding: 0; transition: background .15s, border-color .15s; }
+  .day-check:hover { border-color: #fff; }
+  .day-check.on { background: #2e7d32; border-color: #2e7d32; }
+  .day-state-badge { flex-shrink: 0; font-size: 9px; font-weight: 700; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 10px; background: rgba(255,255,255,0.16); color: #fff; text-transform: uppercase; }
+  .day-done .day-h { border-left-color: #2e7d32; }
+  .day-done .day-state-badge { background: #2e7d32; }
+  .day-locked .day-h { background: #4a4a4a; border-left-color: #888; }
+  /* Righe sbiadite e non modificabili finché il giorno non è confermato */
+  .day-rows.locked-rows { opacity: 0.42; pointer-events: none; filter: grayscale(0.35); }
+  .day-rows.locked-rows .row { background: #f4f3f0; }
   .row { display: grid; grid-template-columns: 18px 50px 1fr 60px 50px; gap: 8px; align-items: center; padding: 4px 8px; font-size: 12.5px; margin-bottom: 2px; border-radius: 3px; background: #ffffff; }
   .row .chip { width: 16px; height: 12px; border-radius: 2px; border: 1px solid rgba(0,0,0,0.2); }
   .row .t { font-weight: 600; }
@@ -97,9 +93,7 @@
   #sync-status { font-size: 11px; color: #4CAF50; font-weight: bold; margin-bottom: 5px; display: inline-block;}
   .offline { color: #F44336 !important; }
 
-  /* ═══════════════════════════════════════════════
-     OVERFLOW MENU (desktop)
-  ═══════════════════════════════════════════════ */
+  /* OVERFLOW MENU (desktop) */
   .overflow-wrap { position: relative; display: inline-block; }
   .overflow-trigger { font: inherit; font-size: 12px; padding: 5px 10px; border: 1px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; border-radius: 3px; }
   .overflow-trigger:hover { background: var(--ink); color: var(--paper); }
@@ -110,16 +104,12 @@
   .overflow-item.danger { color: #c62828; }
   .overflow-item.danger:hover { background: #fde8e8; }
 
-  /* ═══════════════════════════════════════════════
-     MOBILE — drawer
-  ═══════════════════════════════════════════════ */
-  /* Nascosti di default (desktop) */
+  /* MOBILE — drawer */
   .mobile-topbar { display: none; }
   .mb-drawer { display: none; }
   .mb-drawer-overlay { display: none; }
 
   @media (max-width: 680px) {
-    /* Nascondi elementi desktop nella sticky */
     .sticky { padding-top: 0; padding-bottom: 0; border-bottom: none; margin-bottom: 0; }
     .top { display: none; }
     .form { display: none; }
@@ -130,10 +120,8 @@
     .stats-panel { display: none !important; }
     .search-bar { display: none; }
 
-    /* Mostra elementi mobile */
     .mb-drawer { display: block; }
 
-    /* Barra mobile fissa */
     .mobile-topbar {
       display: block;
       position: sticky;
@@ -164,7 +152,6 @@
     }
     .mb-icon-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
-    /* Filtri orizzontali scorrevoli */
     .mb-filters {
       display: flex;
       gap: 5px;
@@ -191,7 +178,6 @@
     .mb-filter-chip.recent-chip { border-color: #e53935; color: #e53935; }
     .mb-filter-chip.recent-chip.on { background: #e53935; color: #fff; border-color: #e53935; }
 
-    /* Drawer overlay */
     .mb-drawer-overlay {
       display: none;
       position: fixed;
@@ -201,7 +187,6 @@
     }
     .mb-drawer-overlay.open { display: block; }
 
-    /* Drawer panel */
     .mb-drawer {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -233,7 +218,6 @@
       margin-bottom: 8px;
     }
 
-    /* Form nel drawer */
     .mb-form { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
     .mb-form input, .mb-form select {
       font: inherit;
@@ -273,7 +257,6 @@
       display: none;
     }
 
-    /* Azioni drawer */
     .mb-drawer-sep { height: 1px; background: var(--line); margin: 14px 0; }
     .mb-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .mb-action-btn {
@@ -295,26 +278,21 @@
     .mb-action-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
     .mb-action-btn.danger { color: #c62828; border-color: #e5a0a0; }
 
-    /* Ricadenza nel drawer */
     .mb-recurrence { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
     .mb-recurrence select { font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid #ccc; border-radius: 8px; background: var(--paper); color: var(--ink); }
     .mb-dow { display: flex; gap: 4px; }
     .mb-dow button { font: inherit; font-size: 12px; font-weight: 600; flex: 1; height: 34px; border: 1px solid #ccc; background: var(--paper); color: var(--muted); cursor: pointer; border-radius: 6px; padding: 0; }
     .mb-dow button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
-    /* Selezione mese nel drawer */
     .mb-month-row { display: flex; gap: 8px; }
     .mb-month-row select { flex: 1; font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid #ccc; border-radius: 8px; background: var(--paper); color: var(--ink); }
 
-    /* Ricerca nel drawer */
     .mb-search { font: inherit; font-size: 14px; padding: 9px 14px; border: 1px solid #ccc; border-radius: 20px; background: var(--paper); width: 100%; margin-bottom: 10px; color: var(--ink); }
 
-    /* Vista e fascia oraria nel drawer */
     .mb-toggle-group { display: flex; gap: 4px; }
     .mb-toggle-group button { font: inherit; font-size: 11px; flex: 1; padding: 7px 4px; border: 1px solid #ccc; background: var(--paper); border-radius: 6px; cursor: pointer; color: var(--muted); }
     .mb-toggle-group button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
-    /* Page padding mobile */
     .page { padding: 0 12px 60px; }
     #list { margin-top: 12px; }
   }
@@ -333,14 +311,16 @@
     .row { grid-template-columns: 12px 32px 1fr 38px; gap: 4px; padding: 1px 5px; margin-bottom: 1px; font-size: 8.5pt; }
     .row .act { display: none; }
     .recent-dot { display: none; }
+    .day-check { display: none !important; }
+    .day-state-badge { display: none !important; }
+    .day-rows.locked-rows { opacity: 1 !important; filter: none !important; pointer-events: auto !important; }
+    .day-rows.locked-rows .row { background: #fff !important; }
   }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════
-     MOBILE TOPBAR (solo su mobile)
-═══════════════════════════════════ -->
+<!-- MOBILE TOPBAR -->
 <div class="mobile-topbar" id="mobile-topbar">
   <div class="mb-top">
     <div class="mb-title-group">
@@ -360,26 +340,21 @@
   <div class="mb-filters" id="mb-filters"></div>
 </div>
 
-<!-- Drawer overlay -->
 <div class="mb-drawer-overlay" id="mb-overlay" onclick="closeDrawer()"></div>
 
-<!-- Drawer panel -->
 <div class="mb-drawer" id="mb-drawer">
   <div class="mb-drawer-handle"></div>
 
-  <!-- Ricerca (mostrata solo quando attiva) -->
   <div id="mb-search-wrap" style="display:none;margin-bottom:10px;">
     <input class="mb-search" id="mb-search-input" placeholder="Cerca nel mese…" oninput="onMbSearch(this.value)">
   </div>
 
-  <!-- Mese -->
   <div class="mb-section-label">Mese</div>
   <div class="mb-month-row" style="margin-bottom:14px;">
     <select id="mb-m-sel"></select>
     <select id="mb-y-sel"></select>
   </div>
 
-  <!-- Form aggiunta -->
   <div class="mb-section-label" id="mb-form-label">Aggiungi programma</div>
   <div class="mb-form">
     <div class="mb-form-row">
@@ -396,7 +371,6 @@
     </div>
   </div>
 
-  <!-- Ricorrenza -->
   <div class="mb-section-label">Cadenza</div>
   <div class="mb-recurrence" style="margin-bottom:14px;">
     <select id="mb-f-preset">
@@ -421,27 +395,8 @@
   <button class="mb-save-btn" id="mb-f-go" onclick="mbSubmitForm()">Salva programma</button>
   <button class="mb-cancel-btn" id="mb-f-cancel" onclick="mbResetForm()">Annulla modifica</button>
 
-  <!-- Separatore -->
   <div class="mb-drawer-sep"></div>
 
-  <!-- Vista e fascia -->
-  <div class="mb-section-label">Vista</div>
-  <div class="mb-toggle-group" style="margin-bottom:10px;">
-    <button id="mb-vm-list" class="on" onclick="window.setViewMode('list');syncMbViewBtns()">☰ Lista</button>
-    <button id="mb-vm-grid" onclick="window.setViewMode('grid');syncMbViewBtns()">▤ Griglia</button>
-  </div>
-  <div class="mb-section-label">Fascia oraria</div>
-  <div class="mb-toggle-group" style="margin-bottom:14px;">
-    <button id="mb-tf-all" class="on" onclick="window.setTimeRange('all');syncMbTimeBtns()">Tutte</button>
-    <button id="mb-tf-morning" onclick="window.setTimeRange('morning');syncMbTimeBtns()">🌅 Mattina</button>
-    <button id="mb-tf-afternoon" onclick="window.setTimeRange('afternoon');syncMbTimeBtns()">🌤 Pomerig.</button>
-    <button id="mb-tf-evening" onclick="window.setTimeRange('evening');syncMbTimeBtns()">🌙 Sera</button>
-  </div>
-
-  <!-- Separatore -->
-  <div class="mb-drawer-sep"></div>
-
-  <!-- Azioni -->
   <div class="mb-section-label">Azioni</div>
   <div class="mb-actions-grid">
     <button class="mb-action-btn primary" onclick="window.printPDF();closeDrawer()">🖨 Stampa</button>
@@ -453,9 +408,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════
-     DESKTOP (invariato, solo hidden su mobile via CSS)
-═══════════════════════════════════ -->
+<!-- DESKTOP -->
 <div class="page">
   <div class="sticky no-print-sticky">
     <div class="top">
@@ -473,7 +426,6 @@
         <div class="bar no-print" style="flex-wrap:wrap;gap:6px;align-items:center;">
           <button class="primary" onclick="window.printPDF()">🖨 Stampa / PDF</button>
           <button onclick="window.copyToNextMonth()">📋 Copia mese →</button>
-          <!-- Overflow menu per azioni rare -->
           <div class="overflow-wrap">
             <button class="overflow-trigger" id="overflow-btn" onclick="toggleOverflow()">⋯ Altro</button>
             <div class="overflow-menu" id="overflow-menu">
@@ -539,25 +491,10 @@
       </div>
     </div>
 
-    <div class="stats-panel no-print" id="stats-panel" style="display:none"></div>
-
     <div class="filters no-print" id="filters"></div>
-    <div class="filter-row no-print">
-      <div class="time-filter">
-        <button id="tf-all" class="on" onclick="window.setTimeRange('all')">Tutte le fasce</button>
-        <button id="tf-morning" onclick="window.setTimeRange('morning')">🌅 Mattina 6–13</button>
-        <button id="tf-afternoon" onclick="window.setTimeRange('afternoon')">🌤 Pomeriggio 13–20</button>
-        <button id="tf-evening" onclick="window.setTimeRange('evening')">🌙 Sera/Notte 20–6</button>
-      </div>
-      <div class="view-toggle">
-        <button id="vm-list" class="on" onclick="window.setViewMode('list')">☰ Lista</button>
-        <button id="vm-grid" onclick="window.setViewMode('grid')">▤ Griglia</button>
-      </div>
-    </div>
 
     <div class="legend-row">
       <button onclick="window.toggleCatPanel()" class="cat-toggle-btn no-print">Categorie ⚙</button>
-      <button onclick="window.toggleStats()" class="cat-toggle-btn no-print">📊 Statistiche</button>
       <div class="legend" id="legend"></div>
     </div>
   </div>
@@ -568,9 +505,7 @@
 <input type="file" id="f-import" accept=".html,.json" style="display:none">
 
 <script>
-  /* ═══════════════════════════════════════════════
-     OVERFLOW MENU — desktop
-  ═══════════════════════════════════════════════ */
+  /* OVERFLOW MENU — desktop */
   function toggleOverflow() {
     document.getElementById("overflow-menu").classList.toggle("open");
   }
@@ -582,9 +517,7 @@
     if (wrap && !wrap.contains(e.target)) closeOverflow();
   });
 
-  /* ═══════════════════════════════════════════════
-     DRAWER — mobile
-  ═══════════════════════════════════════════════ */
+  /* DRAWER — mobile */
   function toggleDrawer() {
     const drawer = document.getElementById("mb-drawer");
     const overlay = document.getElementById("mb-overlay");
@@ -617,26 +550,11 @@
     }
   }
   function onMbSearch(val) {
-    // Sincronizza col search desktop (che triggera il render)
     document.getElementById("f-search").value = val;
     document.getElementById("f-search").dispatchEvent(new Event("input"));
   }
-  function syncMbViewBtns() {
-    ["list","grid"].forEach(v => {
-      const b = document.getElementById("mb-vm-" + v);
-      const bD = document.getElementById("vm-" + v);
-      if (b) b.className = bD && bD.className === "on" ? "on" : "";
-    });
-  }
-  function syncMbTimeBtns() {
-    ["all","morning","afternoon","evening"].forEach(t => {
-      const b = document.getElementById("mb-tf-" + t);
-      const bD = document.getElementById("tf-" + t);
-      if (b) b.className = bD && bD.className === "on" ? "on" : "";
-    });
-  }
 
-  /* Sincronizzazione selettori mese mobile ↔ desktop */
+  /* Sincronizzazione selettori mese mobile <-> desktop */
   const MONTHS_IT = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
   const mbMSel = document.getElementById("mb-m-sel");
   const mbYSel = document.getElementById("mb-y-sel");
@@ -655,13 +573,12 @@
     document.getElementById("y-sel").dispatchEvent(new Event("change"));
   });
 
-  /* Mantieni selettori mobile sincronizzati quando cambia da desktop */
   const origMSel = document.getElementById("m-sel");
   const origYSel = document.getElementById("y-sel");
   if (origMSel) origMSel.addEventListener("change", () => { mbMSel.value = origMSel.value; });
   if (origYSel) origYSel.addEventListener("change", () => { mbYSel.value = origYSel.value; });
 
-  /* ─── Form mobile ─── */
+  /* Form mobile */
   let mbEditingId = null;
 
   function mbSyncCatSelect() {
@@ -672,7 +589,6 @@
   }
 
   window.mbSubmitForm = function() {
-    // Copia i valori nel form desktop e chiama submitForm()
     document.getElementById("f-cat").value   = document.getElementById("mb-f-cat").value;
     document.getElementById("f-date").value  = document.getElementById("mb-f-date").value;
     document.getElementById("f-time").value  = document.getElementById("mb-f-time").value;
@@ -680,7 +596,6 @@
     document.getElementById("f-dur-h").value = document.getElementById("mb-f-dur-h").value;
     document.getElementById("f-dur-m").value = document.getElementById("mb-f-dur-m").value;
     document.getElementById("f-preset").value= document.getElementById("mb-f-preset").value;
-    // Sincronizza DOW
     document.querySelectorAll("#mb-f-dow button").forEach(mbBtn => {
       const desktopBtn = document.querySelector("#f-dow button[data-dow='" + mbBtn.dataset.dow + "']");
       if (desktopBtn) {
@@ -707,7 +622,6 @@
     document.getElementById("mb-form-label").textContent = "Aggiungi programma";
   };
 
-  /* Preset DOW mobile */
   const MB_PRESETS = { single: [], every: [1,2,3,4,5,6,0], no_sun: [1,2,3,4,5,6], weekdays: [1,2,3,4,5] };
   function mbSetSelectedDows(dows) {
     document.querySelectorAll("#mb-f-dow button").forEach(b => b.classList.toggle("on", dows.includes(parseInt(b.dataset.dow,10))));
@@ -721,37 +635,11 @@
     else if (MB_PRESETS[p]) mbSetSelectedDows(MB_PRESETS[p]);
   });
 
-  /* Intercetta editEvent per popolare anche il form mobile */
-  const _origEditEvent = window.editEvent;
-  // verrà rimpiazzata dopo il caricamento del modulo Firebase (vedi sotto)
-  function patchMobileEdit() {
-    const originalEdit = window.editEvent;
-    window.editEvent = function(id) {
-      originalEdit(id);
-      // Copia i valori nel form mobile
-      setTimeout(() => {
-        document.getElementById("mb-f-cat").value   = document.getElementById("f-cat").value;
-        document.getElementById("mb-f-date").value  = document.getElementById("f-date").value;
-        document.getElementById("mb-f-time").value  = document.getElementById("f-time").value;
-        document.getElementById("mb-f-name").value  = document.getElementById("f-name").value;
-        document.getElementById("mb-f-dur-h").value = document.getElementById("f-dur-h").value;
-        document.getElementById("mb-f-dur-m").value = document.getElementById("f-dur-m").value;
-        document.getElementById("mb-f-go").textContent = "Aggiorna";
-        document.getElementById("mb-f-cancel").style.display = "block";
-        document.getElementById("mb-form-label").textContent = "Modifica programma";
-        toggleDrawer();
-      }, 50);
-    };
-  }
-
-  /* Aggiorna label mese nella topbar mobile */
   function updateMbMonthLabel(text) {
     document.getElementById("mb-month-label").textContent = text;
-    const parts = text.match(/(\d+)$/);
-    // Sync selettori se presenti
   }
 
-  /* Aggiorna filtri mobile */
+  /* Filtri mobile */
   function renderMbFilters(inView, CATEGORIES, filter, filterRecent, recentCount) {
     const container = document.getElementById("mb-filters");
     container.innerHTML = "";
@@ -816,11 +704,15 @@
     film:          { label: "Film",          color: "#419636" }
   };
 
+  // Stato dei giorni: mappa { "YYYY-MM-DD": true|false }
+  //  - valore true   -> giorno ABILITATO (spunta attiva): righe modificabili
+  //  - valore false o chiave ASSENTE -> giorno bloccato (spunta spenta): righe sbiadite e non modificabili
+  // La spunta è SEMPRE presente su ogni barra; di default un giorno è bloccato finché non lo si abilita.
+  let dayDone = {};
+
   let editingId = null;
   let filter = "tutte";
   let searchQuery = "";
-  let timeRange = "all";
-  let viewMode = "list";
   let statsOpen = false;
   let filterRecent = false;
   const RECENT_MS = 48 * 60 * 60 * 1000;
@@ -828,13 +720,6 @@
   const DAYS_SHORT = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
   const DAYS_LONG  = ["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
   const MONTHS     = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-
-  const TIME_RANGES = {
-    all:       { fn: () => true },
-    morning:   { fn: t => { const m = timeToMin(t); return m >= 360 && m < 780; } },
-    afternoon: { fn: t => { const m = timeToMin(t); return m >= 780 && m < 1200; } },
-    evening:   { fn: t => { const m = timeToMin(t); return m >= 1200 || m < 360; } }
-  };
 
   const today = new Date();
   let viewYear = today.getFullYear();
@@ -849,7 +734,6 @@
   mSel.addEventListener("change", () => { viewMonth = parseInt(mSel.value, 10); render(); });
   ySel.addEventListener("change", () => { viewYear  = parseInt(ySel.value, 10); render(); });
 
-  // Esponi setter filtri per mobile
   window._setFilter = function(f) { filter = f; filterRecent = false; render(); };
   window._toggleFilterRecent = function() { filterRecent = !filterRecent; filter = "tutte"; render(); };
 
@@ -857,6 +741,28 @@
     if (!ev.updatedAt) return false;
     return (Date.now() - ev.updatedAt) < RECENT_MS;
   }
+
+  // Un giorno è "bloccato" a meno che non sia stato esplicitamente abilitato (true).
+  // Quindi: chiave assente o false => bloccato; true => modificabile.
+  function isDayLocked(dateKey) {
+    return dayDone[dateKey] !== true;
+  }
+
+  // True quando il giorno è modificabile (spunta attiva).
+  function isDayUnlocked(dateKey) {
+    return !isDayLocked(dateKey);
+  }
+
+  // Cliccando la spunta si alterna tra abilitato (true) e bloccato (false).
+  window.toggleDayLocked = async function(dateKey) {
+    dayDone[dateKey] = (dayDone[dateKey] !== true);
+    render();
+    try {
+      await setDoc(doc(db, "config", "daysDone"), dayDone);
+    } catch (err) {
+      console.error("Errore salvataggio stato giorno:", err);
+    }
+  };
 
   onSnapshot(doc(db, "config", "categories"), (docSnap) => {
     if (docSnap.exists() && Object.keys(docSnap.data()).length > 0) {
@@ -868,6 +774,38 @@
     renderCatPanel();
     render();
   }, (error) => { console.error("Errore lettura categorie:", error); });
+
+  // Imposta lo stato iniziale richiesto, UNA SOLA VOLTA (poi lo gestisci tu manualmente).
+  //  - Maggio 2026: tutti i giorni abilitati.
+  //  - Giugno 2026: giorni 1-7 abilitati, gli altri lasciati bloccati.
+  // Un flag salvato dentro la mappa evita di riapplicarlo ai caricamenti successivi.
+  async function seedInitialDays() {
+    if (dayDone.__seed_v1 === true) return;
+    const daysMay = new Date(2026, 5, 0).getDate(); // giorni di maggio 2026
+    for (let d = 1; d <= daysMay; d++) {
+      dayDone["2026-05-" + String(d).padStart(2, "0")] = true;
+    }
+    for (let d = 1; d <= 7; d++) {
+      dayDone["2026-06-" + String(d).padStart(2, "0")] = true;
+    }
+    dayDone.__seed_v1 = true;
+    try {
+      await setDoc(doc(db, "config", "daysDone"), dayDone);
+    } catch (err) {
+      console.error("Errore seeding stato giorni:", err);
+    }
+  }
+
+  // Stato spunte giorni (sincronizzato tra dispositivi)
+  onSnapshot(doc(db, "config", "daysDone"), (docSnap) => {
+    if (docSnap.exists()) {
+      dayDone = docSnap.data() || {};
+    } else {
+      dayDone = {};
+    }
+    seedInitialDays();
+    render();
+  }, (error) => { console.error("Errore lettura stato giorni:", error); });
 
   onSnapshot(collection(db, "events"), (snapshot) => {
     const statusEl = document.getElementById("sync-status");
@@ -894,7 +832,6 @@
     Object.entries(CATEGORIES).forEach(([k, c]) => { selCat.appendChild(new Option(c.label, k)); });
     if (CATEGORIES[prev]) selCat.value = prev;
     else if (Object.keys(CATEGORIES).length > 0) selCat.value = Object.keys(CATEGORIES)[0];
-    // Sync mobile
     if (typeof window.mbSyncCatSelect === "function") window.mbSyncCatSelect();
     else {
       const mbCat = document.getElementById("mb-f-cat");
@@ -931,12 +868,6 @@
     return parseInt(parts[0], 10) * 60 + (parseInt(parts[1], 10) || 0);
   }
 
-  function isLightColor(hex) {
-    const c = String(hex).replace("#", "");
-    const r = parseInt(c.substr(0, 2), 16), g = parseInt(c.substr(2, 2), 16), b = parseInt(c.substr(4, 2), 16);
-    return ((0.299 * r + 0.587 * g + 0.114 * b) / 255) > 0.65;
-  }
-
   function eventsInView() {
     const ymPrefix = viewYear + "-" + String(viewMonth + 1).padStart(2, "0");
     return events.filter(e => e.date && e.date.startsWith(ymPrefix));
@@ -956,10 +887,8 @@
     document.getElementById("monthLabel").textContent = labelText;
     document.getElementById("mb-month-label").textContent = MONTHS[viewMonth] + " " + viewYear + " • " + inView.length + " prog.";
 
-    // Render filtri mobile
     if (window._renderMbFilters) window._renderMbFilters(inView, CATEGORIES, filter, filterRecent, recentCount);
 
-    // Filtri desktop
     const filtersDiv = document.getElementById("filters");
     filtersDiv.innerHTML = "";
     const counts = { tutte: inView.length };
@@ -996,18 +925,6 @@
 
     const sq = (searchQuery || "").trim().toLowerCase();
     if (sq) filtered = filtered.filter(e => (e.name || "").toLowerCase().includes(sq) || (e.time || "").includes(sq));
-    if (timeRange !== "all") filtered = filtered.filter(e => TIME_RANGES[timeRange].fn(e.time));
-
-    ["all","morning","afternoon","evening"].forEach(tr => {
-      const b = document.getElementById("tf-" + tr);
-      if (b) b.className = timeRange === tr ? "on" : "";
-    });
-    ["list","grid"].forEach(vm => {
-      const b = document.getElementById("vm-" + vm);
-      if (b) b.className = viewMode === vm ? "on" : "";
-    });
-
-    if (statsOpen) renderStats();
 
     const legend = document.getElementById("legend");
     legend.innerHTML = "";
@@ -1017,8 +934,6 @@
       it.appendChild(sw); it.appendChild(document.createTextNode(c.label));
       legend.appendChild(it);
     });
-
-    if (viewMode === "grid") { renderGrid(filtered); return; }
 
     const groups = {};
     filtered.forEach(e => { if (!groups[e.date]) groups[e.date] = []; groups[e.date].push(e); });
@@ -1034,12 +949,37 @@
       const dt = new Date(viewYear, viewMonth, d);
       const dayName = DAYS_LONG[dt.getDay()];
       const dateLabel = dayName + " " + String(d).padStart(2, "0") + "/" + String(viewMonth + 1).padStart(2, "0") + "/" + viewYear;
+      const locked = isDayLocked(dateKey);
 
       const dayDiv = document.createElement("div");
-      dayDiv.className = "day" + (items.length === 0 ? " empty-day" : "");
+      dayDiv.className = "day"
+        + (items.length === 0 ? " empty-day" : "")
+        + (locked ? " day-locked" : " day-done");
 
+      // Header del giorno con spunta sempre presente
       const h = document.createElement("div");
-      h.className = "day-h"; h.textContent = dateLabel;
+      h.className = "day-h";
+
+      const checkBtn = document.createElement("button");
+      checkBtn.type = "button";
+      checkBtn.className = "day-check no-print" + (locked ? "" : " on");
+      checkBtn.title = locked
+        ? "Giorno bloccato — clicca per abilitarlo e renderlo modificabile"
+        : "Giorno abilitato — clicca per bloccarlo di nuovo";
+      checkBtn.textContent = locked ? "" : "✓";
+      checkBtn.onclick = (e) => { e.stopPropagation(); window.toggleDayLocked(dateKey); };
+      h.appendChild(checkBtn);
+
+      const dayLabelSpan = document.createElement("span");
+      dayLabelSpan.className = "day-h-label";
+      dayLabelSpan.textContent = dateLabel;
+      h.appendChild(dayLabelSpan);
+
+      const stateBadge = document.createElement("span");
+      stateBadge.className = "day-state-badge no-print";
+      stateBadge.textContent = locked ? "Da Fare" : "Completo";
+      h.appendChild(stateBadge);
+
       dayDiv.appendChild(h);
 
       if (items.length === 0) {
@@ -1057,6 +997,10 @@
         const bStart = timeToMin(items[i + 1].time);
         if (aEnd > 0 && bStart >= 0 && aEnd > bStart) { overlapIds.add(items[i].id); overlapIds.add(items[i + 1].id); }
       }
+
+      const rowsWrap = document.createElement("div");
+      // Sbiadito e non modificabile SOLO se il giorno è bloccato (copiato e non ancora confermato).
+      rowsWrap.className = "day-rows" + (locked ? " locked-rows" : "");
 
       items.forEach(ev => {
         const catKey = CATEGORIES[ev.category] ? ev.category : "nessuna";
@@ -1099,101 +1043,18 @@
 
         const act = document.createElement("div");
         act.className = "act no-print";
-        const editBtn = document.createElement("button"); editBtn.textContent = "✎"; editBtn.onclick = () => window.editEvent(ev.id);
-        const delBtn  = document.createElement("button"); delBtn.textContent  = "×"; delBtn.className = "del"; delBtn.onclick = () => window.deleteEvent(ev.id);
-        act.appendChild(editBtn); act.appendChild(delBtn);
+        // Pulsanti modifica/elimina nascosti solo se il giorno è bloccato (copiato e non confermato).
+        if (!locked) {
+          const editBtn = document.createElement("button"); editBtn.textContent = "✎"; editBtn.onclick = () => window.editEvent(ev.id);
+          const delBtn  = document.createElement("button"); delBtn.textContent  = "×"; delBtn.className = "del"; delBtn.onclick = () => window.deleteEvent(ev.id);
+          act.appendChild(editBtn); act.appendChild(delBtn);
+        }
         row.appendChild(act);
-        dayDiv.appendChild(row);
+        rowsWrap.appendChild(row);
       });
+      dayDiv.appendChild(rowsWrap);
       list.appendChild(dayDiv);
     }
-  }
-
-  function renderGrid(filtered) {
-    const list = document.getElementById("list");
-    list.innerHTML = "";
-    const groups = {};
-    filtered.forEach(e => { if (!groups[e.date]) groups[e.date] = []; groups[e.date].push(e); });
-    Object.values(groups).forEach(arr => arr.sort((a, b) => a.time.localeCompare(b.time)));
-
-    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-    let hasAny = false;
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dateKey = viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
-      const items = groups[dateKey] || [];
-      if (items.length === 0) continue;
-      hasAny = true;
-      const dt = new Date(viewYear, viewMonth, d);
-      const dayDiv = document.createElement("div");
-      dayDiv.className = "grid-day";
-      const header = document.createElement("div");
-      header.className = "grid-day-header";
-      header.textContent = DAYS_SHORT[dt.getDay()] + " " + String(d).padStart(2, "0") + "/" + String(viewMonth + 1).padStart(2, "0");
-      dayDiv.appendChild(header);
-
-      const timeline = document.createElement("div");
-      timeline.className = "grid-timeline";
-      [0, 4, 8, 12, 16, 20].forEach(h => {
-        const tick = document.createElement("div"); tick.className = "grid-tick"; tick.style.left = (h / 24 * 100) + "%";
-        timeline.appendChild(tick);
-      });
-
-      items.forEach(ev => {
-        const startMin = timeToMin(ev.time);
-        if (startMin < 0) return;
-        const { h, m } = parseDuration(ev.duration);
-        const durMin = h * 60 + m;
-        const block = document.createElement("div");
-        block.className = "grid-block";
-        const catKey = CATEGORIES[ev.category] ? ev.category : "nessuna";
-        const cat = CATEGORIES[catKey] || { color: "#ccc" };
-        block.style.background = cat.color;
-        block.style.left  = (startMin / 1440 * 100) + "%";
-        block.style.width = Math.max(durMin > 0 ? durMin / 1440 * 100 : 0.4, 0.4) + "%";
-        block.style.color = isLightColor(cat.color) ? "#111" : "#fff";
-        block.textContent = ev.name;
-        block.title = ev.time + " — " + ev.name + (ev.duration ? " (" + ev.duration + ")" : "") + (isRecentlyModified(ev) ? " 🔴 modificato di recente" : "");
-        if (isRecentlyModified(ev)) block.style.outline = "2px solid #e53935";
-        timeline.appendChild(block);
-      });
-      dayDiv.appendChild(timeline);
-      list.appendChild(dayDiv);
-    }
-    if (!hasAny) list.innerHTML = '<div class="empty">Nessun programma trovato.</div>';
-  }
-
-  function renderStats() {
-    const panel = document.getElementById("stats-panel");
-    const inView = eventsInView();
-    let totalMin = 0;
-    inView.forEach(e => { const { h, m } = parseDuration(e.duration); totalMin += h * 60 + m; });
-    const totalH = Math.floor(totalMin / 60); const totalM = totalMin % 60;
-    const catMin = {};
-    Object.keys(CATEGORIES).forEach(k => catMin[k] = 0);
-    inView.forEach(e => { const k = CATEGORIES[e.category] ? e.category : "nessuna"; const { h, m } = parseDuration(e.duration); catMin[k] = (catMin[k] || 0) + h * 60 + m; });
-
-    let html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
-    html += '<span style="font-weight:700;color:var(--muted);text-transform:uppercase;">Statistiche — ' + MONTHS[viewMonth] + ' ' + viewYear + '</span>';
-    html += '<button onclick="window.toggleStats()" style="font:inherit;font-size:11px;padding:2px 8px;border:1px solid #ccc;background:transparent;">Chiudi ×</button></div>';
-    html += '<div class="stats-grid">';
-    html += '<div class="stats-card"><div class="val">' + inView.length + '</div><div class="lbl">Programmi nel mese</div></div>';
-    html += '<div class="stats-card"><div class="val">' + totalH + 'h' + (totalM > 0 ? ' ' + totalM + 'm' : '') + '</div><div class="lbl">Ore programmate</div></div>';
-    const recentCount = inView.filter(isRecentlyModified).length;
-    html += '<div class="stats-card"><div class="val" style="color:#e53935">' + recentCount + '</div><div class="lbl">Modificati ultime 48h</div></div>';
-    html += '</div>';
-
-    const maxMin = Math.max(...Object.values(catMin).filter(v => v > 0), 1);
-    Object.entries(CATEGORIES).sort((a, b) => (catMin[b[0]] || 0) - (catMin[a[0]] || 0)).forEach(([k, c]) => {
-      const min = catMin[k] || 0;
-      const ch = Math.floor(min / 60); const cm = min % 60;
-      const pct = (min / maxMin * 100).toFixed(0);
-      const lbl = ch > 0 ? ch + "h" + (cm > 0 ? " " + cm + "m" : "") : (cm > 0 ? cm + "m" : "—");
-      html += '<div class="stats-cat-bar">';
-      html += '<span style="width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + c.label + '</span>';
-      html += '<div class="stats-bar-bg"><div class="stats-bar-fill" style="width:' + pct + '%;background:' + c.color + '"></div></div>';
-      html += '<span style="width:55px;text-align:right;">' + lbl + '</span></div>';
-    });
-    panel.innerHTML = html;
   }
 
   function renderCatPanel() {
@@ -1278,6 +1139,7 @@
     const existing   = events.filter(e => e.date && e.date.startsWith(nextPrefix));
     const batch = writeBatch(db);
     let copied = 0, skipped = 0;
+    const copiedTargetDays = new Set();
     const daysInNext = new Date(nextYear, nextMonth + 1, 0).getDate();
     function weekOccurrence(y, m, d) {
       const wd = new Date(y, m - 1, d).getDay();
@@ -1297,15 +1159,29 @@
       if (existing.some(e => e.date === targetDate && e.time === ev.time && e.name === ev.name)) { skipped++; return; }
       const eId = "e" + Date.now() + Math.random().toString(36).slice(2, 5) + "_cp" + targetDay;
       batch.set(doc(db, "events", eId), { id: eId, date: targetDate, time: ev.time, name: ev.name, duration: ev.duration, category: ev.category });
+      copiedTargetDays.add(targetDate);
       copied++;
     });
-    if (copied > 0) { await batch.commit(); viewYear = nextYear; viewMonth = nextMonth; alert(copied + " programmi copiati in " + MONTHS[nextMonth] + " " + nextYear + "."); }
+    if (copied > 0) {
+      // I soli giorni che hanno ricevuto programmi dalla copia partono come BLOCCATI (false),
+      // cioè sbiaditi e non modificabili finché non si attiva la spunta. Lo storico non viene toccato.
+      copiedTargetDays.forEach(dk => { dayDone[dk] = false; });
+      await batch.commit();
+      try { await setDoc(doc(db, "config", "daysDone"), dayDone); } catch (err) { console.error("Errore salvataggio stato giorni:", err); }
+      viewYear = nextYear; viewMonth = nextMonth;
+      alert(copied + " programmi copiati in " + MONTHS[nextMonth] + " " + nextYear + ". I giorni copiati sono bloccati: attiva la spunta su un giorno per renderlo modificabile.");
+    }
     else alert("Nessun programma copiato.");
   };
 
   window.editEvent = function(id) {
     const ev = events.find(e => e.id === id);
     if (!ev) return;
+    // Sicurezza: blocca la modifica solo se il giorno è bloccato (copiato e non ancora confermato).
+    if (isDayLocked(ev.date)) {
+      alert("Questo giorno è ancora bloccato. Attiva la spunta sulla barra del giorno per poterlo modificare.");
+      return;
+    }
     editingId = id;
     document.getElementById("f-cat").value  = CATEGORIES[ev.category] ? ev.category : "nessuna";
     document.getElementById("f-date").value = ev.date;
@@ -1318,7 +1194,6 @@
     setSelectedDows([]);
     document.getElementById("f-go").textContent = "Aggiorna";
     document.getElementById("f-cancel").style.display = "inline-block";
-    // Popola form mobile
     const mbCat = document.getElementById("mb-f-cat");
     if (mbCat) {
       mbCat.value = CATEGORIES[ev.category] ? ev.category : "nessuna";
@@ -1332,7 +1207,6 @@
       document.getElementById("mb-f-go").textContent = "Aggiorna";
       document.getElementById("mb-f-cancel").style.display = "block";
       document.getElementById("mb-form-label").textContent = "Modifica programma";
-      // Apri il drawer su mobile
       if (window.innerWidth <= 680) {
         if (typeof toggleDrawer === "function") toggleDrawer();
       }
@@ -1350,7 +1224,6 @@
     setSelectedDows([]);
     document.getElementById("f-go").textContent = "Salva";
     document.getElementById("f-cancel").style.display = "none";
-    // Reset form mobile
     if (typeof window.mbResetForm === "function") window.mbResetForm();
   };
 
@@ -1371,9 +1244,6 @@
     else { panel.style.display = "block"; renderCatPanel(); }
   };
 
-  window.toggleStats   = function() { statsOpen = !statsOpen; document.getElementById("stats-panel").style.display = statsOpen ? "block" : "none"; if (statsOpen) renderStats(); };
-  window.setTimeRange  = function(tr) { timeRange = tr; render(); };
-  window.setViewMode   = function(vm) { viewMode  = vm; render(); };
   window.printPDF      = function() { window.print(); };
 
   document.getElementById("f-search").addEventListener("input", (e) => { searchQuery = e.target.value; render(); });
@@ -1400,7 +1270,7 @@
   });
 
   window.downloadBackup = function() {
-    const data = { events, categories: CATEGORIES };
+    const data = { events, categories: CATEGORIES, daysDone: dayDone };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -1411,10 +1281,11 @@
   window.exportCSV = function() {
     const inView = eventsInView();
     if (inView.length === 0) return alert("Nessun programma.");
-    const rows = [["Data","Giorno","Orario","Nome programma","Durata","Categoria","Modificato di recente"]];
+    const rows = [["Data","Giorno","Orario","Nome programma","Durata","Categoria","Modificato di recente","Stato giorno"]];
     inView.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)).forEach(e => {
       const [yy, mm, dd] = e.date.split("-");
-      rows.push([dd+"/"+mm+"/"+yy, DAYS_LONG[new Date(e.date).getDay()], e.time, e.name, e.duration || "", (CATEGORIES[e.category]||{label:"Nessuna"}).label, isRecentlyModified(e) ? "Sì" : ""]);
+      const stato = isDayLocked(e.date) ? "Bloccato" : (dayDone[e.date] === true ? "Confermato" : "");
+      rows.push([dd+"/"+mm+"/"+yy, DAYS_LONG[new Date(e.date).getDay()], e.time, e.name, e.duration || "", (CATEGORIES[e.category]||{label:"Nessuna"}).label, isRecentlyModified(e) ? "Sì" : "", stato]);
     });
     const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(",")).join("\r\n");
     const a = document.createElement("a");
@@ -1431,9 +1302,11 @@
     reader.onload = async function(ev) {
       try {
         let importedEvents = [];
+        let importedDays = null;
         if (file.name.endsWith(".json")) {
           const parsed = JSON.parse(ev.target.result);
           importedEvents = parsed.events || parsed;
+          if (parsed.daysDone) importedDays = parsed.daysDone;
         } else {
           const match = ev.target.result.match(/<script[^>]*id="events-data"[^>]*>([\s\S]*?)<\/script>/);
           if (!match) return alert("Nessun dato trovato nel file HTML.");
@@ -1450,6 +1323,10 @@
           if (count === 490) { await batch.commit(); batch = writeBatch(db); count = 0; }
         }
         if (count > 0) await batch.commit();
+        if (importedDays) {
+          dayDone = importedDays;
+          try { await setDoc(doc(db, "config", "daysDone"), dayDone); } catch (e2) { console.error(e2); }
+        }
         alert("Importazione completata!");
       } catch (err) { alert("Errore importazione: " + err.message); }
     };
