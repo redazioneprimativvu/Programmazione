@@ -27,6 +27,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-danger{background:#ef4444;color:white}
 .btn-success{background:#22c55e;color:white}
 .btn-export{background:#8b5cf6;color:white}
+.btn-ferie{background:#0d9488;color:white}
 .btn:hover{opacity:.85}
 
 .strip{background:white;border-bottom:1px solid #e2e8f0;padding:8px 14px;display:flex;align-items:stretch;gap:10px;overflow-x:auto;min-height:46px;flex-wrap:wrap}
@@ -84,6 +85,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cell-chip:hover{transform:scale(1.03)}
 .cell-chip:active{cursor:grabbing;opacity:.7}
 .cell-chip.is-dragging{opacity:.35;transform:scale(.97)}
+.cell-chip.ferie-chip{cursor:pointer;font-weight:800;letter-spacing:.04em}
+.cell-chip.ferie-chip .chip-name{color:#fff}
 
 .chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;font-size:.78rem;display:flex;align-items:center;justify-content:center;gap:3px}
 .chip-time{font-size:.64rem;opacity:.9;font-weight:600;margin-top:1px}
@@ -128,6 +131,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
 .modal{background:white;border-radius:14px;padding:22px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto}
 .modal.modal-wide{max-width:840px}
+.modal.modal-ferie{max-width:920px}
+
+/* ── Finestra Ferie ── */
+.ferie-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ferie-col-title{font-size:.75rem;font-weight:800;color:#0f766e;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #99f6e4;padding-bottom:4px}
+.ferie-person{border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fbfdfd}
+.ferie-person-name{font-weight:700;font-size:.86rem;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.ferie-person-name .rb{font-size:.66rem;color:#94a3b8;font-weight:500}
+.ferie-range{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:nowrap}
+.ferie-range input[type=date]{flex:1;min-width:0;padding:5px 7px;border:1px solid #e2e8f0;border-radius:6px;font-size:.8rem;font-family:inherit;outline:none}
+.ferie-range input[type=date]:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+.ferie-range .arrow{font-size:.78rem;color:#94a3b8;flex-shrink:0}
+.ferie-range .del-range{background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:1rem;padding:0 4px;flex-shrink:0;line-height:1}
+.ferie-range .del-range:hover{color:#ef4444}
+.ferie-add{background:none;border:1px dashed #99f6e4;color:#0d9488;font-size:.76rem;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;margin-top:2px}
+.ferie-add:hover{background:#f0fdfa}
+.ferie-empty{font-size:.76rem;color:#cbd5e1;font-style:italic;padding:4px 0}
+.ferie-scroll{max-height:62vh;overflow-y:auto;overflow-x:hidden;padding-right:4px}
 .modal h2{font-size:1.05rem;font-weight:700;margin-bottom:14px}
 .modal-footer{display:flex;justify-content:flex-end;gap:7px;margin-top:18px;flex-wrap:wrap}
 
@@ -238,11 +259,15 @@ const S={
   cat:'tecnici', weekStart:null,
   staff:[], programmi:[], turni:{},
   hiddenBuiltins:[],
+  // Ferie: { '<staffId>': [ {start:'YYYY-MM-DD', end:'YYYY-MM-DD'}, ... ] }
+  // Regola speciale a priorità assoluta: non sovrascrivibile da turnazione, manuale o clonazione.
+  ferie:{},
   // Layout barra preset. presetLayout: { fissi:[key,...], temporanei:[key,...] }
   // dove key = 'b:<builtinId>' per i preset fissi, 'p:<progId>' per i programmi.
   presetLayout:{fissi:[],temporanei:[]},
   presetReorder:null,        // chiave del preset attualmente trascinato per il riordino
   modalStaff:false, modalProg:false, editProg:null,
+  modalFerie:false,
   cellModal:null, removePrompt:null,
   presetMenu:null,
   dragging:null,
@@ -252,15 +277,15 @@ const S={
 
 // ── PERSISTENCE ──
 async function save(){
-  const payload={staff:S.staff,programmi:S.programmi,turni:S.turni,hiddenBuiltins:S.hiddenBuiltins,presetLayout:S.presetLayout};
+  const payload={staff:S.staff,programmi:S.programmi,turni:S.turni,hiddenBuiltins:S.hiddenBuiltins,presetLayout:S.presetLayout,ferie:S.ferie};
   try{ if(window._fbSave) await window._fbSave(payload); }catch(e){console.error('save:',e);}
   try{ localStorage.setItem('turni_v5_fb',JSON.stringify(payload)); }catch{}
 }
 async function load(){
   try{
-    if(window._fbLoad){ const d=await window._fbLoad(); if(d){S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};S.hiddenBuiltins=d.hiddenBuiltins||[];S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]};migrateData();normalizePresetLayout();return;} }
+    if(window._fbLoad){ const d=await window._fbLoad(); if(d){S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};S.hiddenBuiltins=d.hiddenBuiltins||[];S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]};S.ferie=d.ferie||{};migrateData();normalizePresetLayout();return;} }
   }catch(e){console.error('load:',e);}
-  try{ const d=JSON.parse(localStorage.getItem('turni_v5')||localStorage.getItem('turni_v5_fb')||'{}');S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};S.hiddenBuiltins=d.hiddenBuiltins||[];S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]}; }catch{S.staff=[];S.programmi=[];S.turni={};S.hiddenBuiltins=[];S.presetLayout={fissi:[],temporanei:[]};}
+  try{ const d=JSON.parse(localStorage.getItem('turni_v5')||localStorage.getItem('turni_v5_fb')||'{}');S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};S.hiddenBuiltins=d.hiddenBuiltins||[];S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]};S.ferie=d.ferie||{}; }catch{S.staff=[];S.programmi=[];S.turni={};S.hiddenBuiltins=[];S.presetLayout={fissi:[],temporanei:[]};S.ferie={};}
   migrateData();normalizePresetLayout();
 }
 
@@ -375,7 +400,22 @@ function getAutoFor(person,iso,cat){
   return null;
 }
 function getManual(pid,iso){return S.turni[`${pid}|${iso}|${S.cat}`]??null}
-function getShift(pid,iso){const m=getManual(pid,iso);if(m!==null)return m.blocked?null:m;return getAuto(pid,iso)}
+// Ferie: regola speciale a priorità assoluta. Controllata prima di tutto il resto.
+function isOnFerie(pid,iso){
+  const ranges=(S.ferie&&S.ferie[pid])||[];
+  for(const r of ranges){
+    if(!r||!r.start||!r.end)continue;
+    const a=r.start<=r.end?r.start:r.end, b=r.start<=r.end?r.end:r.start;
+    if(iso>=a&&iso<=b)return true;
+  }
+  return false;
+}
+// Turno "ferie" sintetico, mostrato in rosso con scritta FERIE.
+const FERIE_SHIFT={ferie:true,nomeImprovvisato:'FERIE',coloreNota:'#ef4444',oraInizio:'',oraFine:''};
+function getShift(pid,iso){
+  if(isOnFerie(pid,iso))return FERIE_SHIFT; // priorità assoluta su manuale/auto/clonazione
+  const m=getManual(pid,iso);if(m!==null)return m.blocked?null:m;return getAuto(pid,iso);
+}
 function setManual(pid,iso,val){const k=`${pid}|${iso}|${S.cat}`;if(val===null)delete S.turni[k];else S.turni[k]=val;}
 function conflictCheck(pid,iso){
   const cur=getShift(pid,iso);if(!cur?.eventoId||BUILTIN_IDS.has(cur.eventoId))return null;
@@ -412,6 +452,8 @@ function propagateForward(pid,iso,val){
 function dropOnCell(pid,iso){
   if(!S.dragging)return;
   S.presetReorder=null; // un drop su una cella non è mai un riordino di preset
+  // Le ferie sono una regola speciale: la cella è bloccata, niente override col trascinamento.
+  if(isOnFerie(pid,iso)){S.dragging=null;return;}
   const{type,id,cellShift}=S.dragging;
   const person=byId(S.staff,pid);if(!person)return;
   try{
@@ -475,6 +517,7 @@ function buildHTML(){
   return topBar()+strip()+gridSection()+
     (S.modalStaff?modalStaff():'')+
     (S.modalProg?modalProg():'')+
+    (S.modalFerie?modalFerie():'')+
     (S.cellModal?cellModal():'')+
     (S.removePrompt?removePrompt():'')+
     (S.presetMenu?presetMenu():'');
@@ -495,6 +538,7 @@ function topBar(){
   </div>
   <div class="action-btns">
     <button class="btn btn-export" onclick="exportPDF()">PDF</button>
+    <button class="btn btn-ferie" onclick="openFerie()">🏖️ Ferie</button>
     <button class="btn btn-secondary" onclick="openStaff()">👥 Personale</button>
     <button class="btn btn-primary" onclick="openProg()">📋 Programmi</button>
   </div>
@@ -556,8 +600,15 @@ function gridSection(){
 }
 
 function buildCell(pid,iso){
-  const sh=getShift(pid,iso);
   const today=isToday(iso)?' day-today':'';
+
+  // FERIE: regola speciale, priorità assoluta. Chip rosso pieno, non trascinabile.
+  if(isOnFerie(pid,iso)){
+    const inner=`<div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div>`;
+    return`<td><div class="cell${today}" onclick="onCellClick(event,'${pid}','${iso}')">${inner}</div></td>`;
+  }
+
+  const sh=getShift(pid,iso);
 
   // Pallino rosso: turno modificato manualmente rispetto all'automatico
   const manualEntry=getManual(pid,iso);
@@ -595,6 +646,8 @@ function buildCell(pid,iso){
 window._wasDragging=false;
 function onCellClick(e,pid,iso){
   if(window._wasDragging){window._wasDragging=false;return;}
+  // Le ferie si modificano solo dalla finestra dedicata: il clic la apre.
+  if(isOnFerie(pid,iso)){openFerie();return;}
   openCell(pid,iso);
 }
 
@@ -628,6 +681,51 @@ function modalStaff(){
     <button class="btn btn-primary" style="width:100%" onclick="addStaff()">Aggiungi</button>
   </div>
   <div class="modal-footer"><button class="btn btn-secondary" onclick="S.modalStaff=false;render()">Chiudi</button></div>
+</div></div>`;
+}
+
+// ── FINESTRA FERIE ──
+// Regola speciale: priorità assoluta, non sovrascrivibile dal trascinamento né
+// dalla clonazione settimanale. Si gestisce solo da qui. Per cancellare le ferie
+// basta svuotare/eliminare le date.
+function modalFerie(){
+  const personRow=(s)=>{
+    const ranges=(S.ferie&&S.ferie[s.id])||[];
+    const rangesHTML=ranges.length
+      ? ranges.map((r,ix)=>`<div class="ferie-range">
+          <input type="date" data-fp="${s.id}" data-fi="${ix}" data-ff="start" value="${r.start||''}" onchange="setFerieDate('${s.id}',${ix},'start',this.value)">
+          <span class="arrow">→</span>
+          <input type="date" data-fp="${s.id}" data-fi="${ix}" data-ff="end" value="${r.end||''}" onchange="setFerieDate('${s.id}',${ix},'end',this.value)">
+          <button class="del-range" title="Elimina periodo" onclick="removeFerieRange('${s.id}',${ix})">✕</button>
+        </div>`).join('')
+      : `<div class="ferie-empty">Nessun periodo di ferie</div>`;
+    return`<div class="ferie-person">
+      <div class="ferie-person-name">${esc(s.cognome)} ${esc(s.nome)} <span class="rb">${esc(s.ruolo)}</span></div>
+      ${rangesHTML}
+      <button class="ferie-add" onclick="addFerieRange('${s.id}')">+ Aggiungi periodo</button>
+    </div>`;
+  };
+  const colHTML=(cat)=>{
+    const arr=staffSorted(cat);
+    return arr.length?arr.map(personRow).join(''):`<div class="ferie-empty">Nessuna persona</div>`;
+  };
+  return`<div class="modal-overlay" onclick="if(event.target===this){S.modalFerie=false;render()}">
+<div class="modal modal-ferie" onclick="event.stopPropagation()">
+  <h2>🏖️ Gestione Ferie</h2>
+  <p style="font-size:.78rem;color:#64748b;margin-top:-8px;margin-bottom:14px">Inserisci uno o più periodi per ciascuna persona. I giorni di ferie compaiono in rosso nella turnazione e hanno priorità su tutto. Per cancellarle, elimina le date.</p>
+  <div class="ferie-scroll">
+    <div class="ferie-cols">
+      <div>
+        <div class="ferie-col-title">Tecnici</div>
+        ${colHTML('tecnici')}
+      </div>
+      <div>
+        <div class="ferie-col-title">Giornalisti</div>
+        ${colHTML('giornalisti')}
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-secondary" onclick="S.modalFerie=false;render()">Chiudi</button></div>
 </div></div>`;
 }
 
@@ -773,6 +871,60 @@ function goToday(){S.weekStart=getMonday(toISO(new Date()));render()}
 function setTab(cat){S.cat=cat;render()}
 function openStaff(){S.modalStaff=true;render()}
 function openProg(){S.modalProg=true;S.editProg='list';render()}
+function openFerie(){S.modalFerie=true;render()}
+// ── AZIONI FERIE ──
+function addFerieRange(pid){
+  if(!S.ferie[pid])S.ferie[pid]=[];
+  S.ferie[pid].push({start:'',end:''});
+  refreshFerieOnly(); // mostra la nuova riga senza ridisegnare tutta la pagina
+}
+function removeFerieRange(pid,ix){
+  if(!S.ferie[pid])return;
+  S.ferie[pid].splice(ix,1);
+  if(!S.ferie[pid].length)delete S.ferie[pid];
+  save().catch(e=>console.error(e));
+  refreshGridOnly();   // aggiorna la tabella di sfondo
+  refreshFerieOnly();  // aggiorna la finestra ferie mantenendo lo scroll
+}
+// Ridisegna solo il contenuto della finestra ferie, preservando la posizione di scroll
+function refreshFerieOnly(){
+  const scroller=document.querySelector('.modal-ferie .ferie-scroll');
+  if(!scroller){render();return;}
+  const top=scroller.scrollTop;
+  const tmp=document.createElement('div');
+  tmp.innerHTML=modalFerie();
+  const freshScroller=tmp.querySelector('.ferie-scroll');
+  if(freshScroller){scroller.innerHTML=freshScroller.innerHTML;scroller.scrollTop=top;}
+  else render();
+}
+function setFerieDate(pid,ix,field,val){
+  if(!S.ferie[pid]||!S.ferie[pid][ix])return;
+  S.ferie[pid][ix][field]=val;
+  const r=S.ferie[pid][ix];
+  // Se l'utente imposta solo un estremo, allinea l'altro allo stesso giorno (periodo di 1 giorno).
+  // L'aggiornamento avviene direttamente sull'input gemello, senza ridisegnare la finestra
+  // (così non perde il focus né torna in cima).
+  if(field==='start'&&val&&!r.end){r.end=val;syncFerieInput(pid,ix,'end',val);}
+  if(field==='end'&&val&&!r.start){r.start=val;syncFerieInput(pid,ix,'start',val);}
+  save().catch(e=>console.error(e));
+  refreshGridOnly(); // aggiorna solo la tabella di sfondo, non la finestra ferie
+}
+// Aggiorna il valore di un input data della finestra ferie senza re-render
+function syncFerieInput(pid,ix,field,val){
+  const sel=`.ferie-range input[data-fp="${pid}"][data-fi="${ix}"][data-ff="${field}"]`;
+  const el=document.querySelector(sel);
+  if(el)el.value=val;
+}
+// Ridisegna solo la griglia dei turni, lasciando aperte e immutate le finestre modali
+function refreshGridOnly(){
+  const wrap=document.getElementById('capture-area');
+  if(!wrap){render();return;}
+  const tmp=document.createElement('div');
+  tmp.innerHTML=gridSection();
+  const fresh=tmp.firstElementChild;
+  wrap.replaceWith(fresh);
+  bindDrag();
+}
 function openCell(pid,date){
   const sh=getShift(pid,date);
   if(sh&&!sh.eventoId&&sh.coloreNota) S.noteColor=sh.coloreNota;
@@ -791,6 +943,7 @@ function ensureWeekCopied(){
       dates.forEach(iso=>{
         const k=`${p.id}|${iso}|${cat}`;
         if(S.turni[k]!==undefined)return; // già impostato: non toccare
+        if(isOnFerie(p.id,iso))return;    // ferie: regola speciale, non clonare nulla sopra
         const prevISO=addDays(iso,-7);
         const prevManual=S.turni[`${p.id}|${prevISO}|${cat}`];
         let prevShift;
@@ -1051,6 +1204,21 @@ async function exportPDF(){
       const sh=getShift(s.id,iso);
       if(!sh) return;
 
+      // FERIE: riquadro rosso pieno con scritta bianca
+      if(sh.ferie){
+        const pad=1.2;
+        pdf.setFillColor(239,68,68);
+        pdf.setDrawColor(220,38,38);
+        pdf.setLineWidth(0.4);
+        pdf.roundedRect(x+pad, rowY+pad, dayColW-pad*2, rowH-pad*2, 1, 1, 'FD');
+        pdf.setLineWidth(0.1);
+        pdf.setFont('helvetica','bold');
+        pdf.setFontSize(6.2);
+        pdf.setTextColor(255,255,255);
+        pdf.text('FERIE', x+dayColW/2, rowY+rowH/2+1, {align:'center'});
+        return;
+      }
+
       const bi=BUILTINS.find(b=>b.id===sh.eventoId);
       const pg=!bi?byId(S.programmi,sh.eventoId):null;
       const col=!sh.eventoId?(sh.coloreNota||'#6366f1'):(bi?.colore||pg?.colore||'#6366f1');
@@ -1163,6 +1331,7 @@ window.togGiorno=togGiorno;window.togMese=togMese;window.removeProg=removeProg;w
 window.saveImpro=saveImpro;window.clearCellPrompt=clearCellPrompt;window.confirmRemove=confirmRemove;
 window.exportPDF=exportPDF;window.openPresetMenu=openPresetMenu;window.editPreset=editPreset;window.deletePreset=deletePreset;
 window.onPresetZoneOver=onPresetZoneOver;window.onPresetZoneDrop=onPresetZoneDrop;
+window.openFerie=openFerie;window.addFerieRange=addFerieRange;window.removeFerieRange=removeFerieRange;window.setFerieDate=setFerieDate;
 window.S=S;
 
 // ── INIT ──
