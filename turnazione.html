@@ -276,16 +276,34 @@ const S={
 };
 
 // ── PERSISTENCE ──
+// Rimuove i valori `undefined` in profondità: Firestore rifiuta l'intera scrittura
+// se anche un solo campo è undefined, e questo faceva fallire il salvataggio (ferie comprese).
+function sanitize(v){
+  if(Array.isArray(v))return v.map(sanitize);
+  if(v&&typeof v==='object'){
+    const o={};
+    for(const k of Object.keys(v)){
+      const val=v[k];
+      if(val===undefined)continue;
+      o[k]=sanitize(val);
+    }
+    return o;
+  }
+  return v===undefined?null:v;
+}
 async function save(){
-  const payload={staff:S.staff,programmi:S.programmi,turni:S.turni,hiddenBuiltins:S.hiddenBuiltins,presetLayout:S.presetLayout,ferie:S.ferie};
-  try{ if(window._fbSave) await window._fbSave(payload); }catch(e){console.error('save:',e);}
-  try{ localStorage.setItem('turni_v5_fb',JSON.stringify(payload)); }catch{}
+  const payload=sanitize({staff:S.staff,programmi:S.programmi,turni:S.turni,hiddenBuiltins:S.hiddenBuiltins,presetLayout:S.presetLayout,ferie:S.ferie});
+  // Salva sempre in locale (immediato, non può fallire silenziosamente)
+  try{ localStorage.setItem('turni_v5_fb',JSON.stringify(payload)); }catch(e){console.error('save local:',e);}
+  // Poi su Firebase
+  try{ if(window._fbSave){ await window._fbSave(payload); } else { console.warn('Firebase non pronto: salvato solo in locale'); } }
+  catch(e){ console.error('save firebase:',e); }
 }
 async function load(){
   try{
     if(window._fbLoad){ const d=await window._fbLoad(); if(d){S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};S.hiddenBuiltins=d.hiddenBuiltins||[];S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]};S.ferie=d.ferie||{};migrateData();normalizePresetLayout();return;} }
   }catch(e){console.error('load:',e);}
-  try{ const d=JSON.parse(localStorage.getItem('turni_v5')||localStorage.getItem('turni_v5_fb')||'{}');S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};S.hiddenBuiltins=d.hiddenBuiltins||[];S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]};S.ferie=d.ferie||{}; }catch{S.staff=[];S.programmi=[];S.turni={};S.hiddenBuiltins=[];S.presetLayout={fissi:[],temporanei:[]};S.ferie={};}
+  try{ const d=JSON.parse(localStorage.getItem('turni_v5_fb')||'{}');S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};S.hiddenBuiltins=d.hiddenBuiltins||[];S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]};S.ferie=d.ferie||{}; }catch{S.staff=[];S.programmi=[];S.turni={};S.hiddenBuiltins=[];S.presetLayout={fissi:[],temporanei:[]};S.ferie={};}
   migrateData();normalizePresetLayout();
 }
 
@@ -709,7 +727,7 @@ function modalFerie(){
     const arr=staffSorted(cat);
     return arr.length?arr.map(personRow).join(''):`<div class="ferie-empty">Nessuna persona</div>`;
   };
-  return`<div class="modal-overlay" onclick="if(event.target===this){S.modalFerie=false;render()}">
+  return`<div class="modal-overlay" onclick="if(event.target===this){closeFerie()}">
 <div class="modal modal-ferie" onclick="event.stopPropagation()">
   <h2>🏖️ Gestione Ferie</h2>
   <p style="font-size:.78rem;color:#64748b;margin-top:-8px;margin-bottom:14px">Inserisci uno o più periodi per ciascuna persona. I giorni di ferie compaiono in rosso nella turnazione e hanno priorità su tutto. Per cancellarle, elimina le date.</p>
@@ -725,7 +743,7 @@ function modalFerie(){
       </div>
     </div>
   </div>
-  <div class="modal-footer"><button class="btn btn-secondary" onclick="S.modalFerie=false;render()">Chiudi</button></div>
+  <div class="modal-footer"><button class="btn btn-secondary" onclick="closeFerie()">Chiudi</button></div>
 </div></div>`;
 }
 
@@ -872,6 +890,16 @@ function setTab(cat){S.cat=cat;render()}
 function openStaff(){S.modalStaff=true;render()}
 function openProg(){S.modalProg=true;S.editProg='list';render()}
 function openFerie(){S.modalFerie=true;render()}
+// Chiude la finestra ferie ripulendo gli intervalli incompleti (senza start o end) e salvando.
+function closeFerie(){
+  Object.keys(S.ferie).forEach(pid=>{
+    S.ferie[pid]=(S.ferie[pid]||[]).filter(r=>r&&r.start&&r.end);
+    if(!S.ferie[pid].length)delete S.ferie[pid];
+  });
+  S.modalFerie=false;
+  save().catch(e=>console.error(e));
+  render();
+}
 // ── AZIONI FERIE ──
 function addFerieRange(pid){
   if(!S.ferie[pid])S.ferie[pid]=[];
@@ -1331,7 +1359,7 @@ window.togGiorno=togGiorno;window.togMese=togMese;window.removeProg=removeProg;w
 window.saveImpro=saveImpro;window.clearCellPrompt=clearCellPrompt;window.confirmRemove=confirmRemove;
 window.exportPDF=exportPDF;window.openPresetMenu=openPresetMenu;window.editPreset=editPreset;window.deletePreset=deletePreset;
 window.onPresetZoneOver=onPresetZoneOver;window.onPresetZoneDrop=onPresetZoneDrop;
-window.openFerie=openFerie;window.addFerieRange=addFerieRange;window.removeFerieRange=removeFerieRange;window.setFerieDate=setFerieDate;
+window.openFerie=openFerie;window.closeFerie=closeFerie;window.addFerieRange=addFerieRange;window.removeFerieRange=removeFerieRange;window.setFerieDate=setFerieDate;
 window.S=S;
 
 // ── INIT ──
