@@ -418,6 +418,32 @@ function getAutoFor(person,iso,cat){
   return null;
 }
 function getManual(pid,iso){return S.turni[`${pid}|${iso}|${S.cat}`]??null}
+
+// FIX: risolve lo stato "effettivo" di una casella per una data, risalendo a
+// ritroso di settimana in settimana finché trova l'ultimo stato reale (manuale
+// o clonato). Questo elimina le caselle vuote quando una settimana futura non
+// è ancora stata materializzata in S.turni: la casella eredita sempre ciò che
+// aveva la settimana precedente con dati, esattamente come da regola "clona la
+// precedente". Le ferie e l'automatico restano gestiti a monte da getShift.
+// Limite di risalita: 520 settimane (~10 anni) per evitare loop teoricamente infiniti.
+function resolveManualBack(pid,iso,cat){
+  let cur=iso;
+  for(let i=0;i<520;i++){
+    const rec=S.turni[`${pid}|${cur}|${cat}`];
+    if(rec!==undefined){
+      if(rec.blocked)return{state:'blocked'};
+      return{state:'shift',val:rec};
+    }
+    // Nessun record in questa settimana: se qui esisteva un automatico, quello
+    // è lo stato reale di partenza e non va scavalcato all'indietro.
+    const person=byId(S.staff,pid);
+    const auto=getAutoFor(person,cur,cat);
+    if(auto!==null)return{state:'auto',val:auto,iso:cur};
+    cur=addDays(cur,-7);
+  }
+  return{state:'none'};
+}
+
 // Ferie: regola speciale a priorità assoluta. Controllata prima di tutto il resto.
 function isOnFerie(pid,iso){
   const ranges=(S.ferie&&S.ferie[pid])||[];
@@ -432,7 +458,21 @@ function isOnFerie(pid,iso){
 const FERIE_SHIFT={ferie:true,nomeImprovvisato:'FERIE',coloreNota:'#ef4444',oraInizio:'',oraFine:''};
 function getShift(pid,iso){
   if(isOnFerie(pid,iso))return FERIE_SHIFT; // priorità assoluta su manuale/auto/clonazione
-  const m=getManual(pid,iso);if(m!==null)return m.blocked?null:m;return getAuto(pid,iso);
+  // Stato esplicito in questa esatta settimana
+  const m=getManual(pid,iso);
+  if(m!==null)return m.blocked?null:m;
+  // Nessun record qui: prima prova l'automatico di questa settimana...
+  const auto=getAuto(pid,iso);
+  if(auto!==null)return auto;
+  // ...poi eredita dalla settimana precedente con dati (clonazione senza buchi).
+  // Serve solo per settimane NON passate: il passato resta com'era (niente eredità).
+  if(!isPast(iso)){
+    const back=resolveManualBack(pid,addDays(iso,-7),S.cat);
+    if(back.state==='shift')return back.val;
+    if(back.state==='blocked')return null;
+    // back.state==='auto' verrebbe comunque già gestito dall'automatico locale
+  }
+  return null;
 }
 function setManual(pid,iso,val){const k=`${pid}|${iso}|${S.cat}`;if(val===null)delete S.turni[k];else S.turni[k]=val;}
 function conflictCheck(pid,iso){
@@ -883,10 +923,13 @@ function presetMenu(){
 }
 
 // ── ACTIONS ──
-function prevWeek(){S.weekStart=addDays(S.weekStart,-7);render()}
+// FIX: ogni cambio di settimana o categoria materializza la catena di clonazione
+// fino alla settimana visualizzata, così non restano mai buchi indipendentemente
+// dall'ordine di navigazione (avanti, indietro, salto con "Oggi", cambio tab).
+function prevWeek(){S.weekStart=addDays(S.weekStart,-7);ensureWeekCopied();render()}
 function nextWeek(){S.weekStart=addDays(S.weekStart,7);ensureWeekCopied();render()}
-function goToday(){S.weekStart=getMonday(toISO(new Date()));render()}
-function setTab(cat){S.cat=cat;render()}
+function goToday(){S.weekStart=getMonday(toISO(new Date()));ensureWeekCopied();render()}
+function setTab(cat){S.cat=cat;ensureWeekCopied();render()}
 function openStaff(){S.modalStaff=true;render()}
 function openProg(){S.modalProg=true;S.editProg='list';render()}
 function openFerie(){S.modalFerie=true;render()}
@@ -959,36 +1002,72 @@ function openCell(pid,date){
   S.cellModal={pid,date};render();
 }
 
-// Quando si naviga a una settimana futura senza turni manuali, copia i turni
-// effettivi della settimana precedente come manuali: la nuova settimana parte
-// identica alla precedente.
+// ── CLONAZIONE SETTIMANALE (senza buchi, indipendente dall'ordine) ──
+// Materializza in S.turni i turni della settimana visualizzata (e di tutte le
+// settimane intermedie non ancora presenti) copiando dalla settimana precedente,
+// esattamente secondo la regola "ogni settimana è la copia della precedente".
+//
+// FIX rispetto alla versione originale:
+//  - Non guarda solo iso-7 grezzo: usa resolveManualBack per risalire fino
+//    all'ultima settimana con dati reali, quindi la copia funziona anche se le
+//    settimane intermedie non sono mai state visitate.
+//  - Riempie l'intera catena dalla prima settimana con dati fino alla settimana
+//    corrente, così nessuna casella resta vuota per salti di navigazione.
+//  - Le ferie non vengono mai clonate né scavalcate (regola a priorità assoluta).
 function ensureWeekCopied(){
-  const dates=weekDates();
+  const targetMonday=S.weekStart;
   let changed=false;
+
   ['tecnici','giornalisti'].forEach(cat=>{
     const persons=S.staff.filter(s=>s.cat===cat);
     persons.forEach(p=>{
-      dates.forEach(iso=>{
-        const k=`${p.id}|${iso}|${cat}`;
-        if(S.turni[k]!==undefined)return; // già impostato: non toccare
-        if(isOnFerie(p.id,iso))return;    // ferie: regola speciale, non clonare nulla sopra
-        const prevISO=addDays(iso,-7);
-        const prevManual=S.turni[`${p.id}|${prevISO}|${cat}`];
-        let prevShift;
-        if(prevManual!==undefined){
-          prevShift=prevManual.blocked?null:prevManual;
-        }else{
-          prevShift=getAutoFor(p,prevISO,cat);
+      // Trova la più vecchia settimana (lunedì) con un record per questa persona/cat.
+      const suffix=`|${cat}`;
+      let earliest=null;
+      for(const k of Object.keys(S.turni)){
+        if(!k.endsWith(suffix))continue;
+        const parts=k.split('|');
+        if(parts[0]!==p.id)continue;
+        const mon=getMonday(parts[1]);
+        if(earliest===null||mon<earliest)earliest=mon;
+      }
+      // Se non esiste alcun record, la clonazione parte dall'automatico: non c'è
+      // nulla di manuale da propagare, quindi salta (getShift mostrerà l'auto).
+      if(earliest===null)return;
+      if(targetMonday<=earliest)return; // nulla da riempire prima del primo dato
+
+      // Cammina settimana per settimana dalla prima con dati fino al target,
+      // riempiendo solo le settimane mancanti in base allo stato risolto della
+      // settimana precedente.
+      let cur=addDays(earliest,7);
+      while(cur<=targetMonday){
+        for(let i=0;i<7;i++){
+          const iso=addDays(cur,i);
+          const k=`${p.id}|${iso}|${cat}`;
+          if(S.turni[k]!==undefined)continue; // già impostato
+          if(isOnFerie(p.id,iso))continue;    // ferie: mai clonare sopra
+
+          const prevISO=addDays(iso,-7);
+          const back=resolveManualBack(p.id,prevISO,cat);
+
+          if(back.state==='shift'){
+            S.turni[k]={...back.val,manual:true};changed=true;
+          }else if(back.state==='blocked'){
+            // La settimana precedente era esplicitamente vuota: se qui esiste un
+            // automatico va soppresso, altrimenti si lascia naturalmente vuoto.
+            const autoNow=getAutoFor(p,iso,cat);
+            if(autoNow!==null){S.turni[k]={blocked:true};changed=true;}
+          }else if(back.state==='auto'){
+            // La precedente aveva solo l'automatico: qui l'automatico locale fa già
+            // il suo lavoro, non serve materializzare nulla.
+          }
+          // back.state==='none': nessun dato a monte, si lascia all'automatico locale.
         }
-        if(prevShift===null){
-          const autoNow=getAutoFor(p,iso,cat);
-          if(autoNow!==null){S.turni[k]={blocked:true};changed=true;}
-        }else{
-          S.turni[k]={...prevShift,manual:true};changed=true;
-        }
-      });
+        cur=addDays(cur,7);
+      }
     });
   });
+
   if(changed)save().catch(e=>console.error(e));
 }
 
@@ -1368,6 +1447,7 @@ window.S=S;
   if(window._fbReady)await window._fbReady;
   else await new Promise(r=>setTimeout(r,300));
   await load();
+  ensureWeekCopied(); // materializza la catena fino alla settimana corrente al primo avvio
   render();
 })();
 </script>
