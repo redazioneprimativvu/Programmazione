@@ -154,6 +154,10 @@
   .gallery-thumb { border-radius:10px; overflow:hidden; aspect-ratio:1; background:var(--surface2); cursor:pointer; position:relative; }
   .gallery-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
   .gallery-thumb .thumb-label { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(0,0,0,0.75)); padding:20px 8px 8px; font-size:11px; color:#fff; font-weight:500; }
+  .thumb-dl-btn { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.2); color:#fff; width:30px; height:30px; border-radius:8px; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; z-index:2; }
+  .thumb-dl-btn:hover { background:rgba(0,0,0,0.85); border-color:var(--gold); }
+  .gallery-zip-btn { width:100%; padding:12px; background:var(--gold-dim); border:1px solid var(--gold); color:var(--gold); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; letter-spacing:0.3px; }
+  .gallery-zip-btn:disabled { opacity:0.5; cursor:not-allowed; }
   .empty-state { text-align:center; padding:30px 20px; color:var(--text-muted); font-size:14px; }
 
   /* TOAST */
@@ -298,6 +302,7 @@
       <button class="modal-close" onclick="closeModal('gallery-modal')">&#x2715;</button>
     </div>
     <div class="gallery-filter" id="gallery-filter"></div>
+    <div id="gallery-zip-row" style="margin-bottom:14px"></div>
     <div class="gallery-grid"   id="gallery-grid"></div>
   </div>
 </div>
@@ -323,6 +328,8 @@
 <!-- Firebase Compat SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- JSZip per download ZIP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 /* ── FIREBASE ──────────────────────────────────────────────────────────────── */
 firebase.initializeApp({
@@ -690,30 +697,91 @@ function downloadCurrentPhoto(){
 }
 
 /* ── GALLERY ───────────────────────────────────────────────────────────────── */
+var _galleryFlat = [];
+var _galleryActiveMonth = "all";
+
 function openGallery(){
-  var flat=[];
-  mv().forEach(function(m){getUrls(m).forEach(function(url){flat.push({photoUrl:url,name:m.name,date:m.date,id:m.id});});});
-  var grid=document.getElementById("gallery-grid"),fe=document.getElementById("gallery-filter");
-  if(flat.length===0){
+  _galleryFlat=[];
+  mv().forEach(function(m){getUrls(m).forEach(function(url,idx){_galleryFlat.push({photoUrl:url,name:m.name,date:m.date,id:m.id,idx:idx});});});
+  var grid=document.getElementById("gallery-grid"),fe=document.getElementById("gallery-filter"),zipRow=document.getElementById("gallery-zip-row");
+  if(_galleryFlat.length===0){
     grid.innerHTML='<div class="empty-state" style="grid-column:1/-1">Nessuna foto ancora.</div>';
-    fe.innerHTML="";document.getElementById("gallery-modal").classList.add("open");return;
+    fe.innerHTML="";if(zipRow)zipRow.innerHTML="";
+    document.getElementById("gallery-modal").classList.add("open");return;
   }
-  var ms={};flat.forEach(function(x){ms[x.date.substring(0,7)]=true;});
+  var ms={};_galleryFlat.forEach(function(x){ms[x.date.substring(0,7)]=true;});
   var months=Object.keys(ms).sort(function(a,b){return b.localeCompare(a);});
-  var am="all";
+  _galleryActiveMonth="all";
+
   function rg(){
-    var f=am==="all"?flat:flat.filter(function(x){return x.date.startsWith(am);});
+    var f=_galleryActiveMonth==="all"?_galleryFlat:_galleryFlat.filter(function(x){return x.date.startsWith(_galleryActiveMonth);});
     grid.innerHTML=f.map(function(x){
-      return '<div class="gallery-thumb" onclick="openViewer(\''+x.id+'\')"><img src="'+x.photoUrl+'" loading="lazy"/><div class="thumb-label">'+esc(x.name)+"<br>"+fd(x.date)+"</div></div>";
+      var payload=encodeURIComponent(x.photoUrl)+"|"+encodeURIComponent(x.name)+"|"+x.date+"|"+x.idx;
+      return '<div class="gallery-thumb">'
+        +'<img src="'+x.photoUrl+'" loading="lazy" onclick="openViewer(\''+x.id+'\')"/>'
+        +'<button class="thumb-dl-btn" onclick="event.stopPropagation();dlSingle(\''+payload+'\')">⬇️</button>'
+        +'<div class="thumb-label">'+esc(x.name)+"<br>"+fd(x.date)+"</div></div>";
     }).join("");
   }
+
   fe.innerHTML=["all"].concat(months).map(function(mo){
-    return '<button class="filter-chip '+(mo===am?"active":"")+'" data-mo="'+mo+'" onclick="setGMon(\x27'+mo+'\x27)">'+(mo==="all"?"Tutte":fm(mo))+"</button>";
+    return '<button class="filter-chip '+(mo===_galleryActiveMonth?"active":"")+'" data-mo="'+mo+'" onclick="setGMon(\x27'+mo+'\x27)">'+(mo==="all"?"Tutte":fm(mo))+"</button>";
   }).join("");
+
+  if(zipRow){
+    zipRow.innerHTML='<button class="gallery-zip-btn" id="gallery-zip-btn" onclick="downloadZip()">🗂️ Scarica ZIP <span id="zip-label"></span></button>';
+    updateZipLabel();
+  }
+
   window.setGMon=function(mo){
-    am=mo;document.querySelectorAll("#gallery-filter .filter-chip").forEach(function(c){c.classList.toggle("active",c.dataset.mo===mo);});rg();
+    _galleryActiveMonth=mo;
+    document.querySelectorAll("#gallery-filter .filter-chip").forEach(function(c){c.classList.toggle("active",c.dataset.mo===mo);});
+    rg();updateZipLabel();
   };
   rg();document.getElementById("gallery-modal").classList.add("open");
+}
+
+function updateZipLabel(){
+  var lbl=document.getElementById("zip-label");
+  if(!lbl)return;
+  lbl.textContent=_galleryActiveMonth==="all"?"(tutte)":"("+fm(_galleryActiveMonth)+")";
+}
+
+function dlSingle(payload){
+  var p=payload.split("|");
+  var url=decodeURIComponent(p[0]), name=decodeURIComponent(p[1]), date=p[2], idx=p[3];
+  fetch(url).then(function(r){return r.blob();}).then(function(b){
+    var a=document.createElement("a");a.href=URL.createObjectURL(b);
+    a.download="foto_"+name+"_"+date+"_"+(parseInt(idx)+1)+".jpg";a.click();URL.revokeObjectURL(a.href);
+  }).catch(function(){window.open(url,"_blank");});
+}
+
+function downloadZip(){
+  if(typeof JSZip==="undefined"){toast("Libreria ZIP non caricata","error");return;}
+  var f=_galleryActiveMonth==="all"?_galleryFlat:_galleryFlat.filter(function(x){return x.date.startsWith(_galleryActiveMonth);});
+  if(f.length===0){toast("Nessuna foto da scaricare","error");return;}
+  var btn=document.getElementById("gallery-zip-btn");
+  var origHtml=btn?btn.innerHTML:"";
+  if(btn){btn.disabled=true;btn.innerHTML="⏳ Preparazione...";}
+  var zip=new JSZip();
+  var used={};
+  Promise.all(f.map(function(x){
+    return fetch(x.photoUrl).then(function(r){return r.blob();}).then(function(b){
+      var fname="foto_"+x.name+"_"+x.date+"_"+(x.idx+1)+".jpg";
+      var base=fname, n=1;
+      while(used[fname]){fname=base.replace(/\.jpg$/,"")+"("+n+").jpg";n++;}
+      used[fname]=true;
+      zip.file(fname,b);
+    }).catch(function(){});
+  })).then(function(){
+    return zip.generateAsync({type:"blob"});
+  }).then(function(content){
+    var a=document.createElement("a");a.href=URL.createObjectURL(content);
+    var suffix=_galleryActiveMonth==="all"?"tutte":_galleryActiveMonth;
+    a.download="foto-cassa-"+currentCassa+"-"+suffix+".zip";a.click();URL.revokeObjectURL(a.href);
+    toast("ZIP scaricato ✓","success");
+  }).catch(function(){toast("Errore nella creazione dello ZIP","error");})
+  .finally(function(){if(btn){btn.disabled=false;btn.innerHTML=origHtml;updateZipLabel();}});
 }
 
 /* ── CSV ───────────────────────────────────────────────────────────────────── */
