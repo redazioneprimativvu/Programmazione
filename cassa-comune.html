@@ -412,7 +412,7 @@ function switchCassa(c) {
   document.getElementById("sw-trasferte").className = "sw-btn"+(c==="trasferte"?" active-trasferte":"");
   document.getElementById("header-title").textContent = cfg.label;
   document.getElementById("balance-label").textContent = cfg.balLabel;
-  // mostra "Inserisci Cifra" solo nella cassa comune
+  // mostra "Aggiungi Versamento" solo nella cassa comune
   document.getElementById("set-cifra-btn").style.display = c==="comune" ? "block" : "none";
   var st = document.getElementById("balance-stats");
   st.innerHTML = c==="trasferte"
