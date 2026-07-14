@@ -454,6 +454,10 @@ function hexToRgba(hex,alpha){if(!hex||hex.length<7)return`rgba(0,0,0,${alpha})`
 
 // ── SHIFT LOGIC ──
 function getAuto(pid,iso){
+  // TURNI AUTOMATICI DISATTIVATI DEFINITIVAMENTE (su richiesta). Vedi getAutoFor.
+  return null;
+}
+function getAuto_DISABILITATA(pid,iso){
   const dow=getDow(iso),mon=getMonth(iso);
   const person=byId(S.staff,pid);if(!person)return null;
   for(const pg of S.programmi){
@@ -472,10 +476,13 @@ function getAuto(pid,iso){
 }
 // Variante di getAuto indipendente da S.cat (serve per la copia multi-categoria)
 function getAutoFor(person,iso,cat){
-  // BLOCCO: nessun turno automatico viene generato dal 1° ottobre 2026 in poi.
-  // Le griglie da ottobre in avanti restano vuote finché non si inseriscono turni
-  // a mano. Per riattivare la generazione automatica in futuro, alza questa data.
-  if(iso>='2026-10-01')return null;
+  // TURNI AUTOMATICI DISATTIVATI DEFINITIVAMENTE (su richiesta).
+  // Nessun turno viene mai generato automaticamente dai programmi, in nessuna data.
+  // La griglia mostra SOLO i turni inseriti manualmente. Niente turnazione, niente
+  // clonazione, niente riempimento automatico: mai più.
+  return null;
+}
+function getAutoFor_DISABILITATA(person,iso,cat){
   const dow=getDow(iso),mon=getMonth(iso);
   if(!person||person.cat!==cat)return null;
   for(const pg of S.programmi){
@@ -564,6 +571,12 @@ function conflictCheck(pid,iso){
 // presenti nello stato, così la settimana successiva resta sempre la copia
 // della precedente.
 function propagateForward(pid,iso,val){
+  // PROPAGAZIONE IN AVANTI DISATTIVATA (su richiesta): una modifica o cancellazione
+  // NON si copia più nelle settimane successive. Ogni casella è indipendente e vale
+  // solo per la sua settimana. La funzione non fa più nulla.
+  return;
+}
+function propagateForward_DISABILITATA(pid,iso,val){
   const suffix=`|${S.cat}`;
   let maxISO=iso;
   for(const k of Object.keys(S.turni)){
@@ -1290,14 +1303,9 @@ function saveImpro(pid,date){
 }
 
 function clearCellPrompt(pid,date){
-  const sh=getShift(pid,date);
-  if(sh&&sh.eventoId&&!BUILTIN_IDS.has(sh.eventoId)){
-    const pg=byId(S.programmi,sh.eventoId);
-    if(pg){S.cellModal=null;S.removePrompt={pid,date,progName:pg.nome};render();return;}
-  }
-  // builtin o evento singolo: blocca/azzera la singola cella e propaga in avanti
-  if(getAuto(pid,date)){const v={blocked:true};setManual(pid,date,v);propagateForward(pid,date,v);}
-  else{setManual(pid,date,null);propagateForward(pid,date,null);}
+  // Cancellazione semplice: azzera SOLO questa casella, per questa settimana.
+  // Niente più finestra "solo oggi o tutte le settimane", niente propagazione in avanti.
+  setManual(pid,date,null);
   save().catch(e=>console.error(e));
   S.cellModal=null;render();
 }
