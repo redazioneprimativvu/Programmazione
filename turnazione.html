@@ -539,21 +539,11 @@ function isOnFerie(pid,iso){
 // Turno "ferie" sintetico, mostrato in rosso con scritta FERIE.
 const FERIE_SHIFT={ferie:true,nomeImprovvisato:'FERIE',coloreNota:'#ef4444',oraInizio:'',oraFine:''};
 function getShift(pid,iso){
-  if(isOnFerie(pid,iso))return FERIE_SHIFT; // priorità assoluta su manuale/auto/clonazione
-  // Stato esplicito in questa esatta settimana
+  if(isOnFerie(pid,iso))return FERIE_SHIFT; // priorità assoluta
+  // Mostra SOLO il dato realmente inserito in questa esatta settimana.
+  // Nessuna eredità dal passato, nessun automatico, nessuna clonazione.
   const m=getManual(pid,iso);
   if(m!==null)return m.blocked?null:m;
-  // Nessun record qui: prima prova l'automatico di questa settimana...
-  const auto=getAuto(pid,iso);
-  if(auto!==null)return auto;
-  // ...poi eredita dalla settimana precedente con dati (clonazione senza buchi).
-  // Serve solo per settimane NON passate: il passato resta com'era (niente eredità).
-  if(!isPast(iso)){
-    const back=resolveManualBack(pid,addDays(iso,-7),S.cat);
-    if(back.state==='shift')return back.val;
-    if(back.state==='blocked')return null;
-    // back.state==='auto' verrebbe comunque già gestito dall'automatico locale
-  }
   return null;
 }
 function setManual(pid,iso,val){const k=`${pid}|${iso}|${S.cat}`;if(val===null)delete S.turni[k];else S.turni[k]=val;}
