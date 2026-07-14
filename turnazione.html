@@ -472,6 +472,10 @@ function getAuto(pid,iso){
 }
 // Variante di getAuto indipendente da S.cat (serve per la copia multi-categoria)
 function getAutoFor(person,iso,cat){
+  // BLOCCO: nessun turno automatico viene generato dal 1° ottobre 2026 in poi.
+  // Le griglie da ottobre in avanti restano vuote finché non si inseriscono turni
+  // a mano. Per riattivare la generazione automatica in futuro, alza questa data.
+  if(iso>='2026-10-01')return null;
   const dow=getDow(iso),mon=getMonth(iso);
   if(!person||person.cat!==cat)return null;
   for(const pg of S.programmi){
