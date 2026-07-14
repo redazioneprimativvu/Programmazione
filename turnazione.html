@@ -5,8 +5,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestione Turni</title>
-<script src="./Gestione Turni_files/html2canvas.min.js.download"></script>
-<script src="./Gestione Turni_files/jspdf.umd.min.js.download"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
@@ -651,6 +651,7 @@ function topBar(){
     <button class="btn btn-ferie" onclick="openFerie()">🏖️ Ferie</button>
     <button class="btn btn-secondary" onclick="openStaff()">👥 Personale</button>
     <button class="btn btn-primary" onclick="openProg()">📋 Programmi</button>
+    <button class="btn btn-secondary" onclick="pulisciSettimaneVecchie()" title="Rimuove i turni delle settimane più vecchie della settimana scorsa (le ferie restano)">🧹 Pulisci</button>
   </div>
 </div>`;
 }
@@ -978,7 +979,18 @@ function presetMenu(){
 // FIX: ogni cambio di settimana o categoria materializza la catena di clonazione
 // fino alla settimana visualizzata, così non restano mai buchi indipendentemente
 // dall'ordine di navigazione (avanti, indietro, salto con "Oggi", cambio tab).
-function prevWeek(){S.weekStart=addDays(S.weekStart,-7);ensureWeekCopied();render()}
+// Limite di navigazione all'indietro: il lunedì della settimana PRECEDENTE a quella
+// corrente. Non si può andare più indietro, perché i dati più vecchi vengono
+// rimossi (vedi pulizia) e navigarli non ha più senso.
+function minWeekStart(){return addDays(getMonday(toISO(new Date())),-7);}
+function prevWeek(){
+  const target=addDays(S.weekStart,-7);
+  if(target<minWeekStart()){
+    alert('Non è possibile andare più indietro della settimana precedente a quella corrente.');
+    return;
+  }
+  S.weekStart=target;ensureWeekCopied();render();
+}
 function nextWeek(){S.weekStart=addDays(S.weekStart,7);ensureWeekCopied();render()}
 function goToday(){S.weekStart=getMonday(toISO(new Date()));ensureWeekCopied();render()}
 function setTab(cat){S.cat=cat;ensureWeekCopied();render()}
@@ -1067,6 +1079,14 @@ function openCell(pid,date){
 //    corrente, così nessuna casella resta vuota per salti di navigazione.
 //  - Le ferie non vengono mai clonate né scavalcate (regola a priorità assoluta).
 function ensureWeekCopied(){
+  // CLONAZIONE DISATTIVATA (su richiesta): le settimane non vengono più copiate
+  // automaticamente da quella precedente. Ogni settimana resta indipendente e
+  // mostra solo i turni realmente inseriti o quelli generati dalla turnazione
+  // automatica dei programmi. La funzione è lasciata come "no-op" per non dover
+  // toccare tutte le chiamate esistenti (prevWeek, nextWeek, goToday, setTab).
+  return;
+
+  // NB: il codice sotto resta come riferimento storico ma non viene mai eseguito.
   const targetMonday=S.weekStart;
   let changed=false;
 
@@ -1493,13 +1513,60 @@ window.onPresetZoneOver=onPresetZoneOver;window.onPresetZoneDrop=onPresetZoneDro
 window.openFerie=openFerie;window.closeFerie=closeFerie;window.addFerieRange=addFerieRange;window.removeFerieRange=removeFerieRange;window.setFerieDate=setFerieDate;
 window.S=S;
 
+// ── PULIZIA DATI ──
+// Estrae la data (YYYY-MM-DD) dalla chiave di un turno "pid|data|cat".
+function isoFromTurnoKey(k){const p=k.split('|');return p.length>=2?p[1]:null;}
+
+// Pulizia UNA-TANTUM: rimuove i TURNI (non le ferie) con data dal 1° ottobre 2026
+// in poi. Sono refusi della vecchia clonazione. Le ferie restano intatte.
+// Gira una sola volta: memorizza un flag così non si ripete a ogni avvio.
+function cleanupOttobreInPoi(){
+  const FLAG='cleanup_ott2026_done';
+  try{ if(localStorage.getItem(FLAG)==='1')return false; }catch(e){}
+  const LIMITE='2026-10-01';
+  let rimossi=0;
+  for(const k of Object.keys(S.turni)){
+    const iso=isoFromTurnoKey(k);
+    if(iso && iso>=LIMITE){ delete S.turni[k]; rimossi++; }
+  }
+  try{ localStorage.setItem(FLAG,'1'); }catch(e){}
+  if(rimossi>0){ console.log('Pulizia ottobre in poi: rimossi '+rimossi+' turni.'); return true; }
+  return false;
+}
+
+// Pulizia MANUALE (pulsante): rimuove i turni delle settimane più vecchie della
+// settimana precedente a quella corrente. Tiene: settimana precedente, attuale e
+// tutte le future. Le ferie NON vengono mai toccate. Chiede conferma.
+function pulisciSettimaneVecchie(){
+  const limite=minWeekStart(); // lunedì della settimana precedente all'attuale
+  const daRimuovere=[];
+  for(const k of Object.keys(S.turni)){
+    const iso=isoFromTurnoKey(k);
+    if(!iso)continue;
+    if(getMonday(iso)<limite)daRimuovere.push(k);
+  }
+  if(daRimuovere.length===0){
+    alert('Non ci sono settimane vecchie da rimuovere. Tutto già in ordine.');
+    return;
+  }
+  const ok=confirm('Stai per eliminare definitivamente '+daRimuovere.length+' turni delle settimane passate (prima della settimana scorsa).\n\nLe ferie NON verranno toccate.\n\nVuoi procedere?');
+  if(!ok)return;
+  daRimuovere.forEach(k=>delete S.turni[k]);
+  save().then(()=>{ alert('Fatto: rimossi '+daRimuovere.length+' turni vecchi. Firebase alleggerito.'); render(); })
+         .catch(e=>{ console.error(e); alert('Attenzione: la pulizia locale è avvenuta ma il salvataggio sul cloud potrebbe non essere riuscito. Dettaglio: '+(e&&e.message?e.message:e)); render(); });
+}
+window.pulisciSettimaneVecchie=pulisciSettimaneVecchie;
+
 // ── INIT ──
 (async()=>{
   S.weekStart=getMonday(toISO(new Date()));
   if(window._fbReady)await window._fbReady;
   else await new Promise(r=>setTimeout(r,300));
   await load();
-  ensureWeekCopied(); // materializza la catena fino alla settimana corrente al primo avvio
+  // Sicurezza: se lo stato caricato punta a una settimana troppo indietro, riporta al limite.
+  if(S.weekStart<minWeekStart())S.weekStart=getMonday(toISO(new Date()));
+  // Pulizia una-tantum dei refusi da ottobre 2026 in poi; se rimuove qualcosa, salva.
+  if(cleanupOttobreInPoi())save().catch(e=>console.error(e));
   render();
 })();
 </script>
