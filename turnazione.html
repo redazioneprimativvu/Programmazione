@@ -328,19 +328,37 @@ function sanitize(v){
   }
   return v===undefined?null:v;
 }
+// Aggiorna l'indicatore visivo di sincronizzazione in alto.
+// stato: 'ok' (verde, salvato su Firebase), 'local' (rosso, solo locale), 'saving' (giallo)
+let _syncStato='saving';
+function setSyncStatus(stato){
+  _syncStato=stato; // ricordato così sopravvive ai re-render della pagina
+  const el=document.getElementById('sync-status');
+  if(!el)return;
+  if(stato==='ok'){ el.textContent='● Sincronizzato'; el.style.background='#16a34a'; el.style.color='#fff'; el.title='Le modifiche vengono salvate su Firebase (cloud).'; }
+  else if(stato==='saving'){ el.textContent='● Salvataggio…'; el.style.background='#f59e0b'; el.style.color='#fff'; el.title='Salvataggio in corso…'; }
+  else { el.textContent='● NON sincronizzato (solo locale)'; el.style.background='#dc2626'; el.style.color='#fff'; el.title='ATTENZIONE: le modifiche NON stanno arrivando al cloud. Se ricarichi rischi di perderle. Controlla la connessione.'; }
+}
+
 async function save(){
   const payload=sanitize({staff:S.staff,programmi:S.programmi,turni:S.turni,hiddenBuiltins:S.hiddenBuiltins,presetLayout:S.presetLayout,ferie:S.ferie});
-  // Salva sempre in locale (immediato, non può fallire silenziosamente)
+  // Salva sempre in locale (immediato, non può fallire silenziosamente): resta come
+  // rete di sicurezza, ma NON deve mai essere l'unica copia. L'indicatore avvisa l'utente.
   try{ localStorage.setItem('turni_v5_fb',JSON.stringify(payload)); }catch(e){console.error('save local:',e);}
   // Poi su Firebase. Salviamo tutto in un unico campo di testo `blob` (stringa JSON):
   // Firestore conta una stringa come una sola voce di indice, mentre gli oggetti
   // annidati (turni, ferie) ne generano migliaia e superano il limite del documento
   // (errore "too many index entries"). Così il salvataggio non fallisce più.
+  setSyncStatus('saving');
   try{
-    if(window._fbSave){ await window._fbSave({blob:JSON.stringify(payload)}); }
-    else { console.warn('Firebase non pronto: salvato solo in locale'); }
+    if(window._fbSave){ await window._fbSave({blob:JSON.stringify(payload)}); setSyncStatus('ok'); }
+    else { console.warn('Firebase non pronto: salvato solo in locale'); setSyncStatus('local'); }
   }
-  catch(e){ console.error('save firebase:',e); alert('Attenzione: la modifica NON è stata salvata sul cloud (solo in locale su questo dispositivo). Riprova. Dettaglio: '+(e&&e.message?e.message:e)); }
+  catch(e){
+    console.error('save firebase:',e);
+    setSyncStatus('local');
+    alert('⚠️ ATTENZIONE: la modifica NON è stata salvata sul cloud (solo in locale su questo dispositivo).\n\nNON ricaricare la pagina: rischi di perdere le modifiche.\nControlla la connessione e riprova.\n\nDettaglio tecnico: '+(e&&e.message?e.message:e));
+  }
 }
 async function load(){
   try{
@@ -351,12 +369,13 @@ async function load(){
         // Vecchio formato: dati sparsi direttamente nel documento. Compatibile con entrambi.
         const d = (raw.blob!==undefined) ? JSON.parse(raw.blob) : raw;
         S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};S.hiddenBuiltins=d.hiddenBuiltins||[];S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]};S.ferie=d.ferie||{};
-        migrateData();normalizePresetLayout();return;
+        migrateData();normalizePresetLayout();return 'firebase';
       }
     }
   }catch(e){console.error('load:',e);}
   try{ const d=JSON.parse(localStorage.getItem('turni_v5_fb')||'{}');S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};S.hiddenBuiltins=d.hiddenBuiltins||[];S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]};S.ferie=d.ferie||{}; }catch{S.staff=[];S.programmi=[];S.turni={};S.hiddenBuiltins=[];S.presetLayout={fissi:[],temporanei:[]};S.ferie={};}
   migrateData();normalizePresetLayout();
+  return 'local';
 }
 
 // Migrazione: assegna il ruolo "Produzione" a Luca de Ciuceis ed Enrico Coppola
@@ -621,6 +640,7 @@ function onPresetZoneDrop(e,sezione){
 function render(){
   document.getElementById('app').innerHTML=buildHTML();
   bindDrag();
+  setSyncStatus(_syncStato); // ripristina l'indicatore dopo aver ricostruito la pagina
 }
 
 function buildHTML(){
@@ -636,6 +656,7 @@ function buildHTML(){
 function topBar(){
   return`<div class="topbar">
   <h1>📺 Gestione Turni</h1>
+  <span id="sync-status" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:12px;font-size:.72rem;font-weight:700;background:#64748b;color:#fff;white-space:nowrap">● …</span>
   <div class="week-nav">
     <button onclick="prevWeek()">‹</button>
     <span class="week-label">${fmtWeekLabel()}</span>
@@ -1513,26 +1534,13 @@ window.onPresetZoneOver=onPresetZoneOver;window.onPresetZoneDrop=onPresetZoneDro
 window.openFerie=openFerie;window.closeFerie=closeFerie;window.addFerieRange=addFerieRange;window.removeFerieRange=removeFerieRange;window.setFerieDate=setFerieDate;
 window.S=S;
 
-// ── PULIZIA DATI ──
+// NB: la pulizia dei dati da ottobre 2026 in poi è stata effettuata UNA VOLTA
+// direttamente su Firestore (sostituzione manuale del documento). Non esiste più
+// alcuna pulizia automatica nel codice: i turni futuri che inserirai NON verranno
+// mai cancellati. Questa è la scelta più sicura e definitiva.
+
 // Estrae la data (YYYY-MM-DD) dalla chiave di un turno "pid|data|cat".
 function isoFromTurnoKey(k){const p=k.split('|');return p.length>=2?p[1]:null;}
-
-// Pulizia UNA-TANTUM: rimuove i TURNI (non le ferie) con data dal 1° ottobre 2026
-// in poi. Sono refusi della vecchia clonazione. Le ferie restano intatte.
-// Gira una sola volta: memorizza un flag così non si ripete a ogni avvio.
-function cleanupOttobreInPoi(){
-  const FLAG='cleanup_ott2026_done';
-  try{ if(localStorage.getItem(FLAG)==='1')return false; }catch(e){}
-  const LIMITE='2026-10-01';
-  let rimossi=0;
-  for(const k of Object.keys(S.turni)){
-    const iso=isoFromTurnoKey(k);
-    if(iso && iso>=LIMITE){ delete S.turni[k]; rimossi++; }
-  }
-  try{ localStorage.setItem(FLAG,'1'); }catch(e){}
-  if(rimossi>0){ console.log('Pulizia ottobre in poi: rimossi '+rimossi+' turni.'); return true; }
-  return false;
-}
 
 // Pulizia MANUALE (pulsante): rimuove i turni delle settimane più vecchie della
 // settimana precedente a quella corrente. Tiene: settimana precedente, attuale e
@@ -1562,12 +1570,12 @@ window.pulisciSettimaneVecchie=pulisciSettimaneVecchie;
   S.weekStart=getMonday(toISO(new Date()));
   if(window._fbReady)await window._fbReady;
   else await new Promise(r=>setTimeout(r,300));
-  await load();
+  const fonte=await load();
   // Sicurezza: se lo stato caricato punta a una settimana troppo indietro, riporta al limite.
   if(S.weekStart<minWeekStart())S.weekStart=getMonday(toISO(new Date()));
-  // Pulizia una-tantum dei refusi da ottobre 2026 in poi; se rimuove qualcosa, salva.
-  if(cleanupOttobreInPoi())save().catch(e=>console.error(e));
   render();
+  // Imposta l'indicatore: verde se i dati arrivano da Firebase, rosso se solo da locale.
+  setSyncStatus(fonte==='firebase'?'ok':'local');
 })();
 </script>
 
