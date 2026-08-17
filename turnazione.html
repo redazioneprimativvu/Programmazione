@@ -1,8 +1,8 @@
 
 <!DOCTYPE html>
-<!-- saved from url=(0063)https://redazioneprimativvu.github.io/Programmazione/turnazione -->
-<html lang="it"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="it">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestione Turni</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -10,7 +10,6 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
-
 .topbar{background:#1e293b;color:white;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .topbar h1{font-size:1.1rem;font-weight:700;margin-right:auto}
 .week-nav{display:flex;align-items:center;gap:6px}
@@ -20,7 +19,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tab-btns{display:flex;gap:4px}
 .tab-btn{background:#334155;color:#94a3b8;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.82rem}
 .tab-btn.active{background:#3b82f6;color:white}
-.action-btns{display:flex;gap:6px}
+.action-btns{display:flex;gap:6px;flex-wrap:wrap}
 .btn{padding:5px 12px;border-radius:6px;border:none;cursor:pointer;font-size:.82rem;font-weight:500}
 .btn-primary{background:#3b82f6;color:white}
 .btn-secondary{background:#475569;color:white}
@@ -29,7 +28,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-export{background:#8b5cf6;color:white}
 .btn-ferie{background:#0d9488;color:white}
 .btn:hover{opacity:.85}
-
 .strip{background:white;border-bottom:1px solid #e2e8f0;padding:8px 14px;display:flex;align-items:stretch;gap:10px;overflow-x:auto;min-height:46px;flex-wrap:wrap}
 .strip-label{font-size:.72rem;color:#64748b;white-space:nowrap;font-weight:700;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0}
 .pill{padding:5px 13px;border-radius:20px;font-size:.78rem;font-weight:700;cursor:grab;user-select:none;white-space:nowrap;color:white;text-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .1s,box-shadow .1s,opacity .1s;flex-shrink:0}
@@ -38,17 +36,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .pill.preset-dragging{opacity:.35;transform:scale(.96)}
 .strip-sep{width:1px;height:26px;background:#e2e8f0;margin:0 2px;flex-shrink:0}
 .strip-hint{font-size:.7rem;color:#94a3b8;margin-left:auto;flex-shrink:0;white-space:nowrap}
-
-/* Zone preset: Fissi / Temporanei */
 .preset-zone{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:4px 10px 4px 8px;border:1px dashed #d8dee9;border-radius:10px;min-height:38px;background:#fbfcfe;transition:background .12s,border-color .12s}
 .preset-zone.zone-over{background:#eef4ff;border-color:#3b82f6;border-style:solid}
 .zone-title{font-size:.64rem;color:#94a3b8;font-weight:800;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;flex-shrink:0;margin-right:2px}
 .zone-empty{font-size:.72rem;color:#cbd5e1;font-style:italic;white-space:nowrap}
 .strip-divider{width:2px;align-self:stretch;background:#cbd5e1;border-radius:2px;flex-shrink:0;margin:2px 0}
-
-
 .grid-wrap{padding:10px;overflow-x:auto}
-/* Colonna nome auto-sizing: table-layout:auto + white-space:nowrap sulla prima colonna */
 .grid{border-collapse:collapse;width:100%;min-width:700px;background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden;table-layout:auto}
 .grid th{background:#f8fafc;padding:5px 3px;text-align:center;font-size:.75rem;font-weight:700;color:#475569;border:1px solid #e2e8f0}
 .grid th:first-child{text-align:left;padding-left:8px;white-space:nowrap;position:sticky;left:0;z-index:2;background:#f8fafc}
@@ -56,13 +49,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .grid td:first-child{padding:3px 8px;font-size:.82rem;font-weight:600;position:sticky;left:0;background:white;z-index:1;display:flex;flex-direction:column;justify-content:center;white-space:nowrap}
 .grid tr:hover td{background:#f8fafc}
 .grid tr:hover td:first-child{background:#f8fafc}
-/* Spazio sottile che separa i gruppi di ruolo (Registi / Produzione / Cameraman / Montatori) */
 .grid tr.group-start td{border-top:7px solid #f0f2f5}
 .grid tr.group-start td:first-child{border-top:7px solid #f0f2f5}
-
 .cell{height:100%;width:100%;padding:2px;transition:background .12s;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;overflow:hidden}
 .cell.drag-over{background:#dbeafe!important;outline:2px dashed #3b82f6;outline-offset:-2px}
-
 .cell-chip{
   padding:2px 4px;
   border-radius:5px;
@@ -87,13 +77,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cell-chip.is-dragging{opacity:.35;transform:scale(.97)}
 .cell-chip.ferie-chip{cursor:pointer;font-weight:800;letter-spacing:.04em}
 .cell-chip.ferie-chip .chip-name{color:#fff}
-
 .chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;font-size:.78rem;display:flex;align-items:center;justify-content:center;gap:3px}
 .chip-time{font-size:.64rem;opacity:.9;font-weight:600;margin-top:1px}
-
 .conflict-dot{width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block;flex-shrink:0}
-
-/* Pallino rosso lampeggiante per turni modificati manualmente */
 @keyframes blink-modified{0%,100%{opacity:1}50%{opacity:0}}
 .modified-dot{
   width:7px;height:7px;border-radius:50%;
@@ -102,12 +88,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   flex-shrink:0;
   animation:blink-modified 1s ease-in-out infinite;
 }
-
 .day-today{background:#eff6ff}
 .th-today{background:#3b82f6!important;color:white!important;border-color:#2563eb!important}
 .role-badge{font-size:.62rem;color:#94a3b8;font-weight:400;margin-top:1px}
-
-/* ── PDF overlay a finestra centrata ── */
 .pdf-overlay{
   position:fixed;inset:0;background:rgba(15,23,42,.65);
   z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;
@@ -127,13 +110,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tbtn:hover{opacity:.85}
 .pdf-frame-wrap{flex:1;overflow:hidden;display:flex;align-items:stretch}
 .pdf-frame-wrap iframe{width:100%;height:100%;border:none}
-
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
 .modal{background:white;border-radius:14px;padding:22px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto}
 .modal.modal-wide{max-width:840px}
 .modal.modal-ferie{max-width:920px}
-
-/* ── Finestra Ferie ── */
 .ferie-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .ferie-col-title{font-size:.75rem;font-weight:800;color:#0f766e;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #99f6e4;padding-bottom:4px}
 .ferie-person{border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fbfdfd}
@@ -151,7 +131,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ferie-scroll{max-height:62vh;overflow-y:auto;overflow-x:hidden;padding-right:4px}
 .modal h2{font-size:1.05rem;font-weight:700;margin-bottom:14px}
 .modal-footer{display:flex;justify-content:flex-end;gap:7px;margin-top:18px;flex-wrap:wrap}
-
 .form-row{margin-bottom:12px}
 .form-row label{display:block;font-size:.78rem;font-weight:700;color:#475569;margin-bottom:4px}
 .form-row input[type=text],.form-row input[type=time],.form-row select{width:100%;padding:7px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:.88rem;outline:none;font-family:inherit}
@@ -159,7 +138,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .toggle-group{display:flex;flex-wrap:wrap;gap:5px}
 .tog{padding:4px 9px;border-radius:20px;font-size:.76rem;font-weight:600;border:2px solid #e2e8f0;background:white;color:#64748b;cursor:pointer;transition:all .12s}
 .tog.on{border-color:#3b82f6;background:#3b82f6;color:white}
-
 .staff-list,.prog-list{border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
 .staff-list{max-height:48vh;overflow-y:auto;overflow-x:hidden}
 .prog-list{max-height:250px;overflow-y:auto;margin-bottom:10px}
@@ -171,63 +149,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .list-item .del:hover{color:#ef4444}
 .list-item select.role-edit{font-size:.72rem;padding:3px 4px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;background:white;color:#475569;cursor:pointer;flex-shrink:0}
 .dot12{width:12px;height:12px;border-radius:50%;flex-shrink:0}
-
 .empty-state{text-align:center;padding:40px 20px;color:#94a3b8;font-size:.88rem}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
-
-/* Color swatches per nota */
 .color-swatches{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
 .cswatch{width:24px;height:24px;border-radius:5px;cursor:pointer;border:3px solid transparent;transition:transform .12s,border-color .12s;flex-shrink:0}
 .cswatch:hover{transform:scale(1.18)}
 .cswatch.sel{border-color:#1e293b;transform:scale(1.18)}
-
-/* PDF print area (nascosto, usato per cattura) */
 #pdf-capture{display:none}
 #pdf-header{display:none;margin-bottom:16px;text-align:center}
 #pdf-header h2{font-size:20px;margin-bottom:3px;color:#1e293b}
 #pdf-header p{font-size:13px;color:#64748b}
+/* Banner di allarme mostrato quando la lettura dal cloud è fallita */
+#danger-banner{
+  display:none;background:#7f1d1d;color:#fff;padding:10px 16px;font-size:.85rem;
+  font-weight:600;line-height:1.4;border-bottom:3px solid #ef4444;
+}
 </style>
 </head>
 <body>
-<div id="app"><div class="topbar">
-  <h1>📺 Gestione Turni</h1>
-  <div class="week-nav">
-    <button onclick="prevWeek()">‹</button>
-    <span class="week-label">13 Lug – 19 Lug 2026</span>
-    <button onclick="nextWeek()">›</button>
-    <button onclick="goToday()" style="font-size:.72rem;padding:3px 7px">Oggi</button>
-  </div>
-  <div class="tab-btns">
-    <button class="tab-btn active" onclick="setTab(&#39;tecnici&#39;)">Tecnici</button>
-    <button class="tab-btn " onclick="setTab(&#39;giornalisti&#39;)">Giornalisti</button>
-  </div>
-  <div class="action-btns">
-    <button class="btn btn-export" onclick="exportPDF()">PDF</button>
-    <button class="btn btn-ferie" onclick="openFerie()">🏖️ Ferie</button>
-    <button class="btn btn-secondary" onclick="openStaff()">👥 Personale</button>
-    <button class="btn btn-primary" onclick="openProg()">📋 Programmi</button>
-  </div>
-</div><div class="strip">
-  <div class="preset-zone" data-zone="fissi" ondragover="onPresetZoneOver(event,&#39;fissi&#39;)" ondrop="onPresetZoneDrop(event,&#39;fissi&#39;,null)">
-    <span class="zone-title">FISSI</span>
-    <div class="pill" style="background:#ef4444" draggable="true" data-dtype="builtin" data-did="riposo" data-pkey="b:riposo" onclick="openPresetMenu(event,&#39;builtin&#39;,&#39;riposo&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Assente</div><div class="pill" style="background:#94a3b8" draggable="true" data-dtype="prog" data-did="sv1ryazf" data-pkey="p:sv1ryazf" onclick="openPresetMenu(event,&#39;prog&#39;,&#39;sv1ryazf&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Turno Mattina</div><div class="pill" style="background:#94a3b8" draggable="true" data-dtype="prog" data-did="strhk88w" data-pkey="p:strhk88w" onclick="openPresetMenu(event,&#39;prog&#39;,&#39;strhk88w&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Turno Pomeriggio</div><div class="pill" style="background:#475569" draggable="true" data-dtype="builtin" data-did="intero" data-pkey="b:intero" onclick="openPresetMenu(event,&#39;builtin&#39;,&#39;intero&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Turno Intero</div><div class="pill" style="background:#0ea5e9" draggable="true" data-dtype="builtin" data-did="intermezzo" data-pkey="b:intermezzo" onclick="openPresetMenu(event,&#39;builtin&#39;,&#39;intermezzo&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Turno Intermezzo</div><div class="pill" style="background:#f2b407" draggable="true" data-dtype="prog" data-did="ie04u859" data-pkey="p:ie04u859" onclick="openPresetMenu(event,&#39;prog&#39;,&#39;ie04u859&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Turno Integrale</div><div class="pill" style="background:#b45309" draggable="true" data-dtype="builtin" data-did="trasferta" data-pkey="b:trasferta" onclick="openPresetMenu(event,&#39;builtin&#39;,&#39;trasferta&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Trasferta</div><div class="pill" style="background:#000000" draggable="true" data-dtype="prog" data-did="saylugez" data-pkey="p:saylugez" onclick="openPresetMenu(event,&#39;prog&#39;,&#39;saylugez&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Ritiro Us Avellino</div><div class="pill" style="background:#f2e664" draggable="true" data-dtype="prog" data-did="bk566e3i" data-pkey="p:bk566e3i" onclick="openPresetMenu(event,&#39;prog&#39;,&#39;bk566e3i&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Festival Agerola</div>
-  </div>
-  <div class="strip-divider"></div>
-  <div class="preset-zone" data-zone="temporanei" ondragover="onPresetZoneOver(event,&#39;temporanei&#39;)" ondrop="onPresetZoneDrop(event,&#39;temporanei&#39;,null)">
-    <span class="zone-title">TEMPORANEI</span>
-    <div class="pill" style="background:#0004ff" draggable="true" data-dtype="prog" data-did="txr0vqby" data-pkey="p:txr0vqby" onclick="openPresetMenu(event,&#39;prog&#39;,&#39;txr0vqby&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Percorsi d'Acqua</div><div class="pill" style="background:#e3b945" draggable="true" data-dtype="prog" data-did="jepjrret" data-pkey="p:jepjrret" onclick="openPresetMenu(event,&#39;prog&#39;,&#39;jepjrret&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Sentieri Azzurri - Agerola</div><div class="pill" style="background:#1f8bff" draggable="true" data-dtype="prog" data-did="qv3kib20" data-pkey="p:qv3kib20" onclick="openPresetMenu(event,&#39;prog&#39;,&#39;qv3kib20&#39;)" title="Trascina per riordinare o spostare · clic per modificare/eliminare">Prima Mattina</div>
-  </div>
-</div><div class="grid-wrap" id="capture-area">
-    <div id="pdf-header">
-      <h2>Programmazione Turni — TECNICI</h2>
-      <p>Settimana dal 13 Lug – 19 Lug 2026</p>
-    </div>
-    <table class="grid">
-      <thead><tr><th>Nome</th><th class=""><div>Lun</div><div style="font-size:.68rem;opacity:.8">13/7</div></th><th class=""><div>Mar</div><div style="font-size:.68rem;opacity:.8">14/7</div></th><th class=""><div>Mer</div><div style="font-size:.68rem;opacity:.8">15/7</div></th><th class=""><div>Gio</div><div style="font-size:.68rem;opacity:.8">16/7</div></th><th class=""><div>Ven</div><div style="font-size:.68rem;opacity:.8">17/7</div></th><th class=""><div>Sab</div><div style="font-size:.68rem;opacity:.8">18/7</div></th><th class=""><div>Dom</div><div style="font-size:.68rem;opacity:.8">19/7</div></th></tr></thead>
-      <tbody><tr><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">Bonazzi Alessio</div><div class="role-badge">Regista</div></td><td><div class="cell" onclick="onCellClick(event,&#39;ts9s1qli&#39;,&#39;2026-07-13&#39;)"><div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div></div></td><td><div class="cell" onclick="onCellClick(event,&#39;ts9s1qli&#39;,&#39;2026-07-14&#39;)"><div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div></div></td><td><div class="cell" onclick="onCellClick(event,&#39;ts9s1qli&#39;,&#39;2026-07-15&#39;)"><div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div></div></td><td><div class="cell" onclick="onCellClick(event,&#39;ts9s1qli&#39;,&#39;2026-07-16&#39;)"><div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div></div></td><td><div class="cell" onclick="onCellClick(event,&#39;ts9s1qli&#39;,&#39;2026-07-17&#39;)"><div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div></div></td><td><div class="cell" onclick="onCellClick(event,&#39;ts9s1qli&#39;,&#39;2026-07-18&#39;)"><div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;ts9s1qli&#39;,&#39;2026-07-19&#39;)" onclick="onCellClick(event,&#39;ts9s1qli&#39;,&#39;2026-07-19&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="ts9s1qli" data-ciso="2026-07-19" data-cshift="%7B%22oraFine%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22nota%22%3A%22%22%2C%22manual%22%3Atrue%2C%22eventoId%22%3A%22riposo%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td></tr><tr><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">Picariello Silvana</div><div class="role-badge">Regista</div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;7e56nsne&#39;,&#39;2026-07-13&#39;)" onclick="onCellClick(event,&#39;7e56nsne&#39;,&#39;2026-07-13&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="7e56nsne" data-ciso="2026-07-13" data-cshift="%7B%22oraFine%22%3A%2215%3A00%22%2C%22oraFine2%22%3A%22%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio2%22%3A%22%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;7e56nsne&#39;,&#39;2026-07-14&#39;)" onclick="onCellClick(event,&#39;7e56nsne&#39;,&#39;2026-07-14&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="7e56nsne" data-ciso="2026-07-14" data-cshift="%7B%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22oraFine%22%3A%2215%3A00%22%2C%22oraFine2%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;7e56nsne&#39;,&#39;2026-07-15&#39;)" onclick="onCellClick(event,&#39;7e56nsne&#39;,&#39;2026-07-15&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="7e56nsne" data-ciso="2026-07-15" data-cshift="%7B%22nomeImprovvisato%22%3A%22Turno%20pomeriggio%22%2C%22oraFine%22%3A%2220%3A00%22%2C%22oraFine2%22%3A%22%22%2C%22oraInizio%22%3A%2215%3A00%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno pomeriggio</span></div><div class="chip-time">15:00–20:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;7e56nsne&#39;,&#39;2026-07-16&#39;)" onclick="onCellClick(event,&#39;7e56nsne&#39;,&#39;2026-07-16&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="7e56nsne" data-ciso="2026-07-16" data-cshift="%7B%22oraInizio%22%3A%2210%3A00%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22oraFine2%22%3A%22%22%2C%22oraFine%22%3A%2215%3A00%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22oraInizio2%22%3A%22%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;7e56nsne&#39;,&#39;2026-07-17&#39;)" onclick="onCellClick(event,&#39;7e56nsne&#39;,&#39;2026-07-17&#39;)"><div class="cell-chip" style="border-color:#6366f1;background-color:rgba(99,102,241,0.15)" draggable="true" data-cpid="7e56nsne" data-ciso="2026-07-17" data-cshift="%7B%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%2C%22nomeImprovvisato%22%3A%22Turno%20Ritiro%20Av-Dimaro%22%2C%22oraFine%22%3A%2223%3A00%22%2C%22oraFine2%22%3A%22%22%2C%22coloreNota%22%3A%22%236366f1%22%2C%22oraInizio%22%3A%2217%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Ritiro Av-Dimaro</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">17:00–23:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;7e56nsne&#39;,&#39;2026-07-18&#39;)" onclick="onCellClick(event,&#39;7e56nsne&#39;,&#39;2026-07-18&#39;)"><div class="cell-chip" style="border-color:#6366f1;background-color:rgba(99,102,241,0.15)" draggable="true" data-cpid="7e56nsne" data-ciso="2026-07-18" data-cshift="%7B%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%2C%22oraInizio%22%3A%2217%3A00%22%2C%22coloreNota%22%3A%22%236366f1%22%2C%22nomeImprovvisato%22%3A%22Turno%20Ritiro%20Av-Dimaro%22%2C%22oraFine%22%3A%2223%3A00%22%2C%22oraFine2%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Ritiro Av-Dimaro</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">17:00–23:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;7e56nsne&#39;,&#39;2026-07-19&#39;)" onclick="onCellClick(event,&#39;7e56nsne&#39;,&#39;2026-07-19&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="7e56nsne" data-ciso="2026-07-19" data-cshift="%7B%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%2C%22eventoId%22%3A%22riposo%22%2C%22manual%22%3Atrue%2C%22nota%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td></tr><tr><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">Terranova Vittorio</div><div class="role-badge">Regista</div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;9qneir9h&#39;,&#39;2026-07-13&#39;)" onclick="onCellClick(event,&#39;9qneir9h&#39;,&#39;2026-07-13&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="9qneir9h" data-ciso="2026-07-13" data-cshift="%7B%22oraFine2%22%3A%22%22%2C%22oraFine%22%3A%2220%3A00%22%2C%22nomeImprovvisato%22%3A%22Turno%20pomeriggio%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio%22%3A%2215%3A00%22%2C%22oraInizio2%22%3A%22%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno pomeriggio</span></div><div class="chip-time">15:00–20:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;9qneir9h&#39;,&#39;2026-07-14&#39;)" onclick="onCellClick(event,&#39;9qneir9h&#39;,&#39;2026-07-14&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="9qneir9h" data-ciso="2026-07-14" data-cshift="%7B%22nomeImprovvisato%22%3A%22Turno%20pomeriggio%22%2C%22oraFine2%22%3A%22%22%2C%22oraFine%22%3A%2220%3A00%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio%22%3A%2215%3A00%22%2C%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno pomeriggio</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">15:00–20:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;9qneir9h&#39;,&#39;2026-07-15&#39;)" onclick="onCellClick(event,&#39;9qneir9h&#39;,&#39;2026-07-15&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="9qneir9h" data-ciso="2026-07-15" data-cshift="%7B%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22oraFine%22%3A%2215%3A00%22%2C%22oraFine2%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;9qneir9h&#39;,&#39;2026-07-16&#39;)" onclick="onCellClick(event,&#39;9qneir9h&#39;,&#39;2026-07-16&#39;)"><div class="cell-chip" style="border-color:#6366f1;background-color:rgba(99,102,241,0.15)" draggable="true" data-cpid="9qneir9h" data-ciso="2026-07-16" data-cshift="%7B%22oraInizio%22%3A%2217%3A00%22%2C%22coloreNota%22%3A%22%236366f1%22%2C%22oraFine%22%3A%2223%3A00%22%2C%22oraFine2%22%3A%22%22%2C%22nomeImprovvisato%22%3A%22Turno%20Ritiro%20Av-Dimaro%22%2C%22oraInizio2%22%3A%22%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Ritiro Av-Dimaro</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">17:00–23:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;9qneir9h&#39;,&#39;2026-07-17&#39;)" onclick="onCellClick(event,&#39;9qneir9h&#39;,&#39;2026-07-17&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="9qneir9h" data-ciso="2026-07-17" data-cshift="%7B%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22oraFine%22%3A%2215%3A00%22%2C%22oraFine2%22%3A%22%22%2C%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;9qneir9h&#39;,&#39;2026-07-18&#39;)" onclick="onCellClick(event,&#39;9qneir9h&#39;,&#39;2026-07-18&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="9qneir9h" data-ciso="2026-07-18" data-cshift="%7B%22oraInizio2%22%3A%22%22%2C%22manual%22%3Atrue%2C%22oraFine2%22%3A%22%22%2C%22oraFine%22%3A%2215%3A00%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio%22%3A%2210%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;9qneir9h&#39;,&#39;2026-07-19&#39;)" onclick="onCellClick(event,&#39;9qneir9h&#39;,&#39;2026-07-19&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="9qneir9h" data-ciso="2026-07-19" data-cshift="%7B%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%2C%22eventoId%22%3A%22riposo%22%2C%22manual%22%3Atrue%2C%22nota%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td></tr><tr class="group-start"><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">Coppola Enrico</div><div class="role-badge">Produzione</div></td><td><div class="cell" onclick="onCellClick(event,&#39;j6voxvn4&#39;,&#39;2026-07-13&#39;)"><div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div></div></td><td><div class="cell" onclick="onCellClick(event,&#39;j6voxvn4&#39;,&#39;2026-07-14&#39;)"><div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;j6voxvn4&#39;,&#39;2026-07-15&#39;)" onclick="onCellClick(event,&#39;j6voxvn4&#39;,&#39;2026-07-15&#39;)"><div class="cell-chip" style="border-color:#f59e0b;background-color:rgba(245,158,11,0.15)" draggable="true" data-cpid="j6voxvn4" data-ciso="2026-07-15" data-cshift="%7B%22oraInizio2%22%3A%2217%3A00%22%2C%22manual%22%3Atrue%2C%22coloreNota%22%3A%22%23f59e0b%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22oraFine%22%3A%2214%3A00%22%2C%22oraFine2%22%3A%2220%3A00%22%2C%22nomeImprovvisato%22%3A%22Turno%20Integrale%20-%2010%3A00%20Speciale%20A5%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Integrale - 10:00 Speciale A5</span></div><div class="chip-time">10:00–14:00 / 17:00–20:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;j6voxvn4&#39;,&#39;2026-07-16&#39;)" onclick="onCellClick(event,&#39;j6voxvn4&#39;,&#39;2026-07-16&#39;)"><div class="cell-chip" style="border-color:#f59e0b;background-color:rgba(245,158,11,0.15)" draggable="true" data-cpid="j6voxvn4" data-ciso="2026-07-16" data-cshift="%7B%22nomeImprovvisato%22%3A%22Turno%20Integrale%22%2C%22oraFine2%22%3A%2220%3A00%22%2C%22oraFine%22%3A%2214%3A00%22%2C%22coloreNota%22%3A%22%23f59e0b%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22manual%22%3Atrue%2C%22oraInizio2%22%3A%2217%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Integrale</span></div><div class="chip-time">10:00–14:00 / 17:00–20:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;j6voxvn4&#39;,&#39;2026-07-17&#39;)" onclick="onCellClick(event,&#39;j6voxvn4&#39;,&#39;2026-07-17&#39;)"><div class="cell-chip" style="border-color:#f59e0b;background-color:rgba(245,158,11,0.15)" draggable="true" data-cpid="j6voxvn4" data-ciso="2026-07-17" data-cshift="%7B%22oraInizio2%22%3A%2217%3A00%22%2C%22manual%22%3Atrue%2C%22oraFine2%22%3A%2220%3A00%22%2C%22oraFine%22%3A%2214%3A00%22%2C%22nomeImprovvisato%22%3A%22Turno%20Integrale%22%2C%22coloreNota%22%3A%22%23f59e0b%22%2C%22oraInizio%22%3A%2210%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Integrale</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–14:00 / 17:00–20:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;j6voxvn4&#39;,&#39;2026-07-18&#39;)" onclick="onCellClick(event,&#39;j6voxvn4&#39;,&#39;2026-07-18&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="j6voxvn4" data-ciso="2026-07-18" data-cshift="%7B%22manual%22%3Atrue%2C%22eventoId%22%3A%22riposo%22%2C%22nota%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;j6voxvn4&#39;,&#39;2026-07-19&#39;)" onclick="onCellClick(event,&#39;j6voxvn4&#39;,&#39;2026-07-19&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="j6voxvn4" data-ciso="2026-07-19" data-cshift="%7B%22eventoId%22%3A%22riposo%22%2C%22manual%22%3Atrue%2C%22nota%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td></tr><tr><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">De Ciuceis Luca</div><div class="role-badge">Produzione</div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;kt6iaezi&#39;,&#39;2026-07-13&#39;)" onclick="onCellClick(event,&#39;kt6iaezi&#39;,&#39;2026-07-13&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="kt6iaezi" data-ciso="2026-07-13" data-cshift="%7B%22oraFine%22%3A%2214%3A00%22%2C%22oraInizio%22%3A%2209%3A00%22%2C%22eventoId%22%3A%228xob92ug%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;kt6iaezi&#39;,&#39;2026-07-14&#39;)" onclick="onCellClick(event,&#39;kt6iaezi&#39;,&#39;2026-07-14&#39;)"><div class="cell-chip" style="border-color:#f59e0b;background-color:rgba(245,158,11,0.15)" draggable="true" data-cpid="kt6iaezi" data-ciso="2026-07-14" data-cshift="%7B%22oraFine%22%3A%2220%3A00%22%2C%22oraFine2%22%3A%22%22%2C%22nomeImprovvisato%22%3A%22Turno%20Pomeriggio%20-%20Copertura%20Tg%20%3F%22%2C%22oraInizio%22%3A%2216%3A00%22%2C%22coloreNota%22%3A%22%23f59e0b%22%2C%22oraInizio2%22%3A%22%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Pomeriggio - Copertura Tg ?</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">16:00–20:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;kt6iaezi&#39;,&#39;2026-07-15&#39;)" onclick="onCellClick(event,&#39;kt6iaezi&#39;,&#39;2026-07-15&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="kt6iaezi" data-ciso="2026-07-15" data-cshift="%7B%22oraFine%22%3A%2214%3A00%22%2C%22manual%22%3Atrue%2C%22oraInizio%22%3A%2209%3A00%22%2C%22eventoId%22%3A%228xob92ug%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;kt6iaezi&#39;,&#39;2026-07-16&#39;)" onclick="onCellClick(event,&#39;kt6iaezi&#39;,&#39;2026-07-16&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="kt6iaezi" data-ciso="2026-07-16" data-cshift="%7B%22manual%22%3Atrue%2C%22oraInizio%22%3A%2209%3A00%22%2C%22eventoId%22%3A%228xob92ug%22%2C%22oraFine%22%3A%2214%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;kt6iaezi&#39;,&#39;2026-07-17&#39;)" onclick="onCellClick(event,&#39;kt6iaezi&#39;,&#39;2026-07-17&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="kt6iaezi" data-ciso="2026-07-17" data-cshift="%7B%22oraFine%22%3A%2214%3A00%22%2C%22manual%22%3Atrue%2C%22eventoId%22%3A%228xob92ug%22%2C%22oraInizio%22%3A%2209%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;kt6iaezi&#39;,&#39;2026-07-18&#39;)" onclick="onCellClick(event,&#39;kt6iaezi&#39;,&#39;2026-07-18&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="kt6iaezi" data-ciso="2026-07-18" data-cshift="%7B%22oraInizio%22%3A%2209%3A00%22%2C%22eventoId%22%3A%228xob92ug%22%2C%22manual%22%3Atrue%2C%22oraFine%22%3A%2214%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;kt6iaezi&#39;,&#39;2026-07-19&#39;)" onclick="onCellClick(event,&#39;kt6iaezi&#39;,&#39;2026-07-19&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="kt6iaezi" data-ciso="2026-07-19" data-cshift="%7B%22oraFine%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22nota%22%3A%22%22%2C%22manual%22%3Atrue%2C%22eventoId%22%3A%22riposo%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td></tr><tr class="group-start"><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">Cavaliere Gianluca</div><div class="role-badge">Cameraman</div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;ik7wyvj9&#39;,&#39;2026-07-13&#39;)" onclick="onCellClick(event,&#39;ik7wyvj9&#39;,&#39;2026-07-13&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="ik7wyvj9" data-ciso="2026-07-13" data-cshift="%7B%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%2C%22nomeImprovvisato%22%3A%22Turno%20pomeriggio%22%2C%22oraFine%22%3A%2220%3A30%22%2C%22oraFine2%22%3A%22%22%2C%22oraInizio%22%3A%2215%3A30%22%2C%22coloreNota%22%3A%22%2364748b%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno pomeriggio</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">15:30–20:30</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;ik7wyvj9&#39;,&#39;2026-07-14&#39;)" onclick="onCellClick(event,&#39;ik7wyvj9&#39;,&#39;2026-07-14&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="ik7wyvj9" data-ciso="2026-07-14" data-cshift="%7B%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio%22%3A%2215%3A30%22%2C%22oraFine%22%3A%2220%3A30%22%2C%22oraFine2%22%3A%22%22%2C%22nomeImprovvisato%22%3A%22Turno%20pomeriggio%22%2C%22oraInizio2%22%3A%22%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno pomeriggio</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">15:30–20:30</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;ik7wyvj9&#39;,&#39;2026-07-15&#39;)" onclick="onCellClick(event,&#39;ik7wyvj9&#39;,&#39;2026-07-15&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="ik7wyvj9" data-ciso="2026-07-15" data-cshift="%7B%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%2C%22nomeImprovvisato%22%3A%22Turno%20pomeriggio%22%2C%22oraFine%22%3A%2220%3A30%22%2C%22oraFine2%22%3A%22%22%2C%22oraInizio%22%3A%2215%3A30%22%2C%22coloreNota%22%3A%22%2364748b%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno pomeriggio</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">15:30–20:30</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;ik7wyvj9&#39;,&#39;2026-07-16&#39;)" onclick="onCellClick(event,&#39;ik7wyvj9&#39;,&#39;2026-07-16&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="ik7wyvj9" data-ciso="2026-07-16" data-cshift="%7B%22nomeImprovvisato%22%3A%22Turno%20pomeriggio%22%2C%22oraFine2%22%3A%22%22%2C%22oraFine%22%3A%2220%3A30%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio%22%3A%2215%3A30%22%2C%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno pomeriggio</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">15:30–20:30</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;ik7wyvj9&#39;,&#39;2026-07-17&#39;)" onclick="onCellClick(event,&#39;ik7wyvj9&#39;,&#39;2026-07-17&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="ik7wyvj9" data-ciso="2026-07-17" data-cshift="%7B%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%2C%22oraInizio%22%3A%2215%3A30%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22nomeImprovvisato%22%3A%22Turno%20pomeriggio%22%2C%22oraFine%22%3A%2220%3A30%22%2C%22oraFine2%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno pomeriggio</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">15:30–20:30</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;ik7wyvj9&#39;,&#39;2026-07-18&#39;)" onclick="onCellClick(event,&#39;ik7wyvj9&#39;,&#39;2026-07-18&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="ik7wyvj9" data-ciso="2026-07-18" data-cshift="%7B%22oraInizio%22%3A%2209%3A00%22%2C%22eventoId%22%3A%228xob92ug%22%2C%22manual%22%3Atrue%2C%22oraFine%22%3A%2214%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;ik7wyvj9&#39;,&#39;2026-07-19&#39;)" onclick="onCellClick(event,&#39;ik7wyvj9&#39;,&#39;2026-07-19&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="ik7wyvj9" data-ciso="2026-07-19" data-cshift="%7B%22manual%22%3Atrue%2C%22eventoId%22%3A%22riposo%22%2C%22nota%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td></tr><tr><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">Chiumiento Andrea</div><div class="role-badge">Cameraman</div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;p183shsk&#39;,&#39;2026-07-13&#39;)" onclick="onCellClick(event,&#39;p183shsk&#39;,&#39;2026-07-13&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="p183shsk" data-ciso="2026-07-13" data-cshift="%7B%22oraFine%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22nota%22%3A%22%22%2C%22manual%22%3Atrue%2C%22eventoId%22%3A%22riposo%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span><span class="modified-dot" title="Turno modificato manualmente"></span></div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;p183shsk&#39;,&#39;2026-07-14&#39;)" onclick="onCellClick(event,&#39;p183shsk&#39;,&#39;2026-07-14&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="p183shsk" data-ciso="2026-07-14" data-cshift="%7B%22nota%22%3A%22%22%2C%22manual%22%3Atrue%2C%22eventoId%22%3A%22riposo%22%2C%22oraFine%22%3A%22%22%2C%22oraInizio%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span><span class="modified-dot" title="Turno modificato manualmente"></span></div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;p183shsk&#39;,&#39;2026-07-15&#39;)" onclick="onCellClick(event,&#39;p183shsk&#39;,&#39;2026-07-15&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="p183shsk" data-ciso="2026-07-15" data-cshift="%7B%22eventoId%22%3A%22riposo%22%2C%22manual%22%3Atrue%2C%22nota%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span><span class="modified-dot" title="Turno modificato manualmente"></span></div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;p183shsk&#39;,&#39;2026-07-16&#39;)" onclick="onCellClick(event,&#39;p183shsk&#39;,&#39;2026-07-16&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="p183shsk" data-ciso="2026-07-16" data-cshift="%7B%22manual%22%3Atrue%2C%22eventoId%22%3A%22riposo%22%2C%22nota%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span><span class="modified-dot" title="Turno modificato manualmente"></span></div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;p183shsk&#39;,&#39;2026-07-17&#39;)" onclick="onCellClick(event,&#39;p183shsk&#39;,&#39;2026-07-17&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="p183shsk" data-ciso="2026-07-17" data-cshift="%7B%22manual%22%3Atrue%2C%22eventoId%22%3A%22riposo%22%2C%22nota%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span><span class="modified-dot" title="Turno modificato manualmente"></span></div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;p183shsk&#39;,&#39;2026-07-18&#39;)" onclick="onCellClick(event,&#39;p183shsk&#39;,&#39;2026-07-18&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="p183shsk" data-ciso="2026-07-18" data-cshift="%7B%22eventoId%22%3A%22riposo%22%2C%22manual%22%3Atrue%2C%22nota%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;p183shsk&#39;,&#39;2026-07-19&#39;)" onclick="onCellClick(event,&#39;p183shsk&#39;,&#39;2026-07-19&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="p183shsk" data-ciso="2026-07-19" data-cshift="%7B%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%2C%22eventoId%22%3A%22riposo%22%2C%22manual%22%3Atrue%2C%22nota%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td></tr><tr><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">Favale Christian</div><div class="role-badge">Cameraman</div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;r1wecm77&#39;,&#39;2026-07-13&#39;)" onclick="onCellClick(event,&#39;r1wecm77&#39;,&#39;2026-07-13&#39;)"><div class="cell-chip" style="border-color:#f59e0b;background-color:rgba(245,158,11,0.15)" draggable="true" data-cpid="r1wecm77" data-ciso="2026-07-13" data-cshift="%7B%22oraInizio2%22%3A%2217%3A00%22%2C%22manual%22%3Atrue%2C%22oraInizio%22%3A%2210%3A00%22%2C%22coloreNota%22%3A%22%23f59e0b%22%2C%22oraFine%22%3A%2214%3A00%22%2C%22oraFine2%22%3A%2220%3A00%22%2C%22nomeImprovvisato%22%3A%22Turno%20Integrale%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Integrale</span></div><div class="chip-time">10:00–14:00 / 17:00–20:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;r1wecm77&#39;,&#39;2026-07-14&#39;)" onclick="onCellClick(event,&#39;r1wecm77&#39;,&#39;2026-07-14&#39;)"><div class="cell-chip" style="border-color:#f2b407;background-color:rgba(242,180,7,0.12)" draggable="true" data-cpid="r1wecm77" data-ciso="2026-07-14" data-cshift="%7B%22eventoId%22%3A%22ie04u859%22%2C%22manual%22%3Atrue%2C%22oraInizio2%22%3A%2217%3A00%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22oraFine%22%3A%2214%3A00%22%2C%22oraFine2%22%3A%2220%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Integrale</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–14:00 / 17:00–20:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;r1wecm77&#39;,&#39;2026-07-15&#39;)" onclick="onCellClick(event,&#39;r1wecm77&#39;,&#39;2026-07-15&#39;)"><div class="cell-chip" style="border-color:#f2b407;background-color:rgba(242,180,7,0.12)" draggable="true" data-cpid="r1wecm77" data-ciso="2026-07-15" data-cshift="%7B%22oraFine%22%3A%2214%3A00%22%2C%22oraFine2%22%3A%2220%3A00%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22oraInizio2%22%3A%2217%3A00%22%2C%22eventoId%22%3A%22ie04u859%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Integrale</span></div><div class="chip-time">10:00–14:00 / 17:00–20:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;r1wecm77&#39;,&#39;2026-07-16&#39;)" onclick="onCellClick(event,&#39;r1wecm77&#39;,&#39;2026-07-16&#39;)"><div class="cell-chip" style="border-color:#f2e664;background-color:rgba(242,230,100,0.12)" draggable="true" data-cpid="r1wecm77" data-ciso="2026-07-16" data-cshift="%7B%22manual%22%3Atrue%2C%22eventoId%22%3A%22bk566e3i%22%2C%22oraInizio2%22%3A%22%22%2C%22oraFine%22%3A%2223%3A00%22%2C%22oraFine2%22%3A%22%22%2C%22oraInizio%22%3A%2217%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Festival Agerola</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">17:00–23:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;r1wecm77&#39;,&#39;2026-07-17&#39;)" onclick="onCellClick(event,&#39;r1wecm77&#39;,&#39;2026-07-17&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="r1wecm77" data-ciso="2026-07-17" data-cshift="%7B%22manual%22%3Atrue%2C%22eventoId%22%3A%228xob92ug%22%2C%22oraInizio%22%3A%2209%3A00%22%2C%22oraFine%22%3A%2214%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" onclick="onCellClick(event,&#39;r1wecm77&#39;,&#39;2026-07-18&#39;)"><div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div></div></td><td><div class="cell" onclick="onCellClick(event,&#39;r1wecm77&#39;,&#39;2026-07-19&#39;)"><div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div></div></td></tr><tr><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">Mangiante Luciano</div><div class="role-badge">Cameraman</div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;vm4t6s6y&#39;,&#39;2026-07-13&#39;)" onclick="onCellClick(event,&#39;vm4t6s6y&#39;,&#39;2026-07-13&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="vm4t6s6y" data-ciso="2026-07-13" data-cshift="%7B%22eventoId%22%3A%228xob92ug%22%2C%22manual%22%3Atrue%2C%22oraInizio%22%3A%2209%3A00%22%2C%22oraFine%22%3A%2214%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;vm4t6s6y&#39;,&#39;2026-07-14&#39;)" onclick="onCellClick(event,&#39;vm4t6s6y&#39;,&#39;2026-07-14&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="vm4t6s6y" data-ciso="2026-07-14" data-cshift="%7B%22oraFine%22%3A%2214%3A00%22%2C%22eventoId%22%3A%228xob92ug%22%2C%22oraInizio%22%3A%2209%3A00%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;vm4t6s6y&#39;,&#39;2026-07-15&#39;)" onclick="onCellClick(event,&#39;vm4t6s6y&#39;,&#39;2026-07-15&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="vm4t6s6y" data-ciso="2026-07-15" data-cshift="%7B%22oraInizio%22%3A%2209%3A00%22%2C%22manual%22%3Atrue%2C%22eventoId%22%3A%228xob92ug%22%2C%22oraFine%22%3A%2214%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;vm4t6s6y&#39;,&#39;2026-07-16&#39;)" onclick="onCellClick(event,&#39;vm4t6s6y&#39;,&#39;2026-07-16&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="vm4t6s6y" data-ciso="2026-07-16" data-cshift="%7B%22oraInizio%22%3A%2209%3A00%22%2C%22eventoId%22%3A%228xob92ug%22%2C%22manual%22%3Atrue%2C%22oraFine%22%3A%2214%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;vm4t6s6y&#39;,&#39;2026-07-17&#39;)" onclick="onCellClick(event,&#39;vm4t6s6y&#39;,&#39;2026-07-17&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="vm4t6s6y" data-ciso="2026-07-17" data-cshift="%7B%22manual%22%3Atrue%2C%22eventoId%22%3A%228xob92ug%22%2C%22oraInizio%22%3A%2209%3A00%22%2C%22oraFine%22%3A%2214%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;vm4t6s6y&#39;,&#39;2026-07-18&#39;)" onclick="onCellClick(event,&#39;vm4t6s6y&#39;,&#39;2026-07-18&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="vm4t6s6y" data-ciso="2026-07-18" data-cshift="%7B%22eventoId%22%3A%228xob92ug%22%2C%22oraInizio%22%3A%2209%3A00%22%2C%22manual%22%3Atrue%2C%22oraFine%22%3A%2214%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;vm4t6s6y&#39;,&#39;2026-07-19&#39;)" onclick="onCellClick(event,&#39;vm4t6s6y&#39;,&#39;2026-07-19&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="vm4t6s6y" data-ciso="2026-07-19" data-cshift="%7B%22oraFine%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22nota%22%3A%22%22%2C%22manual%22%3Atrue%2C%22eventoId%22%3A%22riposo%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td></tr><tr class="group-start"><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">Tarantino Alfonso</div><div class="role-badge">Montatore</div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;zgg4n2s3&#39;,&#39;2026-07-13&#39;)" onclick="onCellClick(event,&#39;zgg4n2s3&#39;,&#39;2026-07-13&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="zgg4n2s3" data-ciso="2026-07-13" data-cshift="%7B%22oraFine%22%3A%2215%3A00%22%2C%22oraFine2%22%3A%22%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio2%22%3A%22%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;zgg4n2s3&#39;,&#39;2026-07-14&#39;)" onclick="onCellClick(event,&#39;zgg4n2s3&#39;,&#39;2026-07-14&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="zgg4n2s3" data-ciso="2026-07-14" data-cshift="%7B%22oraFine%22%3A%2215%3A00%22%2C%22oraFine2%22%3A%22%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio2%22%3A%22%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;zgg4n2s3&#39;,&#39;2026-07-15&#39;)" onclick="onCellClick(event,&#39;zgg4n2s3&#39;,&#39;2026-07-15&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="zgg4n2s3" data-ciso="2026-07-15" data-cshift="%7B%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22oraFine%22%3A%2215%3A00%22%2C%22oraFine2%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;zgg4n2s3&#39;,&#39;2026-07-16&#39;)" onclick="onCellClick(event,&#39;zgg4n2s3&#39;,&#39;2026-07-16&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="zgg4n2s3" data-ciso="2026-07-16" data-cshift="%7B%22oraInizio%22%3A%2210%3A00%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22oraFine%22%3A%2215%3A00%22%2C%22oraFine2%22%3A%22%22%2C%22manual%22%3Atrue%2C%22oraInizio2%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;zgg4n2s3&#39;,&#39;2026-07-17&#39;)" onclick="onCellClick(event,&#39;zgg4n2s3&#39;,&#39;2026-07-17&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="zgg4n2s3" data-ciso="2026-07-17" data-cshift="%7B%22oraFine2%22%3A%22%22%2C%22oraFine%22%3A%2215%3A00%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22coloreNota%22%3A%22%2364748b%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22oraInizio2%22%3A%22%22%2C%22manual%22%3Atrue%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;zgg4n2s3&#39;,&#39;2026-07-18&#39;)" onclick="onCellClick(event,&#39;zgg4n2s3&#39;,&#39;2026-07-18&#39;)"><div class="cell-chip" style="border-color:#64748b;background-color:rgba(100,116,139,0.15)" draggable="true" data-cpid="zgg4n2s3" data-ciso="2026-07-18" data-cshift="%7B%22oraInizio2%22%3A%22%22%2C%22manual%22%3Atrue%2C%22oraFine2%22%3A%22%22%2C%22oraFine%22%3A%2215%3A00%22%2C%22nomeImprovvisato%22%3A%22Turno%20Mattina%22%2C%22oraInizio%22%3A%2210%3A00%22%2C%22coloreNota%22%3A%22%2364748b%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">10:00–15:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;zgg4n2s3&#39;,&#39;2026-07-19&#39;)" onclick="onCellClick(event,&#39;zgg4n2s3&#39;,&#39;2026-07-19&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="zgg4n2s3" data-ciso="2026-07-19" data-cshift="%7B%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%2C%22manual%22%3Atrue%2C%22eventoId%22%3A%22riposo%22%2C%22nota%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td></tr><tr><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">Trombetta Vincenzo</div><div class="role-badge">Montatore</div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;byuidiyn&#39;,&#39;2026-07-13&#39;)" onclick="onCellClick(event,&#39;byuidiyn&#39;,&#39;2026-07-13&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="byuidiyn" data-ciso="2026-07-13" data-cshift="%7B%22oraFine%22%3A%2214%3A00%22%2C%22oraInizio%22%3A%2209%3A00%22%2C%22manual%22%3Atrue%2C%22eventoId%22%3A%228xob92ug%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;byuidiyn&#39;,&#39;2026-07-14&#39;)" onclick="onCellClick(event,&#39;byuidiyn&#39;,&#39;2026-07-14&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="byuidiyn" data-ciso="2026-07-14" data-cshift="%7B%22oraFine%22%3A%2214%3A00%22%2C%22manual%22%3Atrue%2C%22eventoId%22%3A%228xob92ug%22%2C%22oraInizio%22%3A%2209%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;byuidiyn&#39;,&#39;2026-07-15&#39;)" onclick="onCellClick(event,&#39;byuidiyn&#39;,&#39;2026-07-15&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="byuidiyn" data-ciso="2026-07-15" data-cshift="%7B%22oraFine%22%3A%2214%3A00%22%2C%22manual%22%3Atrue%2C%22oraInizio%22%3A%2209%3A00%22%2C%22eventoId%22%3A%228xob92ug%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;byuidiyn&#39;,&#39;2026-07-16&#39;)" onclick="onCellClick(event,&#39;byuidiyn&#39;,&#39;2026-07-16&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="byuidiyn" data-ciso="2026-07-16" data-cshift="%7B%22eventoId%22%3A%228xob92ug%22%2C%22oraInizio%22%3A%2209%3A00%22%2C%22manual%22%3Atrue%2C%22oraFine%22%3A%2214%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;byuidiyn&#39;,&#39;2026-07-17&#39;)" onclick="onCellClick(event,&#39;byuidiyn&#39;,&#39;2026-07-17&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="byuidiyn" data-ciso="2026-07-17" data-cshift="%7B%22oraFine%22%3A%2214%3A00%22%2C%22eventoId%22%3A%228xob92ug%22%2C%22manual%22%3Atrue%2C%22oraInizio%22%3A%2209%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;byuidiyn&#39;,&#39;2026-07-18&#39;)" onclick="onCellClick(event,&#39;byuidiyn&#39;,&#39;2026-07-18&#39;)"><div class="cell-chip" style="border-color:#94a3b8;background-color:rgba(148,163,184,0.12)" draggable="true" data-cpid="byuidiyn" data-ciso="2026-07-18" data-cshift="%7B%22manual%22%3Atrue%2C%22eventoId%22%3A%228xob92ug%22%2C%22oraInizio%22%3A%2209%3A00%22%2C%22oraFine%22%3A%2214%3A00%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Turno Mattina</span><span class="modified-dot" title="Turno modificato manualmente"></span></div><div class="chip-time">09:00–14:00</div></div></div></td><td><div class="cell" ondragover="event.preventDefault();this.classList.add(&#39;drag-over&#39;)" ondragleave="this.classList.remove(&#39;drag-over&#39;)" ondrop="this.classList.remove(&#39;drag-over&#39;);dropOnCell(&#39;byuidiyn&#39;,&#39;2026-07-19&#39;)" onclick="onCellClick(event,&#39;byuidiyn&#39;,&#39;2026-07-19&#39;)"><div class="cell-chip" style="border-color:#ef4444;background-color:rgba(239,68,68,0.12)" draggable="true" data-cpid="byuidiyn" data-ciso="2026-07-19" data-cshift="%7B%22manual%22%3Atrue%2C%22eventoId%22%3A%22riposo%22%2C%22nota%22%3A%22%22%2C%22oraInizio%22%3A%22%22%2C%22oraFine%22%3A%22%22%7D"><div class="chip-name"><span style="overflow:hidden;text-overflow:ellipsis">Assente</span></div></div></div></td></tr></tbody>
-    </table>
-  </div></div>
+
+<div id="danger-banner"></div>
+<div id="app"></div>
+
 <div id="pdf-ui" style="display:none">
   <div class="pdf-overlay" id="pdf-overlay" onclick="if(event.target===this)closePdfOverlay()">
     <div class="pdf-window">
@@ -246,7 +190,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, limit }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyD8RyTJgSj5U8DA-T7nPzRIzfYqfzoRhn8",
   authDomain: "turnazione-2722d.firebaseapp.com",
@@ -256,18 +202,51 @@ const firebaseConfig = {
   appId: "1:940298778130:web:923caafd0596e861984acb",
   measurementId: "G-6G952ZHRP3"
 };
+
 window._fbReady = new Promise(resolve => {
   try {
     const fbApp = initializeApp(firebaseConfig);
     const db = getFirestore(fbApp);
     const DB_DOC = doc(db, 'app', 'data');
+
     window._fbSave = async (data) => { await setDoc(DB_DOC, data); };
-    window._fbLoad = async () => { const snap = await getDoc(DB_DOC); return snap.exists() ? snap.data() : null; };
-  } catch(e) { console.error('Firebase init error:', e); }
+
+    window._fbLoad = async () => {
+      const snap = await getDoc(DB_DOC);
+      return snap.exists() ? snap.data() : null;
+    };
+
+    // Backup a rotazione: un documento per giorno del mese, quindi al massimo
+    // 31 copie che si sovrascrivono di mese in mese. Nessuna crescita infinita.
+    window._fbBackup = async (data) => {
+      const gg = 'g' + String(new Date().getDate()).padStart(2, '0');
+      await setDoc(doc(db, 'backups', gg), data);
+    };
+
+    window._fbListBackups = async () => {
+      const snap = await getDocs(query(collection(db, 'backups'), orderBy('ts', 'desc'), limit(40)));
+      return snap.docs.map(d => ({ id: d.id, ts: d.data().ts, blob: d.data().blob }));
+    };
+  } catch(e) {
+    console.error('Firebase init error:', e);
+  }
   resolve();
 });
 </script>
+
 <script>
+// ══════════════════════════════════════════════════════════════════════════
+//  CONFIGURAZIONE
+// ══════════════════════════════════════════════════════════════════════════
+// Il link della pagina è pubblico. Di default chi lo apre può SOLO GUARDARE.
+// Per modificare i turni serve questo codice.
+// ATTENZIONE, onestà: il codice sorgente della pagina è pubblico, quindi chi lo
+// legge lo trova. Non è una password vera. Serve a impedire i danni ACCIDENTALI,
+// che sono quello che è successo davvero. La protezione seria sono le regole di
+// sicurezza di Firestore.
+const CODICE_MODIFICA = 'primativvu2026';   // <-- CAMBIALO
+const SOLA_LETTURA_ATTIVA = true;           // metti false per disattivare del tutto il blocco
+
 // ── CONSTANTS ──
 const BUILTINS=[
   {id:'riposo',     nome:'Assente',           colore:'#ef4444',oraInizio:'',     oraFine:''     },
@@ -281,14 +260,10 @@ const GN=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
 const GF=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
 const MN=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 const BUILTIN_IDS=new Set(BUILTINS.map(b=>b.id));
-
-// Ordine ruoli per categoria (usato sia per ordinare i nomi sia per i menu a tendina)
 const RUOLI_TECNICI=['Regista','Produzione','Cameraman','Montatore'];
 const RUOLI_GIORNALISTI=['Giornalista'];
 function ruoliForCat(cat){return cat==='giornalisti'?RUOLI_GIORNALISTI:RUOLI_TECNICI;}
 function ruoloRank(cat,ruolo){const arr=ruoliForCat(cat);const i=arr.indexOf(ruolo);return i<0?arr.length:i;}
-
-// Palette colori nota singola
 const NOTE_COLORS=['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#f59e0b','#22c55e','#10b981','#06b6d4','#3b82f6','#64748b','#b45309','#be185d','#0369a1','#1e293b'];
 
 // ── STATE ──
@@ -296,13 +271,9 @@ const S={
   cat:'tecnici', weekStart:null,
   staff:[], programmi:[], turni:{},
   hiddenBuiltins:[],
-  // Ferie: { '<staffId>': [ {start:'YYYY-MM-DD', end:'YYYY-MM-DD'}, ... ] }
-  // Regola speciale a priorità assoluta: non sovrascrivibile da turnazione, manuale o clonazione.
   ferie:{},
-  // Layout barra preset. presetLayout: { fissi:[key,...], temporanei:[key,...] }
-  // dove key = 'b:<builtinId>' per i preset fissi, 'p:<progId>' per i programmi.
   presetLayout:{fissi:[],temporanei:[]},
-  presetReorder:null,        // chiave del preset attualmente trascinato per il riordino
+  presetReorder:null,
   modalStaff:false, modalProg:false, editProg:null,
   modalFerie:false,
   cellModal:null, removePrompt:null,
@@ -312,9 +283,12 @@ const S={
   _pdfUrl:null,
 };
 
-// ── PERSISTENCE ──
+// ══════════════════════════════════════════════════════════════════════════
+//  PERSISTENZA  ·  qui vivono i guardrail che impediscono di cancellare tutto
+// ══════════════════════════════════════════════════════════════════════════
+
 // Rimuove i valori `undefined` in profondità: Firestore rifiuta l'intera scrittura
-// se anche un solo campo è undefined, e questo faceva fallire il salvataggio (ferie comprese).
+// se anche un solo campo è undefined.
 function sanitize(v){
   if(Array.isArray(v))return v.map(sanitize);
   if(v&&typeof v==='object'){
@@ -328,58 +302,133 @@ function sanitize(v){
   }
   return v===undefined?null:v;
 }
-// Aggiorna l'indicatore visivo di sincronizzazione in alto.
-// stato: 'ok' (verde, salvato su Firebase), 'local' (rosso, solo locale), 'saving' (giallo)
+
+// ── STATO DELLA CONNESSIONE AL CLOUD ──
+// Sono le tre variabili che impediscono di riscrivere il vuoto sopra i dati buoni.
+let _remoteOk=false;         // la LETTURA da Firestore è riuscita?
+let _remoteStaffCount=null;  // quante persone c'erano nel cloud all'ultima lettura riuscita
+let _lastBackupTs=0;
+
+function applyData(d){
+  S.staff=d.staff||[];
+  S.programmi=d.programmi||[];
+  S.turni=d.turni||{};
+  S.hiddenBuiltins=d.hiddenBuiltins||[];
+  S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]};
+  S.ferie=d.ferie||{};
+}
+
+function currentPayload(){
+  return sanitize({staff:S.staff,programmi:S.programmi,turni:S.turni,hiddenBuiltins:S.hiddenBuiltins,presetLayout:S.presetLayout,ferie:S.ferie});
+}
+
+// Indicatore visivo di sincronizzazione.
 let _syncStato='saving';
 function setSyncStatus(stato){
-  _syncStato=stato; // ricordato così sopravvive ai re-render della pagina
+  _syncStato=stato;
   const el=document.getElementById('sync-status');
   if(!el)return;
   if(stato==='ok'){ el.textContent='● Sincronizzato'; el.style.background='#16a34a'; el.style.color='#fff'; el.title='Le modifiche vengono salvate su Firebase (cloud).'; }
   else if(stato==='saving'){ el.textContent='● Salvataggio…'; el.style.background='#f59e0b'; el.style.color='#fff'; el.title='Salvataggio in corso…'; }
-  else { el.textContent='● NON sincronizzato (solo locale)'; el.style.background='#dc2626'; el.style.color='#fff'; el.title='ATTENZIONE: le modifiche NON stanno arrivando al cloud. Se ricarichi rischi di perderle. Controlla la connessione.'; }
+  else if(stato==='readonly'){ el.textContent='● Sola lettura'; el.style.background='#334155'; el.style.color='#cbd5e1'; el.title='Stai consultando i turni. Per modificarli serve il codice.'; }
+  else { el.textContent='● NON sincronizzato'; el.style.background='#dc2626'; el.style.color='#fff'; el.title='ATTENZIONE: le modifiche NON stanno arrivando al cloud.'; }
+}
+
+function mostraBannerPericolo(testo){
+  const b=document.getElementById('danger-banner');
+  if(!b)return;
+  if(!testo){b.style.display='none';b.textContent='';return;}
+  b.textContent=testo;
+  b.style.display='block';
 }
 
 async function save(){
-  const payload=sanitize({staff:S.staff,programmi:S.programmi,turni:S.turni,hiddenBuiltins:S.hiddenBuiltins,presetLayout:S.presetLayout,ferie:S.ferie});
-  // Salva sempre in locale (immediato, non può fallire silenziosamente): resta come
-  // rete di sicurezza, ma NON deve mai essere l'unica copia. L'indicatore avvisa l'utente.
-  try{ localStorage.setItem('turni_v5_fb',JSON.stringify(payload)); }catch(e){console.error('save local:',e);}
-  // Poi su Firebase. Salviamo tutto in un unico campo di testo `blob` (stringa JSON):
-  // Firestore conta una stringa come una sola voce di indice, mentre gli oggetti
-  // annidati (turni, ferie) ne generano migliaia e superano il limite del documento
-  // (errore "too many index entries"). Così il salvataggio non fallisce più.
+  const payload=currentPayload();
+  const testo=JSON.stringify(payload);
+  const nStaff=(S.staff||[]).length;
+
+  // Copia locale immediata: rete di sicurezza su questo dispositivo.
+  try{ localStorage.setItem('turni_v5_fb',testo); }catch(e){console.error('save local:',e);}
+
+  // ── GUARDRAIL 1 ──────────────────────────────────────────────────────────
+  // Non scrivere MAI sul cloud se all'avvio non siamo riusciti a leggerlo.
+  // È esattamente il caso che ha cancellato i dati ad agosto 2026: lettura
+  // bloccata da un ad blocker o da un attimo di rete assente, stato vuoto in
+  // memoria, salvataggio del vuoto sopra i turni di tutti.
+  if(!_remoteOk){
+    setSyncStatus('local');
+    alert('⚠️ Modifica salvata SOLO su questo dispositivo.\n\n'+
+          'All\'avvio non è stato possibile leggere i dati dal cloud, quindi per sicurezza il programma NON scrive nulla: altrimenti rischierebbe di cancellare i turni di tutti.\n\n'+
+          'Controlla la connessione, disattiva eventuali ad blocker su questo sito, poi ricarica la pagina.');
+    return;
+  }
+
+  // ── GUARDRAIL 2 ──────────────────────────────────────────────────────────
+  // Non svuotare mai. Se il cloud aveva delle persone e adesso ne abbiamo zero,
+  // è un errore per definizione, non una scelta.
+  if(_remoteStaffCount>0 && nStaff===0){
+    setSyncStatus('local');
+    alert('🛑 Salvataggio BLOCCATO per sicurezza.\n\n'+
+          'Stavi per scrivere un elenco personale VUOTO sopra '+_remoteStaffCount+' persone presenti sul cloud.\n\n'+
+          'Se volevi davvero azzerare tutto, usa il pulsante Ripristina. Altrimenti ricarica semplicemente la pagina.');
+    return;
+  }
+
+  // ── Scrittura vera ──
   setSyncStatus('saving');
   try{
-    if(window._fbSave){ await window._fbSave({blob:JSON.stringify(payload)}); setSyncStatus('ok'); }
-    else { console.warn('Firebase non pronto: salvato solo in locale'); setSyncStatus('local'); }
-  }
-  catch(e){
+    if(!window._fbSave){ setSyncStatus('local'); console.warn('Firebase non pronto'); return; }
+    const record={blob:testo, ts:Date.now(), nStaff:nStaff, nTurni:Object.keys(S.turni||{}).length};
+    await window._fbSave(record);
+    _remoteStaffCount=nStaff;
+    setSyncStatus('ok');
+
+    // Backup automatico sul cloud, al massimo uno ogni 10 minuti.
+    const ora=Date.now();
+    if(window._fbBackup && ora-_lastBackupTs>10*60*1000){
+      _lastBackupTs=ora;
+      window._fbBackup(record).catch(e=>console.error('backup:',e));
+    }
+  }catch(e){
     console.error('save firebase:',e);
     setSyncStatus('local');
-    alert('⚠️ ATTENZIONE: la modifica NON è stata salvata sul cloud (solo in locale su questo dispositivo).\n\nNON ricaricare la pagina: rischi di perdere le modifiche.\nControlla la connessione e riprova.\n\nDettaglio tecnico: '+(e&&e.message?e.message:e));
+    alert('⚠️ ATTENZIONE: la modifica NON è stata salvata sul cloud (solo in locale su questo dispositivo).\n\n'+
+          'NON ricaricare la pagina: rischi di perdere le modifiche.\n'+
+          'Controlla la connessione e riprova.\n\n'+
+          'Dettaglio tecnico: '+(e&&e.message?e.message:e));
   }
 }
+
 async function load(){
-  try{
-    if(window._fbLoad){
+  if(window._fbLoad){
+    try{
       const raw=await window._fbLoad();
+      _remoteOk=true;   // la lettura è riuscita, anche se il documento non esiste ancora
       if(raw){
-        // Nuovo formato: dati dentro il campo `blob` (stringa JSON).
-        // Vecchio formato: dati sparsi direttamente nel documento. Compatibile con entrambi.
-        const d = (raw.blob!==undefined) ? JSON.parse(raw.blob) : raw;
-        S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};S.hiddenBuiltins=d.hiddenBuiltins||[];S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]};S.ferie=d.ferie||{};
-        migrateData();normalizePresetLayout();return 'firebase';
+        // Nuovo formato: dati dentro il campo `blob`. Vecchio formato: campi sparsi.
+        const d=(raw.blob!==undefined)?JSON.parse(raw.blob):raw;
+        applyData(d);
+      }else{
+        applyData({});   // database nuovo, prima installazione
       }
+      _remoteStaffCount=(S.staff||[]).length;
+      migrateData();normalizePresetLayout();
+      return 'firebase';
+    }catch(e){
+      // Lettura fallita. NON si prosegue come se niente fosse: da qui in poi
+      // _remoteOk resta false e ogni scrittura sul cloud è vietata.
+      console.error('LETTURA CLOUD FALLITA:',e);
+      _remoteOk=false;
     }
-  }catch(e){console.error('load:',e);}
-  try{ const d=JSON.parse(localStorage.getItem('turni_v5_fb')||'{}');S.staff=d.staff||[];S.programmi=d.programmi||[];S.turni=d.turni||{};S.hiddenBuiltins=d.hiddenBuiltins||[];S.presetLayout=d.presetLayout||{fissi:[],temporanei:[]};S.ferie=d.ferie||{}; }catch{S.staff=[];S.programmi=[];S.turni={};S.hiddenBuiltins=[];S.presetLayout={fissi:[],temporanei:[]};S.ferie={};}
+  }
+  // Fallback di SOLA VISUALIZZAZIONE dalla copia locale di questo browser.
+  try{ applyData(JSON.parse(localStorage.getItem('turni_v5_fb')||'{}')); }
+  catch(e){ applyData({}); }
   migrateData();normalizePresetLayout();
   return 'local';
 }
 
-// Migrazione: assegna il ruolo "Produzione" a Luca de Ciuceis ed Enrico Coppola
-// (una sola volta; idempotente). Eseguita al caricamento sui dati esistenti.
+// Migrazione storica: ruolo "Produzione" per De Ciuceis e Coppola. Idempotente.
 function migrateData(){
   let changed=false;
   const target=[
@@ -396,8 +445,93 @@ function migrateData(){
   if(changed)save().catch(e=>console.error(e));
 }
 
-// ── LAYOUT PRESET (sezioni Fissi/Temporanei + ordine personalizzato) ──
-// Ogni preset è una chiave: 'b:<builtinId>' per i fissi predefiniti, 'p:<progId>' per i programmi.
+// ══════════════════════════════════════════════════════════════════════════
+//  MODALITÀ SOLA LETTURA
+// ══════════════════════════════════════════════════════════════════════════
+let _puoModificare=false;
+
+function requireEdit(){
+  if(!SOLA_LETTURA_ATTIVA)return true;
+  if(_puoModificare)return true;
+  const c=prompt('Questa pagina è in SOLA LETTURA.\n\nInserisci il codice per poter modificare i turni:');
+  if(c===null||c==='')return false;
+  if(c===CODICE_MODIFICA){_puoModificare=true;render();return true;}
+  alert('Codice errato. La pagina resta in sola lettura.');
+  return false;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  BACKUP E RIPRISTINO
+// ══════════════════════════════════════════════════════════════════════════
+function scaricaBackup(){
+  const testo=JSON.stringify(currentPayload(),null,2);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([testo],{type:'application/json'}));
+  a.download='turni-backup-'+toISO(new Date())+'.json';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+}
+
+function ripristinaBackup(){
+  if(!requireEdit())return;
+  const inp=document.createElement('input');
+  inp.type='file';
+  inp.accept='application/json,.json';
+  inp.onchange=()=>{
+    const f=inp.files&&inp.files[0];
+    if(!f)return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const d=JSON.parse(r.result);
+        if(!Array.isArray(d.staff))throw new Error('File non valido: manca l\'elenco del personale.');
+        const nTurni=Object.keys(d.turni||{}).length;
+        if(!confirm('Ripristinare "'+f.name+'"?\n\nPersone: '+d.staff.length+'\nTurni: '+nTurni+'\n\nI dati attualmente sul cloud verranno sostituiti.'))return;
+        applyData(d);
+        normalizePresetLayout();
+        _remoteStaffCount=0;   // ripristino volontario: il guardrail 2 non deve bloccarlo
+        save().then(()=>{alert('Ripristino completato.');render();});
+      }catch(e){
+        alert('Errore nella lettura del backup: '+(e&&e.message?e.message:e));
+      }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+
+async function ripristinaDaCloud(){
+  if(!requireEdit())return;
+  if(!window._fbListBackups){alert('Funzione non disponibile.');return;}
+  try{
+    const lista=await window._fbListBackups();
+    if(!lista.length){alert('Nessun backup disponibile sul cloud.');return;}
+    const righe=lista.map((b,i)=>{
+      let n=0;
+      try{ n=(JSON.parse(b.blob).staff||[]).length; }catch(e){}
+      return (i+1)+') '+new Date(b.ts).toLocaleString('it-IT')+'  ·  '+n+' persone';
+    }).join('\n');
+    const scelta=prompt('Backup disponibili sul cloud:\n\n'+righe+'\n\nScrivi il NUMERO del backup da ripristinare:');
+    if(!scelta)return;
+    const b=lista[parseInt(scelta,10)-1];
+    if(!b){alert('Numero non valido.');return;}
+    const d=JSON.parse(b.blob);
+    const nTurni=Object.keys(d.turni||{}).length;
+    if(!confirm('Ripristinare il backup del '+new Date(b.ts).toLocaleString('it-IT')+'?\n\nPersone: '+((d.staff||[]).length)+'\nTurni: '+nTurni+'\n\nI dati attuali verranno sostituiti.'))return;
+    applyData(d);
+    normalizePresetLayout();
+    _remoteStaffCount=0;
+    await save();
+    alert('Ripristino completato.');
+    render();
+  }catch(e){
+    alert('Errore: '+(e&&e.message?e.message:e));
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  LAYOUT PRESET
+// ══════════════════════════════════════════════════════════════════════════
 function presetKeyBuiltin(id){return 'b:'+id;}
 function presetKeyProg(id){return 'p:'+id;}
 function allPresetKeys(){
@@ -411,8 +545,6 @@ function presetExists(key){
   if(key.startsWith('p:')){const id=key.slice(2);const pg=byId(S.programmi,id);return !!pg&&pg.isRealProg!==false;}
   return false;
 }
-// Garantisce che presetLayout contenga esattamente i preset esistenti, senza duplicati.
-// I preset nuovi (non ancora collocati) finiscono di default nella sezione "Fissi".
 function normalizePresetLayout(){
   if(!S.presetLayout||typeof S.presetLayout!=='object')S.presetLayout={fissi:[],temporanei:[]};
   if(!Array.isArray(S.presetLayout.fissi))S.presetLayout.fissi=[];
@@ -438,7 +570,6 @@ function getMonth(iso){return fromISO(iso).getMonth()}
 function fmtDate(iso){const d=fromISO(iso);return`${d.getDate()}/${d.getMonth()+1}`}
 function isToday(iso){return iso===toISO(new Date())}
 function isPast(iso){return iso<toISO(new Date())}
-function weekOffset(iso,baseISO){const d=fromISO(getMonday(iso)),b=fromISO(getMonday(baseISO));return Math.round((d-b)/(7*86400*1000))}
 function weekDates(){return Array.from({length:7},(_,i)=>addDays(S.weekStart,i))}
 function fmtWeekLabel(){const dd=weekDates(),s=fromISO(dd[0]),e=fromISO(dd[6]);return`${s.getDate()} ${MN[s.getMonth()]} – ${e.getDate()} ${MN[e.getMonth()]} ${e.getFullYear()}`}
 function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),dy=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,dy)}
@@ -447,86 +578,16 @@ function isHoliday(iso){const d=fromISO(iso),y=d.getFullYear();const md=`${Strin
 // ── DATA HELPERS ──
 function uid(){return Math.random().toString(36).slice(2,10)}
 function byId(arr,id){return arr.find(x=>x.id===id)}
-// Ordinamento: prima per ruolo (ordine fisso), poi per cognome e nome.
 function staffSorted(cat){return S.staff.filter(s=>s.cat===cat).sort((a,b)=>ruoloRank(cat,a.ruolo)-ruoloRank(cat,b.ruolo)||a.cognome.localeCompare(b.cognome)||a.nome.localeCompare(b.nome))}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function hexToRgba(hex,alpha){if(!hex||hex.length<7)return`rgba(0,0,0,${alpha})`;let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${alpha})`}
 
 // ── SHIFT LOGIC ──
-function getAuto(pid,iso){
-  // TURNI AUTOMATICI DISATTIVATI DEFINITIVAMENTE (su richiesta). Vedi getAutoFor.
-  return null;
-}
-function getAuto_DISABILITATA(pid,iso){
-  const dow=getDow(iso),mon=getMonth(iso);
-  const person=byId(S.staff,pid);if(!person)return null;
-  for(const pg of S.programmi){
-    if(!pg.giorni||!pg.giorni.includes(dow))continue;
-    if(pg.mesi&&pg.mesi.length&&!pg.mesi.includes(mon))continue;
-    if(pg.turnazione){
-      const roleRot=(pg.rotazioni&&pg.rotazioni[person.ruolo])||(pg.rotazione?pg.rotazione:[]);
-      if(!roleRot.length)continue;
-      const di=pg.giorni.indexOf(dow),wo=weekOffset(iso,pg.baseDate||iso),len=roleRot.length;
-      if(roleRot[((di+wo)%len+len)%len]===pid) return{eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2,oraFine2:pg.oraFine2};
-    }else{
-      if(((pg.fissi||{})[dow]||[]).includes(pid)) return{eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2,oraFine2:pg.oraFine2};
-    }
-  }
-  return null;
-}
-// Variante di getAuto indipendente da S.cat (serve per la copia multi-categoria)
-function getAutoFor(person,iso,cat){
-  // TURNI AUTOMATICI DISATTIVATI DEFINITIVAMENTE (su richiesta).
-  // Nessun turno viene mai generato automaticamente dai programmi, in nessuna data.
-  // La griglia mostra SOLO i turni inseriti manualmente. Niente turnazione, niente
-  // clonazione, niente riempimento automatico: mai più.
-  return null;
-}
-function getAutoFor_DISABILITATA(person,iso,cat){
-  const dow=getDow(iso),mon=getMonth(iso);
-  if(!person||person.cat!==cat)return null;
-  for(const pg of S.programmi){
-    if(!pg.giorni||!pg.giorni.includes(dow))continue;
-    if(pg.mesi&&pg.mesi.length&&!pg.mesi.includes(mon))continue;
-    if(pg.turnazione){
-      const roleRot=(pg.rotazioni&&pg.rotazioni[person.ruolo])||(pg.rotazione?pg.rotazione:[]);
-      if(!roleRot.length)continue;
-      const di=pg.giorni.indexOf(dow),wo=weekOffset(iso,pg.baseDate||iso),len=roleRot.length;
-      if(roleRot[((di+wo)%len+len)%len]===person.id) return{eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2,oraFine2:pg.oraFine2};
-    }else{
-      if(((pg.fissi||{})[dow]||[]).includes(person.id)) return{eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2,oraFine2:pg.oraFine2};
-    }
-  }
-  return null;
-}
+// TURNI AUTOMATICI DISATTIVATI DEFINITIVAMENTE (su richiesta).
+function getAuto(pid,iso){ return null; }
+function getAutoFor(person,iso,cat){ return null; }
 function getManual(pid,iso){return S.turni[`${pid}|${iso}|${S.cat}`]??null}
 
-// FIX: risolve lo stato "effettivo" di una casella per una data, risalendo a
-// ritroso di settimana in settimana finché trova l'ultimo stato reale (manuale
-// o clonato). Questo elimina le caselle vuote quando una settimana futura non
-// è ancora stata materializzata in S.turni: la casella eredita sempre ciò che
-// aveva la settimana precedente con dati, esattamente come da regola "clona la
-// precedente". Le ferie e l'automatico restano gestiti a monte da getShift.
-// Limite di risalita: 520 settimane (~10 anni) per evitare loop teoricamente infiniti.
-function resolveManualBack(pid,iso,cat){
-  let cur=iso;
-  for(let i=0;i<520;i++){
-    const rec=S.turni[`${pid}|${cur}|${cat}`];
-    if(rec!==undefined){
-      if(rec.blocked)return{state:'blocked'};
-      return{state:'shift',val:rec};
-    }
-    // Nessun record in questa settimana: se qui esisteva un automatico, quello
-    // è lo stato reale di partenza e non va scavalcato all'indietro.
-    const person=byId(S.staff,pid);
-    const auto=getAutoFor(person,cur,cat);
-    if(auto!==null)return{state:'auto',val:auto,iso:cur};
-    cur=addDays(cur,-7);
-  }
-  return{state:'none'};
-}
-
-// Ferie: regola speciale a priorità assoluta. Controllata prima di tutto il resto.
 function isOnFerie(pid,iso){
   const ranges=(S.ferie&&S.ferie[pid])||[];
   for(const r of ranges){
@@ -536,12 +597,9 @@ function isOnFerie(pid,iso){
   }
   return false;
 }
-// Turno "ferie" sintetico, mostrato in rosso con scritta FERIE.
 const FERIE_SHIFT={ferie:true,nomeImprovvisato:'FERIE',coloreNota:'#ef4444',oraInizio:'',oraFine:''};
 function getShift(pid,iso){
   if(isOnFerie(pid,iso))return FERIE_SHIFT; // priorità assoluta
-  // Mostra SOLO il dato realmente inserito in questa esatta settimana.
-  // Nessuna eredità dal passato, nessun automatico, nessuna clonazione.
   const m=getManual(pid,iso);
   if(m!==null)return m.blocked?null:m;
   return null;
@@ -555,40 +613,16 @@ function conflictCheck(pid,iso){
   }
   return null;
 }
+// PROPAGAZIONE IN AVANTI DISATTIVATA (su richiesta).
+function propagateForward(pid,iso,val){ return; }
+// CLONAZIONE SETTIMANALE DISATTIVATA (su richiesta).
+function ensureWeekCopied(){ return; }
 
-// ── PROPAGAZIONE ALLE SETTIMANE FUTURE ──
-// Ogni modifica manuale viene copiata anche su tutte le settimane future già
-// presenti nello stato, così la settimana successiva resta sempre la copia
-// della precedente.
-function propagateForward(pid,iso,val){
-  // PROPAGAZIONE IN AVANTI DISATTIVATA (su richiesta): una modifica o cancellazione
-  // NON si copia più nelle settimane successive. Ogni casella è indipendente e vale
-  // solo per la sua settimana. La funzione non fa più nulla.
-  return;
-}
-function propagateForward_DISABILITATA(pid,iso,val){
-  const suffix=`|${S.cat}`;
-  let maxISO=iso;
-  for(const k of Object.keys(S.turni)){
-    if(!k.endsWith(suffix))continue;
-    const parts=k.split('|');
-    if(parts[0]!==pid)continue;
-    if(parts[1]>maxISO)maxISO=parts[1];
-  }
-  let cur=addDays(iso,7);
-  while(cur<=maxISO){
-    const kk=`${pid}|${cur}|${S.cat}`;
-    if(val===null)delete S.turni[kk];
-    else S.turni[kk]={...val};
-    cur=addDays(cur,7);
-  }
-}
-
-// ── DROP (strip pill → cella, oppure cella → cella) ──
+// ── DROP ──
 function dropOnCell(pid,iso){
   if(!S.dragging)return;
-  S.presetReorder=null; // un drop su una cella non è mai un riordino di preset
-  // Le ferie sono una regola speciale: la cella è bloccata, niente override col trascinamento.
+  if(!requireEdit()){S.dragging=null;S.presetReorder=null;return;}
+  S.presetReorder=null;
   if(isOnFerie(pid,iso)){S.dragging=null;return;}
   const{type,id,cellShift}=S.dragging;
   const person=byId(S.staff,pid);if(!person)return;
@@ -599,32 +633,28 @@ function dropOnCell(pid,iso){
     }else if(type==='builtin'){
       const bi=BUILTINS.find(b=>b.id===id);if(!bi)return;
       v={eventoId:bi.id,oraInizio:bi.oraInizio,oraFine:bi.oraFine,nota:'',manual:true};
-    }else{ // prog
+    }else{
       const pg=byId(S.programmi,id);if(!pg)return;
       v={eventoId:pg.id,oraInizio:pg.oraInizio,oraFine:pg.oraFine,oraInizio2:pg.oraInizio2||'',oraFine2:pg.oraFine2||'',manual:true};
     }
     if(v===null)return;
-    // Override netto: sovrascrive SEMPRE come manuale qualunque cosa ci fosse prima
     setManual(pid,iso,v);
     propagateForward(pid,iso,v);
     save().catch(e=>console.error(e));render();
   }catch(e){console.error(e);alert('Errore nel trascinamento: '+e.message);}
 }
 
-// ── RIORDINO / SPOSTAMENTO PRESET TRA ZONE ──
-// Calcola la posizione di inserimento in base alla pillola più vicina al cursore.
+// ── RIORDINO PRESET ──
 function presetInsertIndex(zoneEl,clientX){
   const pills=[...zoneEl.querySelectorAll('.pill')].filter(p=>p.dataset.pkey!==S.presetReorder);
   for(let i=0;i<pills.length;i++){
     const r=pills[i].getBoundingClientRect();
-    if(clientX < r.left + r.width/2){
-      return {key:pills[i].dataset.pkey};
-    }
+    if(clientX < r.left + r.width/2){ return {key:pills[i].dataset.pkey}; }
   }
-  return {key:null}; // in coda
+  return {key:null};
 }
 function onPresetZoneOver(e,sezione){
-  if(!S.presetReorder)return; // attivo solo durante il riordino di un preset
+  if(!S.presetReorder)return;
   e.preventDefault();
   e.dataTransfer.dropEffect='move';
   e.currentTarget.classList.add('zone-over');
@@ -632,11 +662,10 @@ function onPresetZoneOver(e,sezione){
 function onPresetZoneDrop(e,sezione){
   if(!S.presetReorder)return;
   e.preventDefault();e.stopPropagation();
+  if(!requireEdit()){S.presetReorder=null;return;}
   const movingKey=S.presetReorder;
   const beforeKey=presetInsertIndex(e.currentTarget,e.clientX).key;
-  // Rimuove la chiave da entrambe le sezioni
   ['fissi','temporanei'].forEach(z=>{S.presetLayout[z]=(S.presetLayout[z]||[]).filter(k=>k!==movingKey);});
-  // Inserisce nella sezione di destinazione, alla posizione calcolata
   const arr=S.presetLayout[sezione];
   if(beforeKey===null){arr.push(movingKey);}
   else{const ix=arr.indexOf(beforeKey);if(ix<0)arr.push(movingKey);else arr.splice(ix,0,movingKey);}
@@ -644,12 +673,15 @@ function onPresetZoneDrop(e,sezione){
   window._wasDragging=true;setTimeout(()=>{window._wasDragging=false;},150);
   save().catch(err=>console.error(err));render();
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════════════════════════════
 function render(){
   document.getElementById('app').innerHTML=buildHTML();
   bindDrag();
-  setSyncStatus(_syncStato); // ripristina l'indicatore dopo aver ricostruito la pagina
+  setSyncStatus(_syncStato);
 }
-
 function buildHTML(){
   return topBar()+strip()+gridSection()+
     (S.modalStaff?modalStaff():'')+
@@ -659,8 +691,10 @@ function buildHTML(){
     (S.removePrompt?removePrompt():'')+
     (S.presetMenu?presetMenu():'');
 }
-
 function topBar(){
+  const lucchetto=(SOLA_LETTURA_ATTIVA&&!_puoModificare)
+    ?`<button class="btn btn-secondary" onclick="requireEdit()" title="Sblocca la modifica dei turni">🔒 Sblocca</button>`
+    :'';
   return`<div class="topbar">
   <h1>📺 Gestione Turni</h1>
   <span id="sync-status" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:12px;font-size:.72rem;font-weight:700;background:#64748b;color:#fff;white-space:nowrap">● …</span>
@@ -675,7 +709,11 @@ function topBar(){
     <button class="tab-btn ${S.cat==='giornalisti'?'active':''}" onclick="setTab('giornalisti')">Giornalisti</button>
   </div>
   <div class="action-btns">
+    ${lucchetto}
     <button class="btn btn-export" onclick="exportPDF()">PDF</button>
+    <button class="btn btn-success" onclick="scaricaBackup()" title="Scarica una copia di sicurezza sul tuo computer">💾 Backup</button>
+    <button class="btn btn-secondary" onclick="ripristinaBackup()" title="Ripristina da un file di backup">♻️ Da file</button>
+    <button class="btn btn-secondary" onclick="ripristinaDaCloud()" title="Ripristina da un backup automatico sul cloud">☁️ Da cloud</button>
     <button class="btn btn-ferie" onclick="openFerie()">🏖️ Ferie</button>
     <button class="btn btn-secondary" onclick="openStaff()">👥 Personale</button>
     <button class="btn btn-primary" onclick="openProg()">📋 Programmi</button>
@@ -683,7 +721,6 @@ function topBar(){
   </div>
 </div>`;
 }
-
 function presetPill(key){
   const info=presetInfo(key);if(!info)return'';
   const dragging=S.presetReorder===key?' preset-dragging':'';
@@ -709,7 +746,6 @@ function strip(){
   ${presetZone('temporanei','TEMPORANEI')}
 </div>`;
 }
-
 function gridSection(){
   const list=staffSorted(S.cat);
   const dates=weekDates();
@@ -721,7 +757,6 @@ function gridSection(){
   }).join('');
   const rows=list.map((s,idx)=>{
     const cells=dates.map(d=>buildCell(s.id,d)).join('');
-    // Linea divisoria marcata quando cambia il ruolo rispetto alla persona precedente
     const newGroup=idx>0 && list[idx-1].ruolo!==s.ruolo;
     const trClass=newGroup?' class="group-start"':'';
     return`<tr${trClass}><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">${esc(s.cognome)} ${esc(s.nome)}</div><div class="role-badge">${esc(s.ruolo)}</div></td>${cells}</tr>`;
@@ -737,23 +772,16 @@ function gridSection(){
     </table>
   </div>`;
 }
-
 function buildCell(pid,iso){
   const today=isToday(iso)?' day-today':'';
-
-  // FERIE: regola speciale, priorità assoluta. Chip rosso pieno, non trascinabile.
   if(isOnFerie(pid,iso)){
     const inner=`<div class="cell-chip ferie-chip" style="border-color:#dc2626;background-color:#ef4444;color:#fff!important"><div class="chip-name"><span>FERIE</span></div></div>`;
     return`<td><div class="cell${today}" onclick="onCellClick(event,'${pid}','${iso}')">${inner}</div></td>`;
   }
-
   const sh=getShift(pid,iso);
-
-  // Pallino rosso: turno modificato manualmente rispetto all'automatico
   const manualEntry=getManual(pid,iso);
   const autoEntry=getAuto(pid,iso);
   const isModified=manualEntry!==null&&!manualEntry?.blocked&&autoEntry!==null&&!isPast(iso);
-
   let inner='';
   if(sh){
     const bi=BUILTINS.find(b=>b.id===sh.eventoId);
@@ -780,12 +808,10 @@ function buildCell(pid,iso){
     onclick="onCellClick(event,'${pid}','${iso}')"
   >${inner}</div></td>`;
 }
-
-// click sulla cella: ignora se appena finito un drag
 window._wasDragging=false;
 function onCellClick(e,pid,iso){
   if(window._wasDragging){window._wasDragging=false;return;}
-  // Le ferie si modificano solo dalla finestra dedicata: il clic la apre.
+  if(!requireEdit())return;
   if(isOnFerie(pid,iso)){openFerie();return;}
   openCell(pid,iso);
 }
@@ -822,11 +848,6 @@ function modalStaff(){
   <div class="modal-footer"><button class="btn btn-secondary" onclick="S.modalStaff=false;render()">Chiudi</button></div>
 </div></div>`;
 }
-
-// ── FINESTRA FERIE ──
-// Regola speciale: priorità assoluta, non sovrascrivibile dal trascinamento né
-// dalla clonazione settimanale. Si gestisce solo da qui. Per cancellare le ferie
-// basta svuotare/eliminare le date.
 function modalFerie(){
   const personRow=(s)=>{
     const ranges=(S.ferie&&S.ferie[s.id])||[];
@@ -867,7 +888,6 @@ function modalFerie(){
   <div class="modal-footer"><button class="btn btn-secondary" onclick="closeFerie()">Chiudi</button></div>
 </div></div>`;
 }
-
 function modalProg(){
   const progs=S.programmi.filter(p=>p.isRealProg!==false);
   if(S.editProg==='list'||S.editProg===null){
@@ -879,7 +899,7 @@ function modalProg(){
       ?progs.map(pg=>`<div class="list-item">
         <div class="dot12" style="background:${pg.colore||'#6366f1'}"></div>
         <div class="info"><div style="font-weight:600">${esc(pg.nome)}</div>
-        <div class="meta">${pg.giorni.map(d=>GN[d]).join(', ')}${pg.oraInizio?` · ${pg.oraInizio}–${pg.oraFine}`:''}${pg.oraInizio2?` / ${pg.oraInizio2}–${pg.oraFine2}`:''}</div></div>
+        <div class="meta">${(pg.giorni||[]).map(d=>GN[d]).join(', ')}${pg.oraInizio?` · ${pg.oraInizio}–${pg.oraFine}`:''}${pg.oraInizio2?` / ${pg.oraInizio2}–${pg.oraFine2}`:''}</div></div>
         <button class="del" style="color:#94a3b8;margin-right:2px" onclick="startEditProg('${pg.id}')">✎</button>
         <button class="del" onclick="removeProg('${pg.id}')">✕</button>
       </div>`).join('')
@@ -912,7 +932,6 @@ function modalProg(){
   <div class="modal-footer"><button class="btn btn-secondary" onclick="S.editProg='list';render()">Annulla</button><button class="btn btn-primary" onclick="saveProg()">Salva</button></div>
 </div></div>`;
 }
-
 function cellModal(){
   const{pid,date}=S.cellModal;
   const person=byId(S.staff,pid);
@@ -921,18 +940,15 @@ function cellModal(){
   const dstr=`${GF[getDow(date)]}, ${d.getDate()} ${MN[d.getMonth()]} ${d.getFullYear()}`;
   const isImpro=sh&&!sh.eventoId;
   const curColor=isImpro&&sh.coloreNota?sh.coloreNota:S.noteColor;
-
   const swatches=NOTE_COLORS.map(c=>`<div class="cswatch${c===curColor?' sel':''}"
     style="background:${c}" title="${c}"
     onclick="pickNoteColor('${c}')"></div>`).join('');
-
   return`<div class="modal-overlay" onclick="if(event.target===this){S.cellModal=null;render()}">
 <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
   <h2>${person?esc(person.cognome+' '+person.nome):''}</h2>
   <div style="font-size:.78rem;color:#64748b;margin-top:-10px;margin-bottom:16px">${dstr}</div>
   <div style="background:#f8fafc;padding:15px;border-radius:10px;margin-bottom:15px;border:1px solid #e2e8f0">
     <div class="form-row"><label>Nome Evento Singolo</label><input type="text" id="im-nome" value="${isImpro?esc(sh.nomeImprovvisato||''):''}" placeholder="Esempio: Intervista Speciale"></div>
-
     <div class="form-row" style="margin-bottom:10px">
       <label>Colore etichetta</label>
       <div class="color-swatches">${swatches}</div>
@@ -944,7 +960,6 @@ function cellModal(){
         <span style="font-size:.72rem;color:#94a3b8">o scegli colore custom</span>
       </div>
     </div>
-
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
       <div class="form-row" style="margin:0"><label>Inizio 1</label><input type="time" id="im-ini" value="${sh?sh.oraInizio||'':''}"></div>
       <div class="form-row" style="margin:0"><label>Fine 1</label><input type="time" id="im-fin" value="${sh?sh.oraFine||'':''}"></div>
@@ -961,16 +976,12 @@ function cellModal(){
   </div>
 </div></div>`;
 }
-
-// Aggiorna colore senza full-render
 function pickNoteColor(col){
   S.noteColor=col;
   document.querySelectorAll('.cswatch').forEach(el=>el.classList.toggle('sel',el.title===col));
   const prev=document.getElementById('color-preview');if(prev)prev.style.background=col;
   const cp=document.getElementById('im-color-custom');if(cp&&col.length===7)cp.value=col;
 }
-window.pickNoteColor=pickNoteColor;
-
 function removePrompt(){
   const{pid,date,progName}=S.removePrompt;
   return`<div class="modal-overlay">
@@ -984,8 +995,6 @@ function removePrompt(){
   </div>
 </div></div>`;
 }
-
-// Menu rapido preset: modifica o elimina direttamente dalla barra in alto
 function presetMenu(){
   const{ptype,pid}=S.presetMenu;
   let nome='';const isBuiltin=ptype==='builtin';
@@ -1004,12 +1013,6 @@ function presetMenu(){
 }
 
 // ── ACTIONS ──
-// FIX: ogni cambio di settimana o categoria materializza la catena di clonazione
-// fino alla settimana visualizzata, così non restano mai buchi indipendentemente
-// dall'ordine di navigazione (avanti, indietro, salto con "Oggi", cambio tab).
-// Limite di navigazione all'indietro: il lunedì della settimana PRECEDENTE a quella
-// corrente. Non si può andare più indietro, perché i dati più vecchi vengono
-// rimossi (vedi pulizia) e navigarli non ha più senso.
 function minWeekStart(){return addDays(getMonday(toISO(new Date())),-7);}
 function prevWeek(){
   const target=addDays(S.weekStart,-7);
@@ -1022,10 +1025,9 @@ function prevWeek(){
 function nextWeek(){S.weekStart=addDays(S.weekStart,7);ensureWeekCopied();render()}
 function goToday(){S.weekStart=getMonday(toISO(new Date()));ensureWeekCopied();render()}
 function setTab(cat){S.cat=cat;ensureWeekCopied();render()}
-function openStaff(){S.modalStaff=true;render()}
-function openProg(){S.modalProg=true;S.editProg='list';render()}
-function openFerie(){S.modalFerie=true;render()}
-// Chiude la finestra ferie ripulendo gli intervalli incompleti (senza start o end) e salvando.
+function openStaff(){if(!requireEdit())return;S.modalStaff=true;render()}
+function openProg(){if(!requireEdit())return;S.modalProg=true;S.editProg='list';render()}
+function openFerie(){if(!requireEdit())return;S.modalFerie=true;render()}
 function closeFerie(){
   Object.keys(S.ferie).forEach(pid=>{
     S.ferie[pid]=(S.ferie[pid]||[]).filter(r=>r&&r.start&&r.end);
@@ -1035,21 +1037,19 @@ function closeFerie(){
   save().catch(e=>console.error(e));
   render();
 }
-// ── AZIONI FERIE ──
 function addFerieRange(pid){
   if(!S.ferie[pid])S.ferie[pid]=[];
   S.ferie[pid].push({start:'',end:''});
-  refreshFerieOnly(); // mostra la nuova riga senza ridisegnare tutta la pagina
+  refreshFerieOnly();
 }
 function removeFerieRange(pid,ix){
   if(!S.ferie[pid])return;
   S.ferie[pid].splice(ix,1);
   if(!S.ferie[pid].length)delete S.ferie[pid];
   save().catch(e=>console.error(e));
-  refreshGridOnly();   // aggiorna la tabella di sfondo
-  refreshFerieOnly();  // aggiorna la finestra ferie mantenendo lo scroll
+  refreshGridOnly();
+  refreshFerieOnly();
 }
-// Ridisegna solo il contenuto della finestra ferie, preservando la posizione di scroll
 function refreshFerieOnly(){
   const scroller=document.querySelector('.modal-ferie .ferie-scroll');
   if(!scroller){render();return;}
@@ -1064,21 +1064,16 @@ function setFerieDate(pid,ix,field,val){
   if(!S.ferie[pid]||!S.ferie[pid][ix])return;
   S.ferie[pid][ix][field]=val;
   const r=S.ferie[pid][ix];
-  // Se l'utente imposta solo un estremo, allinea l'altro allo stesso giorno (periodo di 1 giorno).
-  // L'aggiornamento avviene direttamente sull'input gemello, senza ridisegnare la finestra
-  // (così non perde il focus né torna in cima).
   if(field==='start'&&val&&!r.end){r.end=val;syncFerieInput(pid,ix,'end',val);}
   if(field==='end'&&val&&!r.start){r.start=val;syncFerieInput(pid,ix,'start',val);}
   save().catch(e=>console.error(e));
-  refreshGridOnly(); // aggiorna solo la tabella di sfondo, non la finestra ferie
+  refreshGridOnly();
 }
-// Aggiorna il valore di un input data della finestra ferie senza re-render
 function syncFerieInput(pid,ix,field,val){
   const sel=`.ferie-range input[data-fp="${pid}"][data-fi="${ix}"][data-ff="${field}"]`;
   const el=document.querySelector(sel);
   if(el)el.value=val;
 }
-// Ridisegna solo la griglia dei turni, lasciando aperte e immutate le finestre modali
 function refreshGridOnly(){
   const wrap=document.getElementById('capture-area');
   if(!wrap){render();return;}
@@ -1093,84 +1088,6 @@ function openCell(pid,date){
   if(sh&&!sh.eventoId&&sh.coloreNota) S.noteColor=sh.coloreNota;
   S.cellModal={pid,date};render();
 }
-
-// ── CLONAZIONE SETTIMANALE (senza buchi, indipendente dall'ordine) ──
-// Materializza in S.turni i turni della settimana visualizzata (e di tutte le
-// settimane intermedie non ancora presenti) copiando dalla settimana precedente,
-// esattamente secondo la regola "ogni settimana è la copia della precedente".
-//
-// FIX rispetto alla versione originale:
-//  - Non guarda solo iso-7 grezzo: usa resolveManualBack per risalire fino
-//    all'ultima settimana con dati reali, quindi la copia funziona anche se le
-//    settimane intermedie non sono mai state visitate.
-//  - Riempie l'intera catena dalla prima settimana con dati fino alla settimana
-//    corrente, così nessuna casella resta vuota per salti di navigazione.
-//  - Le ferie non vengono mai clonate né scavalcate (regola a priorità assoluta).
-function ensureWeekCopied(){
-  // CLONAZIONE DISATTIVATA (su richiesta): le settimane non vengono più copiate
-  // automaticamente da quella precedente. Ogni settimana resta indipendente e
-  // mostra solo i turni realmente inseriti o quelli generati dalla turnazione
-  // automatica dei programmi. La funzione è lasciata come "no-op" per non dover
-  // toccare tutte le chiamate esistenti (prevWeek, nextWeek, goToday, setTab).
-  return;
-
-  // NB: il codice sotto resta come riferimento storico ma non viene mai eseguito.
-  const targetMonday=S.weekStart;
-  let changed=false;
-
-  ['tecnici','giornalisti'].forEach(cat=>{
-    const persons=S.staff.filter(s=>s.cat===cat);
-    persons.forEach(p=>{
-      // Trova la più vecchia settimana (lunedì) con un record per questa persona/cat.
-      const suffix=`|${cat}`;
-      let earliest=null;
-      for(const k of Object.keys(S.turni)){
-        if(!k.endsWith(suffix))continue;
-        const parts=k.split('|');
-        if(parts[0]!==p.id)continue;
-        const mon=getMonday(parts[1]);
-        if(earliest===null||mon<earliest)earliest=mon;
-      }
-      // Se non esiste alcun record, la clonazione parte dall'automatico: non c'è
-      // nulla di manuale da propagare, quindi salta (getShift mostrerà l'auto).
-      if(earliest===null)return;
-      if(targetMonday<=earliest)return; // nulla da riempire prima del primo dato
-
-      // Cammina settimana per settimana dalla prima con dati fino al target,
-      // riempiendo solo le settimane mancanti in base allo stato risolto della
-      // settimana precedente.
-      let cur=addDays(earliest,7);
-      while(cur<=targetMonday){
-        for(let i=0;i<7;i++){
-          const iso=addDays(cur,i);
-          const k=`${p.id}|${iso}|${cat}`;
-          if(S.turni[k]!==undefined)continue; // già impostato
-          if(isOnFerie(p.id,iso))continue;    // ferie: mai clonare sopra
-
-          const prevISO=addDays(iso,-7);
-          const back=resolveManualBack(p.id,prevISO,cat);
-
-          if(back.state==='shift'){
-            S.turni[k]={...back.val,manual:true};changed=true;
-          }else if(back.state==='blocked'){
-            // La settimana precedente era esplicitamente vuota: se qui esiste un
-            // automatico va soppresso, altrimenti si lascia naturalmente vuoto.
-            const autoNow=getAutoFor(p,iso,cat);
-            if(autoNow!==null){S.turni[k]={blocked:true};changed=true;}
-          }else if(back.state==='auto'){
-            // La precedente aveva solo l'automatico: qui l'automatico locale fa già
-            // il suo lavoro, non serve materializzare nulla.
-          }
-          // back.state==='none': nessun dato a monte, si lascia all'automatico locale.
-        }
-        cur=addDays(cur,7);
-      }
-    });
-  });
-
-  if(changed)save().catch(e=>console.error(e));
-}
-
 function updateRuoloOpts(){
   const cat=document.getElementById('s-cat').value;
   document.getElementById('s-ruolo').innerHTML=cat==='giornalisti'?'<option>Giornalista</option>':'<option>Regista</option><option>Produzione</option><option>Cameraman</option><option>Montatore</option>';
@@ -1181,7 +1098,6 @@ function addStaff(){
   S.staff.push({id:uid(),nome,cognome,ruolo:document.getElementById('s-ruolo').value,cat:document.getElementById('s-cat').value});
   save().catch(e=>console.error(e));render();
 }
-// Modifica del ruolo direttamente dalla lista personale
 function changeStaffRole(id,nuovoRuolo){
   const p=byId(S.staff,id);if(!p)return;
   p.ruolo=nuovoRuolo;
@@ -1197,7 +1113,6 @@ function removeStaff(id){
   });
   save().catch(e=>console.error(e));render();
 }
-
 function readProgForm(){
   if(!S.editProg||typeof S.editProg!=='object')return;
   const f=id=>document.getElementById(id);
@@ -1212,7 +1127,7 @@ function startNewProg(){
   S.editProg={id:uid(),nome:'',colore:'#6366f1',oraInizio:'',oraFine:'',oraInizio2:'',oraFine2:'',giorni:[],mesi:[],turnazione:false,rotazioni:{},fissi:{},baseDate:getMonday(toISO(new Date())),isRealProg:true};
   render();
 }
-function startEditProg(id){S.editProg=JSON.parse(JSON.stringify(byId(S.programmi,id)));if(!S.editProg.mesi)S.editProg.mesi=[];render()}
+function startEditProg(id){S.editProg=JSON.parse(JSON.stringify(byId(S.programmi,id)));if(!S.editProg.mesi)S.editProg.mesi=[];if(!S.editProg.giorni)S.editProg.giorni=[];render()}
 function togGiorno(i){readProgForm();const a=S.editProg.giorni,ix=a.indexOf(i);if(ix>=0)a.splice(ix,1);else{a.push(i);a.sort((x,y)=>x-y);}render()}
 function togMese(i){readProgForm();if(!S.editProg.mesi)S.editProg.mesi=[];const a=S.editProg.mesi,ix=a.indexOf(i);if(ix>=0)a.splice(ix,1);else{a.push(i);a.sort((x,y)=>x-y);}render()}
 function removeProg(id){if(!confirm('Eliminare questo programma?'))return;S.programmi=S.programmi.filter(p=>p.id!==id);normalizePresetLayout();save().catch(e=>console.error(e));render()}
@@ -1225,26 +1140,21 @@ function saveProg(){
   normalizePresetLayout();
   save().catch(e=>console.error(e));S.editProg='list';render();
 }
-
-// ── PRESET MENU (modifica/elimina direttamente dalla barra in alto) ──
 function openPresetMenu(e,ptype,pid){
   if(e){e.preventDefault();e.stopPropagation();}
-  if(window._wasDragging){window._wasDragging=false;return;} // ignora se è appena finito un drag
+  if(window._wasDragging){window._wasDragging=false;return;}
+  if(!requireEdit())return;
   S.presetMenu={ptype,pid};render();
 }
 function editPreset(){
   const{ptype,pid}=S.presetMenu;
   if(ptype==='builtin'){
-    // Trasforma il builtin in un programma reale modificabile e nasconde l'originale
     const bi=BUILTINS.find(b=>b.id===pid);if(!bi)return;
     let pg=S.programmi.find(p=>p.replacesBuiltin===bi.id);
-    const isNew=!pg;
     if(!pg){
       pg={id:uid(),nome:bi.nome,colore:bi.colore,oraInizio:bi.oraInizio,oraFine:bi.oraFine,oraInizio2:'',oraFine2:'',giorni:[0,1,2,3,4,5,6],mesi:[],turnazione:false,rotazioni:{},fissi:{},baseDate:getMonday(toISO(new Date())),isRealProg:true,replacesBuiltin:bi.id};
       S.programmi.push(pg);
     }
-    // Sostituisce nel layout la chiave del builtin con quella del nuovo programma,
-    // mantenendo posizione e sezione.
     const oldKey=presetKeyBuiltin(bi.id), newKey=presetKeyProg(pg.id);
     ['fissi','temporanei'].forEach(z=>{
       const arr=S.presetLayout[z]||[];const ix=arr.indexOf(oldKey);
@@ -1258,7 +1168,7 @@ function editPreset(){
   }
   const pg=byId(S.programmi,pid);if(!pg)return;
   S.presetMenu=null;S.modalProg=true;
-  S.editProg=JSON.parse(JSON.stringify(pg));if(!S.editProg.mesi)S.editProg.mesi=[];
+  S.editProg=JSON.parse(JSON.stringify(pg));if(!S.editProg.mesi)S.editProg.mesi=[];if(!S.editProg.giorni)S.editProg.giorni=[];
   render();
 }
 function deletePreset(){
@@ -1276,7 +1186,6 @@ function deletePreset(){
   normalizePresetLayout();
   S.presetMenu=null;save().catch(e=>console.error(e));render();
 }
-
 function saveImpro(pid,date){
   const nome=document.getElementById('im-nome').value.trim();
   const ini=document.getElementById('im-ini').value;
@@ -1291,15 +1200,11 @@ function saveImpro(pid,date){
   save().catch(e=>console.error(e));
   S.cellModal=null;render();
 }
-
 function clearCellPrompt(pid,date){
-  // Cancellazione semplice: azzera SOLO questa casella, per questa settimana.
-  // Niente più finestra "solo oggi o tutte le settimane", niente propagazione in avanti.
   setManual(pid,date,null);
   save().catch(e=>console.error(e));
   S.cellModal=null;render();
 }
-
 function confirmRemove(type){
   const{pid,date}=S.removePrompt;
   const sh=getShift(pid,date);
@@ -1309,10 +1214,10 @@ function confirmRemove(type){
     const v={blocked:true};setManual(pid,date,v);propagateForward(pid,date,v);
     save().catch(e=>console.error(e));
   }else{
-    if(pg.turnazione){
+    if(pg&&pg.turnazione){
       if(pg.rotazioni&&person&&pg.rotazioni[person.ruolo])pg.rotazioni[person.ruolo]=pg.rotazioni[person.ruolo].filter(id=>id!==pid);
       if(pg.rotazione)pg.rotazione=pg.rotazione.filter(id=>id!==pid);
-    }else{
+    }else if(pg){
       const dow=getDow(date);
       if(pg.fissi&&pg.fissi[dow])pg.fissi[dow]=pg.fissi[dow].filter(id=>id!==pid);
     }
@@ -1321,19 +1226,38 @@ function confirmRemove(type){
   S.removePrompt=null;render();
 }
 
-// ── PDF INLINE ──
+// ── PULIZIA MANUALE ──
+function isoFromTurnoKey(k){const p=k.split('|');return p.length>=2?p[1]:null;}
+function pulisciSettimaneVecchie(){
+  if(!requireEdit())return;
+  const limite=minWeekStart();
+  const daRimuovere=[];
+  for(const k of Object.keys(S.turni)){
+    const iso=isoFromTurnoKey(k);
+    if(!iso)continue;
+    if(getMonday(iso)<limite)daRimuovere.push(k);
+  }
+  if(daRimuovere.length===0){
+    alert('Non ci sono settimane vecchie da rimuovere. Tutto già in ordine.');
+    return;
+  }
+  const ok=confirm('Stai per eliminare definitivamente '+daRimuovere.length+' turni delle settimane passate (prima della settimana scorsa).\n\nLe ferie NON verranno toccate.\n\nSuggerimento: prima clicca 💾 Backup.\n\nVuoi procedere?');
+  if(!ok)return;
+  daRimuovere.forEach(k=>delete S.turni[k]);
+  save().then(()=>{ alert('Fatto: rimossi '+daRimuovere.length+' turni vecchi.'); render(); })
+         .catch(e=>{ console.error(e); render(); });
+}
+
+// ── PDF ──
 async function exportPDF(){
   const{jsPDF}=window.jspdf;
   const list=staffSorted(S.cat);
   const dates=weekDates();
-
-  // A4 landscape in mm: 297 × 210
   const pdf=new jsPDF('l','mm','a4');
   const PW=297, PH=210;
   const ML=8, MR=8, MT=18, MB=6;
   const usableW=PW-ML-MR;
   const usableH=PH-MT-MB;
-
   pdf.setFont('helvetica','bold');
   pdf.setFontSize(13);
   pdf.setTextColor(30,41,59);
@@ -1342,16 +1266,12 @@ async function exportPDF(){
   pdf.setFontSize(8);
   pdf.setTextColor(100,116,139);
   pdf.text(`Settimana dal ${fmtWeekLabel()}`,PW/2,15,{align:'center'});
-
-  // Calcola larghezza colonna nome in base al nome più lungo
   const maxNameLen=list.reduce((m,s)=>Math.max(m,`${s.cognome} ${s.nome}`.length),0);
   const nameColW=Math.min(55,Math.max(28,maxNameLen*1.9));
-
   const dayColW=(usableW-nameColW)/7;
   const headerH=9;
   const nRows=list.length;
   const rowH=Math.min(22, Math.max(10, (usableH-headerH)/nRows));
-
   const hdrY=MT;
   pdf.setFillColor(241,245,249);
   pdf.setDrawColor(203,213,225);
@@ -1360,7 +1280,6 @@ async function exportPDF(){
   pdf.setFontSize(7.5);
   pdf.setTextColor(71,85,105);
   pdf.text('Nome', ML+2, hdrY+6);
-
   dates.forEach((d,i)=>{
     const x=ML+nameColW+i*dayColW;
     const isTod=isToday(d), isHol=isHoliday(d);
@@ -1370,16 +1289,14 @@ async function exportPDF(){
     pdf.setFont('helvetica','bold');
     pdf.setFontSize(8);
     pdf.setTextColor(isTod?255:71, isTod?255:85, isTod?255:105);
-    pdf.text(GN[i]+(isHol?' ✦':''), x+dayColW/2, hdrY+4, {align:'center'});
+    pdf.text(GN[i]+(isHol?' *':''), x+dayColW/2, hdrY+4, {align:'center'});
     pdf.setFontSize(6.5);
     pdf.text(fmtDate(d), x+dayColW/2, hdrY+7.5, {align:'center'});
   });
-
   pdf.setDrawColor(203,213,225);
   list.forEach((s,ri)=>{
     const rowY=hdrY+headerH+ri*rowH;
     const bg=ri%2===0?[255,255,255]:[250,250,250];
-
     pdf.setFillColor(...bg);
     pdf.setDrawColor(203,213,225);
     pdf.setLineWidth(0.1);
@@ -1395,18 +1312,14 @@ async function exportPDF(){
     pdf.setFontSize(5.5);
     pdf.setTextColor(148,163,184);
     pdf.text(s.ruolo, ML+1.5, rowY+rowH/2+2.5);
-
     dates.forEach((iso,i)=>{
       const x=ML+nameColW+i*dayColW;
       pdf.setFillColor(...bg);
       pdf.setDrawColor(203,213,225);
       pdf.setLineWidth(0.1);
       pdf.rect(x, rowY, dayColW, rowH, 'FD');
-
       const sh=getShift(s.id,iso);
       if(!sh) return;
-
-      // FERIE: riquadro rosso pieno con scritta bianca
       if(sh.ferie){
         const pad=1.2;
         pdf.setFillColor(239,68,68);
@@ -1420,14 +1333,12 @@ async function exportPDF(){
         pdf.text('FERIE', x+dayColW/2, rowY+rowH/2+1, {align:'center'});
         return;
       }
-
       const bi=BUILTINS.find(b=>b.id===sh.eventoId);
       const pg=!bi?byId(S.programmi,sh.eventoId):null;
       const col=!sh.eventoId?(sh.coloreNota||'#6366f1'):(bi?.colore||pg?.colore||'#6366f1');
       const nom=bi?.nome||pg?.nome||sh.nomeImprovvisato||'?';
       let t='';
       if(sh.oraInizio&&sh.oraFine){ t=`${sh.oraInizio}–${sh.oraFine}`; if(sh.oraInizio2&&sh.oraFine2) t+=` / ${sh.oraInizio2}–${sh.oraFine2}`; }
-
       const hr=parseInt(col.slice(1,3),16),hg=parseInt(col.slice(3,5),16),hb=parseInt(col.slice(5,7),16);
       const pad=1.2;
       const lightR=Math.round(hr*0.15+240*0.85), lightG=Math.round(hg*0.15+245*0.85), lightB=Math.round(hb*0.15+249*0.85);
@@ -1436,7 +1347,6 @@ async function exportPDF(){
       pdf.setLineWidth(0.4);
       pdf.roundedRect(x+pad, rowY+pad, dayColW-pad*2, rowH-pad*2, 1, 1, 'FD');
       pdf.setLineWidth(0.1);
-
       pdf.setFont('helvetica','bold');
       pdf.setFontSize(6);
       pdf.setTextColor(30,41,59);
@@ -1452,32 +1362,18 @@ async function exportPDF(){
       } else {
         pdf.text(nomStr, cx, rowY+rowH/2+1, {align:'center'});
       }
-
-      // Pallino rosso fisso se il turno è stato modificato manualmente
-      const manualPdf=getManual(s.id,iso);
-      const autoPdf=getAuto(s.id,iso);
-      if(manualPdf!==null&&!manualPdf?.blocked&&autoPdf!==null){
-        const dotR=1.4;
-        pdf.setFillColor(239,68,68);
-        pdf.setDrawColor(239,68,68);
-        pdf.circle(x+dayColW-pad-dotR-0.5, rowY+pad+dotR+0.5, dotR, 'F');
-      }
     });
   });
-
   const blob=pdf.output('blob');
   if(S._pdfUrl)URL.revokeObjectURL(S._pdfUrl);
   S._pdfUrl=URL.createObjectURL(blob);
-
   const iframe=document.getElementById('pdf-iframe');
   document.getElementById('pdf-title').textContent=`📄 Turni – ${S.cat} – ${fmtWeekLabel()}`;
   document.getElementById('pdf-print-btn').onclick=()=>iframe.contentWindow&&iframe.contentWindow.print();
   document.getElementById('pdf-save-btn').onclick=()=>{const a=document.createElement('a');a.href=S._pdfUrl;a.download=`Turni_${S.cat}_${S.weekStart}.pdf`;a.click();};
-
   iframe.src=S._pdfUrl;
   document.getElementById('pdf-ui').style.display='block';
 }
-
 window.closePdfOverlay=function(){
   document.getElementById('pdf-ui').style.display='none';
 };
@@ -1487,7 +1383,6 @@ function bindDrag(){
   document.querySelectorAll('.pill[draggable]').forEach(el=>{
     el.addEventListener('dragstart',e=>{
       S.dragging={type:e.currentTarget.dataset.dtype,id:e.currentTarget.dataset.did};
-      // chiave per il riordino (consente lo spostamento tra le zone Fissi/Temporanei)
       S.presetReorder=e.currentTarget.dataset.pkey||null;
       e.dataTransfer.effectAllowed='copyMove';
     });
@@ -1497,19 +1392,16 @@ function bindDrag(){
       setTimeout(()=>{window._wasDragging=false;},150);
     });
   });
-
-  // Rimuove l'evidenziazione quando si esce da una zona preset
   document.querySelectorAll('.preset-zone').forEach(z=>{
     z.addEventListener('dragleave',e=>{
       if(!z.contains(e.relatedTarget))z.classList.remove('zone-over');
     });
   });
-
   document.querySelectorAll('.cell-chip[draggable]').forEach(el=>{
     el.addEventListener('dragstart',e=>{
       e.stopPropagation();
       let cellShift=null;
-      try{ cellShift=JSON.parse(decodeURIComponent(e.currentTarget.dataset.cshift||'')); }catch{}
+      try{ cellShift=JSON.parse(decodeURIComponent(e.currentTarget.dataset.cshift||'')); }catch(err){}
       S.dragging={type:'cell',id:null,cellShift};
       S.presetReorder=null;
       e.currentTarget.classList.add('is-dragging');
@@ -1524,7 +1416,7 @@ function bindDrag(){
   });
 }
 
-// Espone le funzioni usate inline negli attributi onclick
+// ── ESPOSIZIONE FUNZIONI USATE NEGLI ATTRIBUTI onclick ──
 window.prevWeek=prevWeek;window.nextWeek=nextWeek;window.goToday=goToday;window.setTab=setTab;
 window.openStaff=openStaff;window.openProg=openProg;window.openCell=openCell;window.onCellClick=onCellClick;
 window.dropOnCell=dropOnCell;window.addStaff=addStaff;window.removeStaff=removeStaff;window.changeStaffRole=changeStaffRole;
@@ -1534,52 +1426,36 @@ window.saveImpro=saveImpro;window.clearCellPrompt=clearCellPrompt;window.confirm
 window.exportPDF=exportPDF;window.openPresetMenu=openPresetMenu;window.editPreset=editPreset;window.deletePreset=deletePreset;
 window.onPresetZoneOver=onPresetZoneOver;window.onPresetZoneDrop=onPresetZoneDrop;
 window.openFerie=openFerie;window.closeFerie=closeFerie;window.addFerieRange=addFerieRange;window.removeFerieRange=removeFerieRange;window.setFerieDate=setFerieDate;
-window.S=S;
-
-// NB: la pulizia dei dati da ottobre 2026 in poi è stata effettuata UNA VOLTA
-// direttamente su Firestore (sostituzione manuale del documento). Non esiste più
-// alcuna pulizia automatica nel codice: i turni futuri che inserirai NON verranno
-// mai cancellati. Questa è la scelta più sicura e definitiva.
-
-// Estrae la data (YYYY-MM-DD) dalla chiave di un turno "pid|data|cat".
-function isoFromTurnoKey(k){const p=k.split('|');return p.length>=2?p[1]:null;}
-
-// Pulizia MANUALE (pulsante): rimuove i turni delle settimane più vecchie della
-// settimana precedente a quella corrente. Tiene: settimana precedente, attuale e
-// tutte le future. Le ferie NON vengono mai toccate. Chiede conferma.
-function pulisciSettimaneVecchie(){
-  const limite=minWeekStart(); // lunedì della settimana precedente all'attuale
-  const daRimuovere=[];
-  for(const k of Object.keys(S.turni)){
-    const iso=isoFromTurnoKey(k);
-    if(!iso)continue;
-    if(getMonday(iso)<limite)daRimuovere.push(k);
-  }
-  if(daRimuovere.length===0){
-    alert('Non ci sono settimane vecchie da rimuovere. Tutto già in ordine.');
-    return;
-  }
-  const ok=confirm('Stai per eliminare definitivamente '+daRimuovere.length+' turni delle settimane passate (prima della settimana scorsa).\n\nLe ferie NON verranno toccate.\n\nVuoi procedere?');
-  if(!ok)return;
-  daRimuovere.forEach(k=>delete S.turni[k]);
-  save().then(()=>{ alert('Fatto: rimossi '+daRimuovere.length+' turni vecchi. Firebase alleggerito.'); render(); })
-         .catch(e=>{ console.error(e); alert('Attenzione: la pulizia locale è avvenuta ma il salvataggio sul cloud potrebbe non essere riuscito. Dettaglio: '+(e&&e.message?e.message:e)); render(); });
-}
 window.pulisciSettimaneVecchie=pulisciSettimaneVecchie;
+window.pickNoteColor=pickNoteColor;
+window.scaricaBackup=scaricaBackup;window.ripristinaBackup=ripristinaBackup;window.ripristinaDaCloud=ripristinaDaCloud;
+window.requireEdit=requireEdit;
+window.S=S;
 
 // ── INIT ──
 (async()=>{
   S.weekStart=getMonday(toISO(new Date()));
   if(window._fbReady)await window._fbReady;
   else await new Promise(r=>setTimeout(r,300));
+
   const fonte=await load();
-  // Sicurezza: se lo stato caricato punta a una settimana troppo indietro, riporta al limite.
+
   if(S.weekStart<minWeekStart())S.weekStart=getMonday(toISO(new Date()));
   render();
-  // Imposta l'indicatore: verde se i dati arrivano da Firebase, rosso se solo da locale.
-  setSyncStatus(fonte==='firebase'?'ok':'local');
+
+  if(fonte==='firebase'){
+    setSyncStatus((SOLA_LETTURA_ATTIVA&&!_puoModificare)?'readonly':'ok');
+    mostraBannerPericolo(null);
+  }else{
+    setSyncStatus('local');
+    mostraBannerPericolo(
+      '⚠️ ATTENZIONE: non è stato possibile leggere i dati dal cloud. '+
+      'Quello che vedi è solo una copia locale di questo dispositivo e potrebbe essere incompleto o vuoto. '+
+      'Per sicurezza le modifiche NON verranno salvate sul cloud. '+
+      'Controlla la connessione, disattiva eventuali ad blocker su questo sito, poi ricarica la pagina.'
+    );
+  }
 })();
 </script>
-
-
-</body></html>
+</body>
+</html>
