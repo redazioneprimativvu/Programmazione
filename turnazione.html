@@ -455,7 +455,7 @@ function requireEdit(){
   if(_puoModificare)return true;
   const c=prompt('Questa pagina è in SOLA LETTURA.\n\nInserisci il codice per poter modificare i turni:');
   if(c===null||c==='')return false;
-  if(c===CODICE_MODIFICA){_puoModificare=true;render();return true;}
+  if(c===CODICE_MODIFICA){ _puoModificare=true; setSyncStatus('ok'); render(); return true; }
   alert('Codice errato. La pagina resta in sola lettura.');
   return false;
 }
