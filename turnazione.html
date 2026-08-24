@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -190,7 +191,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, limit }
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs, query, orderBy, limit }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -209,12 +210,31 @@ window._fbReady = new Promise(resolve => {
     const db = getFirestore(fbApp);
     const DB_DOC = doc(db, 'app', 'data');
 
-    window._fbSave = async (data) => { await setDoc(DB_DOC, data); };
+    // Scrittura con controllo del conflitto. Prima di sovrascrivere rilegge il
+    // documento: se nel frattempo un altro computer ha salvato qualcosa di più
+    // recente, la scrittura viene rifiutata invece di cancellare il suo lavoro.
+    window._fbSave = async (data, tsAtteso) => {
+      const snap = await getDoc(DB_DOC);
+      const tsRemoto = snap.exists() ? (snap.data().ts || 0) : 0;
+      if (tsAtteso !== null && tsAtteso !== undefined && tsRemoto > tsAtteso) {
+        const err = new Error('Un altro utente ha salvato dopo di te.');
+        err.conflitto = true;
+        throw err;
+      }
+      await setDoc(DB_DOC, data);
+    };
 
     window._fbLoad = async () => {
       const snap = await getDoc(DB_DOC);
       return snap.exists() ? snap.data() : null;
     };
+
+    // Ascolto in tempo reale: ogni pagina aperta viene avvisata subito quando
+    // un altro computer salva, e si aggiorna da sola. È questo che impedisce a
+    // una scheda dimenticata aperta da ieri di riscrivere dati vecchi.
+    window._fbWatch = (cb) => onSnapshot(DB_DOC, snap => {
+      if (snap.exists()) cb(snap.data());
+    });
 
     // Backup a rotazione: un documento per giorno del mese, quindi al massimo
     // 31 copie che si sovrascrivono di mese in mese. Nessuna crescita infinita.
@@ -308,6 +328,9 @@ function sanitize(v){
 let _remoteOk=false;         // la LETTURA da Firestore è riuscita?
 let _remoteStaffCount=null;  // quante persone c'erano nel cloud all'ultima lettura riuscita
 let _lastBackupTs=0;
+let _lastTs=0;               // data e ora dell'ultima versione del cloud che questa pagina conosce
+let _bloccaAggiornamento=false; // durante un salvataggio non si ridisegna la pagina
+let _forzaScrittura=false;   // solo per i ripristini volontari da backup
 
 function applyData(d){
   S.staff=d.staff||[];
@@ -379,7 +402,14 @@ async function save(){
   try{
     if(!window._fbSave){ setSyncStatus('local'); console.warn('Firebase non pronto'); return; }
     const record={blob:testo, ts:Date.now(), nStaff:nStaff, nTurni:Object.keys(S.turni||{}).length};
-    await window._fbSave(record);
+    _bloccaAggiornamento=true;
+    try{
+      await window._fbSave(record,_forzaScrittura?null:_lastTs);
+    } finally {
+      _bloccaAggiornamento=false;
+      _forzaScrittura=false;
+    }
+    _lastTs=record.ts;
     _remoteStaffCount=nStaff;
     setSyncStatus('ok');
 
@@ -392,6 +422,13 @@ async function save(){
   }catch(e){
     console.error('save firebase:',e);
     setSyncStatus('local');
+    if(e&&e.conflitto){
+      alert('🛑 Salvataggio ANNULLATO per sicurezza.\n\n'+
+            'Un altro computer ha modificato i turni mentre questa pagina era aperta. '+
+            'Se avessimo salvato, il suo lavoro sarebbe stato cancellato.\n\n'+
+            'Ricarica la pagina (F5) per vedere la versione aggiornata, poi rifai la tua modifica.');
+      return;
+    }
     alert('⚠️ ATTENZIONE: la modifica NON è stata salvata sul cloud (solo in locale su questo dispositivo).\n\n'+
           'NON ricaricare la pagina: rischi di perdere le modifiche.\n'+
           'Controlla la connessione e riprova.\n\n'+
@@ -404,6 +441,7 @@ async function load(){
     try{
       const raw=await window._fbLoad();
       _remoteOk=true;   // la lettura è riuscita, anche se il documento non esiste ancora
+      _lastTs=(raw&&raw.ts)||0;
       if(raw){
         // Nuovo formato: dati dentro il campo `blob`. Vecchio formato: campi sparsi.
         const d=(raw.blob!==undefined)?JSON.parse(raw.blob):raw;
@@ -455,7 +493,7 @@ function requireEdit(){
   if(_puoModificare)return true;
   const c=prompt('Questa pagina è in SOLA LETTURA.\n\nInserisci il codice per poter modificare i turni:');
   if(c===null||c==='')return false;
-  if(c===CODICE_MODIFICA){ _puoModificare=true; setSyncStatus('ok'); render(); return true; }
+  if(c===CODICE_MODIFICA){_puoModificare=true;render();return true;}
   alert('Codice errato. La pagina resta in sola lettura.');
   return false;
 }
@@ -489,7 +527,7 @@ function ripristinaBackup(){
         if(!confirm('Ripristinare "'+f.name+'"?\n\nPersone: '+d.staff.length+'\nTurni: '+nTurni+'\n\nI dati attualmente sul cloud verranno sostituiti.'))return;
         applyData(d);
         normalizePresetLayout();
-        _remoteStaffCount=0;   // ripristino volontario: il guardrail 2 non deve bloccarlo
+        _remoteStaffCount=0;_forzaScrittura=true;   // ripristino volontario: i guardrail non devono bloccarlo
         save().then(()=>{alert('Ripristino completato.');render();});
       }catch(e){
         alert('Errore nella lettura del backup: '+(e&&e.message?e.message:e));
@@ -520,7 +558,7 @@ async function ripristinaDaCloud(){
     if(!confirm('Ripristinare il backup del '+new Date(b.ts).toLocaleString('it-IT')+'?\n\nPersone: '+((d.staff||[]).length)+'\nTurni: '+nTurni+'\n\nI dati attuali verranno sostituiti.'))return;
     applyData(d);
     normalizePresetLayout();
-    _remoteStaffCount=0;
+    _remoteStaffCount=0;_forzaScrittura=true;
     await save();
     alert('Ripristino completato.');
     render();
@@ -1432,6 +1470,54 @@ window.scaricaBackup=scaricaBackup;window.ripristinaBackup=ripristinaBackup;wind
 window.requireEdit=requireEdit;
 window.S=S;
 
+// ══════════════════════════════════════════════════════════════════════════
+//  AGGIORNAMENTO AUTOMATICO DA ALTRI COMPUTER
+// ══════════════════════════════════════════════════════════════════════════
+// Ogni volta che un altro computer salva, questa pagina se ne accorge entro
+// pochi secondi e si riallinea da sola. È così che una scheda lasciata aperta
+// da ieri smette di essere pericolosa: non contiene più dati vecchi.
+let _timerAvviso=null;
+function avvisoAggiornamento(testo){
+  mostraBannerPericolo(testo);
+  if(_timerAvviso)clearTimeout(_timerAvviso);
+  _timerAvviso=setTimeout(()=>{ mostraBannerPericolo(null); _timerAvviso=null; },10000);
+}
+
+function avviaAscoltoCloud(){
+  if(!window._fbWatch)return;
+  window._fbWatch(raw=>{
+    if(!raw||!raw.ts)return;
+    if(raw.ts<=_lastTs)return;          // è la nostra stessa scrittura, o roba vecchia
+    if(_bloccaAggiornamento)return;     // stiamo salvando proprio adesso
+    // Se c'è un pannello aperto non si ridisegna sotto le mani di chi sta
+    // lavorando: si riprova fra qualche secondo.
+    const occupato = S.modalStaff || S.modalProg || S.modalFerie || S.cellModal || S.removePrompt || S.presetMenu || S.presetReorder || S.dragging;
+    if(occupato){ setTimeout(()=>avviaAscoltoCloudRitenta(raw),4000); return; }
+    applicaAggiornamentoCloud(raw);
+  });
+}
+
+function avviaAscoltoCloudRitenta(raw){
+  const occupato = S.modalStaff || S.modalProg || S.modalFerie || S.cellModal || S.removePrompt || S.presetMenu || S.presetReorder || S.dragging;
+  if(occupato){ setTimeout(()=>avviaAscoltoCloudRitenta(raw),4000); return; }
+  if(raw.ts<=_lastTs)return;
+  applicaAggiornamentoCloud(raw);
+}
+
+function applicaAggiornamentoCloud(raw){
+  try{
+    const d=(raw.blob!==undefined)?JSON.parse(raw.blob):raw;
+    applyData(d);
+    normalizePresetLayout();
+    _lastTs=raw.ts;
+    _remoteStaffCount=(S.staff||[]).length;
+    try{ localStorage.setItem('turni_v5_fb',JSON.stringify(currentPayload())); }catch(e){}
+    render();
+    avvisoAggiornamento('🔄 I turni sono stati modificati da un altro computer '+
+      '('+new Date(raw.ts).toLocaleTimeString('it-IT')+'). La pagina si è aggiornata da sola.');
+  }catch(e){ console.error('aggiornamento cloud:',e); }
+}
+
 // ── INIT ──
 (async()=>{
   S.weekStart=getMonday(toISO(new Date()));
@@ -1446,6 +1532,7 @@ window.S=S;
   if(fonte==='firebase'){
     setSyncStatus((SOLA_LETTURA_ATTIVA&&!_puoModificare)?'readonly':'ok');
     mostraBannerPericolo(null);
+    avviaAscoltoCloud();
   }else{
     setSyncStatus('local');
     mostraBannerPericolo(
