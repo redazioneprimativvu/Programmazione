@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="it"><head>
 <meta charset="UTF-8">
@@ -87,8 +86,8 @@
   .row .act button { font: inherit; font-size: 12px; border: none; background: transparent; cursor: pointer; padding: 2px 6px; color: var(--muted); border-radius: 2px; }
   .row .act button.del:hover { background: #c62828; color: #fff; }
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-style: italic; }
-  .recent-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #e53935; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(229,57,53,.25); animation: pulse-dot 2s ease-in-out infinite; cursor: default; }
-  @keyframes pulse-dot { 0%,100% { box-shadow: 0 0 0 2px rgba(229,57,53,.25); } 50% { box-shadow: 0 0 0 4px rgba(229,57,53,.10); } }
+  .recent-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #e53935; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(229,57,53,.25); }
+  .mod-timestamp { font-size: 10.5px; color: #a3a3a3; margin-left: 2px; white-space: nowrap; }
   .filters button.recent-active { background: #e53935; color: #fff; border-color: #e53935; }
   #sync-status { font-size: 11px; color: #4CAF50; font-weight: bold; margin-bottom: 5px; display: inline-block;}
   .offline { color: #F44336 !important; }
@@ -311,6 +310,7 @@
     .row { grid-template-columns: 12px 32px 1fr 38px; gap: 4px; padding: 1px 5px; margin-bottom: 1px; font-size: 8.5pt; }
     .row .act { display: none; }
     .recent-dot { display: none; }
+    .mod-timestamp { display: none; }
     .day-check { display: none !important; }
     .day-state-badge { display: none !important; }
     .day-rows.locked-rows { opacity: 1 !important; filter: none !important; pointer-events: auto !important; }
@@ -715,7 +715,6 @@
   let searchQuery = "";
   let statsOpen = false;
   let filterRecent = false;
-  const RECENT_MS = 48 * 60 * 60 * 1000;
 
   const DAYS_SHORT = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
   const DAYS_LONG  = ["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
@@ -737,9 +736,20 @@
   window._setFilter = function(f) { filter = f; filterRecent = false; render(); };
   window._toggleFilterRecent = function() { filterRecent = !filterRecent; filter = "tutte"; render(); };
 
+  // Il pallino è ora fisso: resta visibile finché la voce ha una modifica registrata
+  // (non scompare più dopo 48 ore).
   function isRecentlyModified(ev) {
-    if (!ev.updatedAt) return false;
-    return (Date.now() - ev.updatedAt) < RECENT_MS;
+    return !!ev.updatedAt;
+  }
+
+  // Formatta la data/ora dell'ultima modifica in stile italiano (gg/mm hh:mm)
+  function formatUpdatedAt(ts) {
+    const d = new Date(ts);
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mi = String(d.getMinutes()).padStart(2, "0");
+    return dd + "/" + mm + " " + hh + ":" + mi;
   }
 
   // Un giorno è "bloccato" a meno che non sia stato esplicitamente abilitato (true).
@@ -1025,9 +1035,13 @@
         if (isRecentlyModified(ev)) {
           const dot = document.createElement("span");
           dot.className = "recent-dot no-print";
-          const hoursAgo = Math.round((Date.now() - ev.updatedAt) / (1000 * 60 * 60));
-          dot.title = "Modificato " + (hoursAgo < 1 ? "meno di 1 ora fa" : hoursAgo + "h fa");
+          dot.title = "Modificato";
           n.appendChild(dot);
+
+          const ts = document.createElement("span");
+          ts.className = "mod-timestamp no-print";
+          ts.textContent = formatUpdatedAt(ev.updatedAt);
+          n.appendChild(ts);
         }
 
         if (overlapIds.has(ev.id)) {
