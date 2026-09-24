@@ -87,6 +87,7 @@
   .row .act button.del:hover { background: #c62828; color: #fff; }
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-style: italic; }
   .recent-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #e53935; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(229,57,53,.25); }
+  .recent-dot.dot-added { background: #2e7d32; box-shadow: 0 0 0 2px rgba(46,125,50,.25); }
   .mod-timestamp { font-size: 10.5px; color: #a3a3a3; margin-left: 2px; white-space: nowrap; }
   .filters button.recent-active { background: #e53935; color: #fff; border-color: #e53935; }
   #sync-status { font-size: 11px; color: #4CAF50; font-weight: bold; margin-bottom: 5px; display: inline-block;}
@@ -736,10 +737,18 @@
   window._setFilter = function(f) { filter = f; filterRecent = false; render(); };
   window._toggleFilterRecent = function() { filterRecent = !filterRecent; filter = "tutte"; render(); };
 
-  // Il pallino è ora fisso: resta visibile finché la voce ha una modifica registrata
+  // Il pallino è ora fisso: resta visibile finché la voce ha una modifica o un'aggiunta registrata
   // (non scompare più dopo 48 ore).
   function isRecentlyModified(ev) {
-    return !!ev.updatedAt;
+    return !!(ev.updatedAt || ev.createdAt);
+  }
+
+  // Determina se una voce è stata modificata (pallino rosso) o solo aggiunta ex novo (pallino verde),
+  // restituendo il timestamp da mostrare.
+  function getModStatus(ev) {
+    if (ev.updatedAt) return { added: false, ts: ev.updatedAt };
+    if (ev.createdAt) return { added: true, ts: ev.createdAt };
+    return null;
   }
 
   // Formatta la data/ora dell'ultima modifica in stile italiano (gg/mm hh:mm)
@@ -1032,15 +1041,16 @@
         nameSpan.textContent = ev.name;
         n.appendChild(nameSpan);
 
-        if (isRecentlyModified(ev)) {
+        const modStatus = getModStatus(ev);
+        if (modStatus) {
           const dot = document.createElement("span");
-          dot.className = "recent-dot no-print";
-          dot.title = "Modificato";
+          dot.className = "recent-dot no-print" + (modStatus.added ? " dot-added" : "");
+          dot.title = modStatus.added ? "Aggiunto" : "Modificato";
           n.appendChild(dot);
 
           const ts = document.createElement("span");
           ts.className = "mod-timestamp no-print";
-          ts.textContent = formatUpdatedAt(ev.updatedAt);
+          ts.textContent = formatUpdatedAt(modStatus.ts);
           n.appendChild(ts);
         }
 
@@ -1102,13 +1112,19 @@
     const [yy, mm, dd] = date.split("-").map(Number);
     const batch = writeBatch(db);
     const isEdit = !!editingId;
+    const origEvent = isEdit ? events.find(e => e.id === editingId) : null;
 
     if (editingId) batch.delete(doc(db, "events", editingId));
 
     if (selectedDows.length === 0) {
       const eId = editingId || ("e" + Date.now() + Math.random().toString(36).slice(2, 5));
       const evData = { id: eId, date, time, name, duration, category };
-      if (isEdit) evData.updatedAt = Date.now();
+      if (isEdit) {
+        evData.updatedAt = Date.now();
+        if (origEvent && origEvent.createdAt) evData.createdAt = origEvent.createdAt;
+      } else {
+        evData.createdAt = Date.now();
+      }
       batch.set(doc(db, "events", eId), evData);
     } else {
       const daysInMonth = new Date(yy, mm, 0).getDate();
@@ -1117,8 +1133,7 @@
         if (!selectedDows.includes(dt.getDay())) continue;
         const isoDate = yy + "-" + String(mm).padStart(2, "0") + "-" + String(d).padStart(2, "0");
         const eId = "e" + Date.now() + Math.random().toString(36).slice(2, 5) + "_" + d;
-        const evData = { id: eId, date: isoDate, time, name, duration, category };
-        if (isEdit) evData.updatedAt = Date.now();
+        const evData = { id: eId, date: isoDate, time, name, duration, category, createdAt: Date.now() };
         batch.set(doc(db, "events", eId), evData);
       }
     }
