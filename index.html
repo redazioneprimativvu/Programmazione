@@ -737,18 +737,20 @@
   window._setFilter = function(f) { filter = f; filterRecent = false; render(); };
   window._toggleFilterRecent = function() { filterRecent = !filterRecent; filter = "tutte"; render(); };
 
-  // Il pallino è ora fisso: resta visibile finché la voce ha una modifica o un'aggiunta registrata
-  // (non scompare più dopo 48 ore).
-  function isRecentlyModified(ev) {
-    return !!(ev.updatedAt || ev.createdAt);
+  const RECENT_MS = 48 * 60 * 60 * 1000;
+
+  // Determina se una voce è stata modificata (pallino rosso, solo per 48h) o aggiunta ex novo
+  // (pallino verde, fisso). Il timestamp resta sempre visibile; "dot" dice se mostrare il pallino.
+  function getModStatus(ev) {
+    if (ev.updatedAt) return { added: false, ts: ev.updatedAt, dot: (Date.now() - ev.updatedAt) < RECENT_MS };
+    if (ev.createdAt) return { added: true, ts: ev.createdAt, dot: true };
+    return null;
   }
 
-  // Determina se una voce è stata modificata (pallino rosso) o solo aggiunta ex novo (pallino verde),
-  // restituendo il timestamp da mostrare.
-  function getModStatus(ev) {
-    if (ev.updatedAt) return { added: false, ts: ev.updatedAt };
-    if (ev.createdAt) return { added: true, ts: ev.createdAt };
-    return null;
+  // Vero quando la voce mostra un pallino (filtri e contatori "recenti").
+  function isRecentlyModified(ev) {
+    const s = getModStatus(ev);
+    return !!(s && s.dot);
   }
 
   // Formatta la data/ora dell'ultima modifica in stile italiano (gg/mm hh:mm)
@@ -1043,14 +1045,16 @@
 
         const modStatus = getModStatus(ev);
         if (modStatus) {
-          const dot = document.createElement("span");
-          dot.className = "recent-dot no-print" + (modStatus.added ? " dot-added" : "");
-          dot.title = modStatus.added ? "Aggiunto" : "Modificato";
-          n.appendChild(dot);
+          if (modStatus.dot) {
+            const dot = document.createElement("span");
+            dot.className = "recent-dot no-print" + (modStatus.added ? " dot-added" : "");
+            dot.title = modStatus.added ? "Aggiunto" : "Modificato";
+            n.appendChild(dot);
+          }
 
           const ts = document.createElement("span");
           ts.className = "mod-timestamp no-print";
-          ts.textContent = formatUpdatedAt(modStatus.ts);
+          ts.textContent = (modStatus.added ? "aggiunto " : "ultima modifica ") + formatUpdatedAt(modStatus.ts);
           n.appendChild(ts);
         }
 
