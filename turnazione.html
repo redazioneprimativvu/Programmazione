@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -266,6 +265,11 @@ window._fbReady = new Promise(resolve => {
 // sicurezza di Firestore.
 const CODICE_MODIFICA = 'primativvu2026';   // <-- CAMBIALO
 const SOLA_LETTURA_ATTIVA = true;           // metti false per disattivare del tutto il blocco
+
+// Quante settimane PASSATE (prima di quella corrente) restano consultabili e
+// non vengono eliminate dalla pulizia. La più vecchia viene eliminata solo
+// quando supera questo numero.
+const SETTIMANE_CONSERVATE = 5;
 
 // ── CONSTANTS ──
 const BUILTINS=[
@@ -748,6 +752,7 @@ function topBar(){
   </div>
   <div class="action-btns">
     ${lucchetto}
+    <button class="btn btn-primary" onclick="copiaSettimanaSuccessiva()" title="Copia i turni della settimana visualizzata nella settimana successiva (categoria selezionata)">📑 Copia in sett. successiva</button>
     <button class="btn btn-export" onclick="exportPDF()">PDF</button>
     <button class="btn btn-success" onclick="scaricaBackup()" title="Scarica una copia di sicurezza sul tuo computer">💾 Backup</button>
     <button class="btn btn-secondary" onclick="ripristinaBackup()" title="Ripristina da un file di backup">♻️ Da file</button>
@@ -755,7 +760,7 @@ function topBar(){
     <button class="btn btn-ferie" onclick="openFerie()">🏖️ Ferie</button>
     <button class="btn btn-secondary" onclick="openStaff()">👥 Personale</button>
     <button class="btn btn-primary" onclick="openProg()">📋 Programmi</button>
-    <button class="btn btn-secondary" onclick="pulisciSettimaneVecchie()" title="Rimuove i turni delle settimane più vecchie della settimana scorsa (le ferie restano)">🧹 Pulisci</button>
+    <button class="btn btn-secondary" onclick="pulisciSettimaneVecchie()" title="Rimuove i turni delle settimane più vecchie delle ultime 5 settimane passate (le ferie restano)">🧹 Pulisci</button>
   </div>
 </div>`;
 }
@@ -1051,11 +1056,12 @@ function presetMenu(){
 }
 
 // ── ACTIONS ──
-function minWeekStart(){return addDays(getMonday(toISO(new Date())),-7);}
+// Prima settimana ancora conservata: SETTIMANE_CONSERVATE settimane prima di quella corrente.
+function minWeekStart(){return addDays(getMonday(toISO(new Date())),-7*SETTIMANE_CONSERVATE);}
 function prevWeek(){
   const target=addDays(S.weekStart,-7);
   if(target<minWeekStart()){
-    alert('Non è possibile andare più indietro della settimana precedente a quella corrente.');
+    alert('Non è possibile andare più indietro di '+SETTIMANE_CONSERVATE+' settimane rispetto a quella corrente.');
     return;
   }
   S.weekStart=target;ensureWeekCopied();render();
@@ -1063,6 +1069,39 @@ function prevWeek(){
 function nextWeek(){S.weekStart=addDays(S.weekStart,7);ensureWeekCopied();render()}
 function goToday(){S.weekStart=getMonday(toISO(new Date()));ensureWeekCopied();render()}
 function setTab(cat){S.cat=cat;ensureWeekCopied();render()}
+
+// Copia i turni della settimana visualizzata (categoria attiva) nella settimana successiva.
+// Le ferie non si copiano: sono periodi di date, non turni.
+function copiaSettimanaSuccessiva(){
+  if(!requireEdit())return;
+  const dates=weekDates();
+  const list=staffSorted(S.cat);
+  if(!list.length){alert('Nessun personale in questa categoria.');return;}
+  const copie=[];     // [chiaveDestinazione, valore]
+  const daSvuotare=[];// chiavi destinazione da svuotare perché la sorgente è vuota
+  let giaPresenti=0;
+  list.forEach(s=>{
+    dates.forEach(iso=>{
+      const kSrc=`${s.id}|${iso}|${S.cat}`;
+      const kDst=`${s.id}|${addDays(iso,7)}|${S.cat}`;
+      const v=S.turni[kSrc];
+      const haDst=S.turni[kDst]!==undefined;
+      if(haDst)giaPresenti++;
+      if(v!==undefined)copie.push([kDst,JSON.parse(JSON.stringify(v))]);
+      else if(haDst)daSvuotare.push(kDst);
+    });
+  });
+  if(!copie.length){alert('Nella settimana visualizzata non ci sono turni da copiare.');return;}
+  const dstLabel=`${fmtDate(addDays(dates[0],7))} – ${fmtDate(addDays(dates[6],7))}`;
+  let msg='Copiare i turni ('+S.cat+') di questa settimana nella settimana successiva ('+dstLabel+')?\n\nTurni da copiare: '+copie.length;
+  if(giaPresenti>0)msg+='\n\n⚠️ La settimana successiva contiene già '+giaPresenti+' turni: verranno SOSTITUITI.';
+  if(!confirm(msg))return;
+  daSvuotare.forEach(k=>delete S.turni[k]);
+  copie.forEach(([k,v])=>{S.turni[k]=v;});
+  save().catch(e=>console.error(e));
+  S.weekStart=addDays(S.weekStart,7);
+  render();
+}
 function openStaff(){if(!requireEdit())return;S.modalStaff=true;render()}
 function openProg(){if(!requireEdit())return;S.modalProg=true;S.editProg='list';render()}
 function openFerie(){if(!requireEdit())return;S.modalFerie=true;render()}
@@ -1279,7 +1318,7 @@ function pulisciSettimaneVecchie(){
     alert('Non ci sono settimane vecchie da rimuovere. Tutto già in ordine.');
     return;
   }
-  const ok=confirm('Stai per eliminare definitivamente '+daRimuovere.length+' turni delle settimane passate (prima della settimana scorsa).\n\nLe ferie NON verranno toccate.\n\nSuggerimento: prima clicca 💾 Backup.\n\nVuoi procedere?');
+  const ok=confirm('Stai per eliminare definitivamente '+daRimuovere.length+' turni delle settimane passate (più vecchie delle ultime '+SETTIMANE_CONSERVATE+' settimane).\n\nLe ferie NON verranno toccate.\n\nSuggerimento: prima clicca 💾 Backup.\n\nVuoi procedere?');
   if(!ok)return;
   daRimuovere.forEach(k=>delete S.turni[k]);
   save().then(()=>{ alert('Fatto: rimossi '+daRimuovere.length+' turni vecchi.'); render(); })
@@ -1456,6 +1495,7 @@ function bindDrag(){
 
 // ── ESPOSIZIONE FUNZIONI USATE NEGLI ATTRIBUTI onclick ──
 window.prevWeek=prevWeek;window.nextWeek=nextWeek;window.goToday=goToday;window.setTab=setTab;
+window.copiaSettimanaSuccessiva=copiaSettimanaSuccessiva;
 window.openStaff=openStaff;window.openProg=openProg;window.openCell=openCell;window.onCellClick=onCellClick;
 window.dropOnCell=dropOnCell;window.addStaff=addStaff;window.removeStaff=removeStaff;window.changeStaffRole=changeStaffRole;
 window.updateRuoloOpts=updateRuoloOpts;window.startNewProg=startNewProg;window.startEditProg=startEditProg;
