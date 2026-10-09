@@ -31,7 +31,7 @@ header h1 small{display:block;font-size:11px;font-weight:500;color:#8c9ab8;lette
 .dot{width:8px;height:8px;border-radius:50%;background:var(--amber)}
 .dot.on{background:#3ddc84}
 
-main{max-width:1900px;margin:22px auto;padding:0 20px}
+main{max-width:none;margin:22px 0;padding:0 20px}
 #err{display:none;background:#fdeaea;color:#b3261e;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-weight:600}
 
 .datebar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
@@ -43,8 +43,8 @@ main{max-width:1900px;margin:22px auto;padding:0 20px}
 .badge{font-size:11px;font-weight:800;letter-spacing:1.2px;padding:4px 10px;border-radius:20px;background:#fff0d1;color:#a56a00}
 .badge:empty{display:none}
 
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 600px;gap:20px;align-items:start}
-@media(max-width:1300px){.layout{grid-template-columns:1fr}}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) clamp(400px,24vw,520px);gap:20px;align-items:start}
+@media(max-width:1700px){.layout{grid-template-columns:1fr}.layout .side{position:static;max-height:none}}
 
 .editors{background:var(--card);border-radius:14px;padding:14px 18px;box-shadow:0 1px 3px rgba(20,30,60,.08);margin-bottom:18px}
 .editors h2,.side h2{margin:0 0 10px;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
@@ -59,36 +59,54 @@ main{max-width:1900px;margin:22px auto;padding:0 20px}
 
 .panel{display:none}.panel.on{display:block}
 .printhead{display:none}
-.card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(20,30,60,.08);overflow:auto}
-table{width:100%;border-collapse:collapse;font-size:14px}
-thead th{background:#f4f6fb;color:var(--muted);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;padding:12px 6px;text-align:center;border-bottom:2px solid var(--accent);white-space:nowrap}
+.card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(20,30,60,.08);overflow:hidden}
+table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:clamp(11px,.62vw,14px)}
+thead th{background:#f4f6fb;color:var(--muted);font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:11px 3px;text-align:center;border-bottom:2px solid var(--accent);white-space:nowrap;overflow:hidden}
+th.hd{width:24px}th.wn{width:34px}th.wnm{width:16em}th.wg{width:15em}th.wm{width:15em}th.wc{width:96px}th.wo{width:62px}th.ac{width:158px}
+td.ac{padding-left:4px;padding-right:4px}
+.th-p{display:none}
 tbody td{padding:6px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
 tbody tr:hover td{background:#fafbfe}
-td.n{width:40px;font-weight:800;color:var(--navy);font-size:16px}
-td.hd{width:26px;color:#a4adc0;cursor:grab;font-size:18px;user-select:none}
+td.n{font-weight:800;color:var(--navy);font-size:1.15em}
+td.hd{color:#a4adc0;cursor:grab;font-size:18px;user-select:none}
 td.hd:hover{color:var(--accent)}
-td.nm{width:190px}td.tt{min-width:300px}
-input[type=text]{width:100%;border:1px solid transparent;background:transparent;padding:8px 10px;border-radius:8px;font:inherit;color:var(--ink)}
+input[type=text]{width:100%;border:1px solid transparent;background:transparent;padding:7px 6px;border-radius:8px;font:inherit;color:var(--ink)}
 input[type=text]:hover{background:#f1f4fa}
 input[type=text]:focus{outline:0;border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
 input.up{text-transform:uppercase}
 input.up::placeholder{text-transform:none}
 input.nm{font-weight:700}
-.cw{display:flex;align-items:center;gap:6px}
-.cnt{flex:0 0 48px;text-align:right;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cw{display:flex;align-items:center;gap:4px}
+.cnt{flex:0 0 40px;text-align:right;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .cnt.max{color:var(--red);font-weight:700}
-select{width:100%;min-width:110px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px;font:inherit;cursor:pointer;color:var(--ink)}
+select{width:100%;min-width:0;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 4px;font:inherit;cursor:pointer;color:var(--ink)}
 select:focus{outline:0;border-color:var(--accent)}
 .ck{width:26px;height:26px;accent-color:var(--green);cursor:pointer}
 .ck:disabled{cursor:not-allowed;opacity:1}
 .ck.lock{outline:2px solid #bfe3cb;outline-offset:2px;border-radius:4px}
 td.t{width:64px;font-variant-numeric:tabular-nums;font-weight:700;color:var(--navy)}
 td.g{border-left:1px solid var(--line)}
-td.ac{width:110px;white-space:nowrap}
+td.ac{width:158px;white-space:nowrap}
 .rb{border:0;background:transparent;cursor:pointer;color:var(--muted);font-size:15px;padding:5px 7px;border-radius:6px}
 .rb:hover{background:var(--tint);color:var(--tint-ink)}
 .rb.del:hover{background:#fdeaea;color:var(--red)}
+.tb{width:30px;height:30px;margin-left:2px;border-radius:8px;border:1.5px solid;font-size:16px;font-weight:800;line-height:1;cursor:pointer;padding:0;transition:.12s;vertical-align:middle}
+.tb:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 3px 8px rgba(20,30,60,.2)}
+.tb.b-add{background:var(--tint);color:var(--tint-ink);border-color:var(--accent)}
+.tb.b-no{background:#fff3d6;color:#a56a00;border-color:#e9b949}
+.tb.b-del{background:#fdeaea;color:#c62828;border-color:#e57373}
+.tb.b-rst{background:#eef1f6;color:var(--ink);border-color:#aab3c5}
+.tb:disabled{opacity:.28;cursor:not-allowed}
 .adm{display:none}body.admin .adm{display:inline-block}
+textarea{width:100%;display:block;border:1px solid transparent;background:transparent;padding:8px 10px;border-radius:8px;font:inherit;color:var(--ink);resize:none;overflow:hidden;line-height:1.3}
+textarea:hover{background:#f1f4fa}
+textarea:focus{outline:0;border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+textarea.up{text-transform:uppercase}
+textarea::placeholder{text-transform:none}
+tr.barrato td{background:#fde3e3!important;border-bottom:1px solid #f3b8b8}
+tr.barrato input[type=text],tr.barrato textarea,tr.barrato select,tr.barrato td.t{text-decoration:line-through;color:#b3261e}
+tr.barrato td.hd{opacity:.3;cursor:not-allowed}
+tr.nonair td{background:#f9d9d9!important;color:#b3261e;font-weight:800;letter-spacing:3px;font-size:12px;padding:8px!important;text-align:center}
 tr.pausa td{background:var(--tint)!important;border-bottom:1px solid var(--tint-line)}
 td.pt{font-weight:800;letter-spacing:6px;color:var(--tint-ink);font-size:15px;padding:9px 6px!important}
 tr.dragging{opacity:.35}
@@ -172,7 +190,9 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   table{table-layout:fixed;border-collapse:collapse;width:100%;break-inside:avoid}
   th,td{border:.7px solid #444!important;text-align:center!important;vertical-align:middle!important}
   thead th{padding:3px 4px;font-size:10px;letter-spacing:.4px;background:#e9ecf2!important;color:#111}
-  th.wn{width:9%}th.wnm{width:41%}th.wg{width:25%}th.wm{width:25%}
+  th.wn{width:8%}th.wnm{width:34%}th.wg{width:22%}th.wm{width:22%}th.wo{width:14%}
+  .th-s{display:none}.th-p{display:inline}
+  td.t{width:auto;font-weight:600}
   tbody tr{break-inside:avoid;page-break-inside:avoid}
   tbody td{height:var(--rh,8mm);padding:0 4px;font-size:var(--pf,12px);line-height:1.2}
   td.n{width:auto;font-size:var(--pf,12px)}
@@ -237,7 +257,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
     <div class="tags" id="tagM"></div>
 
     <h3>Strumenti</h3>
-    <label class="opt"><input type="checkbox" id="admChk"> Mostra il pulsante ↺ per sbloccare le singole righe</label>
+    <label class="opt"><input type="checkbox" id="admChk"> Mostra il pulsante ↺ (sblocca spunte) e permetti di eliminare i servizi già completati</label>
     <button class="btn danger" id="bReset">🗑️ Azzera la scaletta di questo giorno</button>
     <p class="fb">L'azzeramento cancella servizi, spunte, orari e attività extra del giorno selezionato. Le liste di nomi e i dati di "Andamento" restano. I giorni più vecchi di 30 giorni vengono eliminati automaticamente.</p>
 
@@ -286,12 +306,14 @@ const latestDay=todayId;                 // l'ultima scaletta è sempre quella d
 const oldestDay=()=>addDays(todayId(),-RETENTION_DAYS);
 
 /* ---------- stato ---------- */
-const newRow=()=>({nome:'',titolo:'',g:'',m:'',c1:false,o1:'',t1:0,c2:false,o2:'',t2:0});
+const newRow=()=>({nome:'',titolo:'',g:'',m:'',c1:false,o1:'',t1:0,c2:false,o2:'',t2:0,x:false});
+const adminOn=()=>document.body.classList.contains('admin');
+const NO_LABEL='NON IN ONDA';
 function blank(){
   const s={extras:{}};
   EM.forEach(e=>{
     const rows={},order=[];
-    for(let i=0;i<20;i++){const id='s'+i;rows[id]=newRow();order.push(id);if(i===9)order.push('P');}
+    for(let i=0;i<6;i++){const id='s'+i;rows[id]=newRow();order.push(id);if(i===2)order.push('P');}   // 3 servizi, pausa, 3 servizi
     s[e.id]={order,rows};
   });
   return s;
@@ -305,7 +327,7 @@ function merge(base,src){
     const seen=new Set(),order=[];
     (Array.isArray(d.order)?d.order:[]).forEach(id=>{if(typeof id==='string'&&(id==='P'||rows[id])&&!seen.has(id)){seen.add(id);order.push(id);}});
     Object.keys(rows).sort().forEach(id=>{if(!seen.has(id)){seen.add(id);order.push(id);}});
-    if(!seen.has('P'))order.splice(Math.min(10,order.length),0,'P');
+    if(!seen.has('P'))order.splice(Math.min(3,order.length),0,'P');
     base[e.id]={order,rows};
   });
   base.extras=(src.extras&&typeof src.extras==='object')?src.extras:{};
@@ -361,7 +383,7 @@ EM.forEach(e=>{
   const p=document.createElement('section');p.className='panel';p.dataset.e=e.id;
   p.innerHTML=`<div class="printhead"><h1>${e.nome} — <span class="pdate"></span></h1></div>
   <div class="card"><table>
-    <thead><tr><th class="hd np"></th><th class="wn">N°</th><th class="wnm">Nome servizio</th><th class="wtt np">Titolo servizio</th><th class="wg">Giornalista</th><th class="wm">Montatore</th><th class="wc np">Consegnato</th><th class="wo np">Orario</th><th class="wc np">Completato</th><th class="wo np">Orario</th><th class="ac np"></th></tr></thead>
+    <thead><tr><th class="hd np"></th><th class="wn">N°</th><th class="wnm">Nome servizio</th><th class="wtt np">Titolo servizio</th><th class="wg">Giornalista</th><th class="wm">Montatore</th><th class="wc np">Consegnato</th><th class="wo"><span class="th-s">Orario</span><span class="th-p">Ora consegna</span></th><th class="wc np">Completato</th><th class="wo np">Orario</th><th class="ac np"></th></tr></thead>
     <tbody></tbody></table></div>`;
   panelsEl.appendChild(p);
   TB[e.id]=p.querySelector('tbody');ROW[e.id]={};
@@ -375,23 +397,29 @@ function makeRow(e,id){
   const tr=document.createElement('tr');tr.dataset.e=e;tr.dataset.id=id;
   if(id==='P'){
     tr.className='pausa';
-    tr.innerHTML=`<td class="hd np" title="Trascina per spostare">⠿</td><td class="pt" colspan="9">PAUSA</td><td class="ac np"><button class="rb" data-act="add" title="Inserisci un servizio sotto">＋</button></td>`;
+    tr.innerHTML=`<td class="hd np" title="Trascina per spostare">⠿</td><td class="pt" colspan="9">PAUSA</td><td class="ac np"><button class="tb b-add" data-act="add" title="Inserisci un servizio sotto">＋</button></td>`;
   }else{
     tr.innerHTML=`
       <td class="hd np" title="Trascina per spostare">⠿</td>
       <td class="n"></td>
       <td class="nm"><input type="text" class="nm up" data-f="nome" maxlength="${MAX_NOME}" placeholder="Nome servizio" autocomplete="off"></td>
-      <td class="tt np"><div class="cw"><input type="text" class="up" data-f="titolo" maxlength="${MAX_TITOLO}" placeholder="Titolo del servizio" autocomplete="off"><span class="cnt"></span></div></td>
+      <td class="tt np"><div class="cw"><input type="text" class="up" data-f="titolo" maxlength="${MAX_TITOLO}" placeholder="Titolo del servizio" autocomplete="off" spellcheck="false"><span class="cnt"></span></div></td>
       <td><select data-f="g"></select></td>
       <td><select data-f="m"></select></td>
       <td class="g np"><input type="checkbox" class="ck" data-f="c1"></td>
-      <td class="t np" data-f="o1"></td>
+      <td class="t" data-f="o1"></td>
       <td class="g np"><input type="checkbox" class="ck" data-f="c2"></td>
       <td class="t np" data-f="o2"></td>
-      <td class="ac np"><button class="rb adm" data-act="reset" title="Sblocca spunte e orari">↺</button><button class="rb" data-act="add" title="Inserisci un servizio sotto">＋</button><button class="rb del" data-act="del" title="Elimina servizio">🗑</button></td>`;
+      <td class="ac np"><button class="tb b-rst adm" data-act="reset" title="Sblocca spunte e orari">↺</button><button class="tb b-add" data-act="add" title="Inserisci un servizio sotto">＋</button><button class="tb b-no" data-act="no" title="Non va più in onda: barra la riga">⊘</button><button class="tb b-del" data-act="del" title="Elimina riga">🗑</button></td>`;
   }
   return tr;
 }
+const DIV={};
+EM.forEach(e=>{
+  const d=document.createElement('tr');d.className='nonair np';d.dataset.div='1';
+  d.innerHTML=`<td colspan="11">${NO_LABEL} · restano in scaletta per i dati, non vengono stampati</td>`;
+  DIV[e.id]=d;
+});
 function fillSelect(sel,list,val){
   const items=list.slice();if(val&&!items.includes(val))items.push(val);
   const key=items.join('\u0001');
@@ -410,7 +438,7 @@ function counts(){
     if(id==='P')return;const r=S[em.id].rows[id];
     if(!r||!r.m)return;
     if(r.c1)pres.add(r.m);
-    if(r.c1&&!r.c2)c[r.m]=(c[r.m]||0)+1;
+    if(r.c1&&!r.c2&&!r.x)c[r.m]=(c[r.m]||0)+1;
   }));
   CFG.montatori.forEach(n=>{
     const ex=S.extras[mkey(n)]||{};
@@ -427,12 +455,21 @@ function sync(){
     const st=S[em.id],tb=TB[em.id],map=ROW[em.id];
     Object.keys(map).forEach(id=>{if(!st.order.includes(id)){map[id].remove();delete map[id];}});
     st.order.forEach(id=>{if(!map[id])map[id]=makeRow(em.id,id);});
-    if([...tb.children].map(t=>t.dataset.id).join()!==st.order.join())st.order.forEach(id=>tb.appendChild(map[id]));
+    // ordine visualizzato: prima i servizi in onda (e la pausa), poi quelli "non in onda"
+    const act=st.order.filter(id=>id==='P'||!st.rows[id].x);
+    const off=st.order.filter(id=>id!=='P'&&st.rows[id].x);
+    const els=act.map(id=>map[id]);
+    if(off.length){els.push(DIV[em.id]);off.forEach(id=>els.push(map[id]));}
+    else if(DIV[em.id].parentNode)DIV[em.id].remove();
+    const key=t=>t.dataset.id||'__x';
+    if([...tb.children].map(key).join()!==els.map(key).join())els.forEach(t=>tb.appendChild(t));
     let n=0;
     st.order.forEach(id=>{
       if(id==='P')return;
-      n++;const tr=map[id],r=st.rows[id];
-      tr.querySelector('.n').textContent=n;
+      const tr=map[id],r=st.rows[id];
+      if(!r.x)n++;
+      tr.classList.toggle('barrato',!!r.x);tr.classList.toggle('np',!!r.x);
+      tr.querySelector('.n').textContent=r.x?'':n;
       tr.querySelectorAll('[data-f]').forEach(el=>{
         const f=el.dataset.f;
         if(f==='nome'||f==='titolo'){
@@ -441,10 +478,16 @@ function sync(){
         }
         else if(f==='g')fillSelect(el,gl,r.g);
         else if(f==='m')fillSelect(el,ml,r.m);
-        else if(f==='c1'){el.checked=r.c1;el.disabled=r.c1;el.classList.toggle('lock',r.c1);}
-        else if(f==='c2'){el.checked=r.c2;el.disabled=r.c2||!r.c1;el.classList.toggle('lock',r.c2);}
+        else if(f==='c1'){el.checked=r.c1;el.disabled=r.c1||!!r.x;el.classList.toggle('lock',r.c1);}
+        else if(f==='c2'){el.checked=r.c2;el.disabled=r.c2||!r.c1||!!r.x;el.classList.toggle('lock',r.c2);}
         else el.textContent=r[f];
       });
+      const no=tr.querySelector('[data-act=no]');
+      no.textContent=r.x?'↩':'⊘';
+      no.title=r.x?'Rimetti in scaletta al suo posto':'Non va più in onda: barra la riga';
+      const del=tr.querySelector('[data-act=del]'),lock=r.c2&&!adminOn();
+      del.disabled=lock;
+      del.title=lock?'Servizio completato: non eliminabile (usa ⊘ se non va più in onda)':'Elimina riga';
     });
   });
   const {c,pres}=counts();
@@ -526,7 +569,7 @@ panelsEl.addEventListener('input',ev=>{
   const el=ev.target,f=el.dataset.f;
   if(f!=='nome'&&f!=='titolo')return;
   const s=el.selectionStart,e=el.selectionEnd;
-  el.value=el.value.toUpperCase().slice(0,f==='nome'?MAX_NOME:MAX_TITOLO);
+  el.value=el.value.replace(/[\r\n]+/g,' ').toUpperCase().slice(0,f==='nome'?MAX_NOME:MAX_TITOLO);
   try{el.setSelectionRange(s,e);}catch(x){}
   if(f==='titolo'){const c=el.closest('.cw').querySelector('.cnt');c.textContent=el.value.length+'/'+MAX_TITOLO;c.classList.toggle('max',el.value.length>=MAX_TITOLO);}
 });
@@ -557,6 +600,7 @@ function addRow(e,afterId){
 }
 function delRow(e,id){
   const r=S[e].rows[id];
+  if(r&&r.c2&&!adminOn())return;
   if(r&&(r.nome||r.titolo||r.g||r.m||r.c1)&&!confirm('Eliminare questo servizio?'))return;
   patch({[e+'.rows.'+id]:DEL,[e+'.order']:S[e].order.filter(x=>x!==id)});
 }
@@ -564,7 +608,8 @@ panelsEl.addEventListener('click',ev=>{
   const bt=ev.target.closest('[data-act]');if(!bt)return;
   const e=bt.closest('.panel').dataset.e,a=bt.dataset.act,tr=bt.closest('tr'),id=tr&&tr.dataset.id;
   if(a==='add')addRow(e,id);
-  if(a==='del')delRow(e,id);
+  if(a==='del'&&!bt.disabled)delRow(e,id);
+  if(a==='no')patch({[e+'.rows.'+id+'.x']:!S[e].rows[id].x});
   if(a==='reset'&&confirm('Sbloccare e azzerare le spunte e gli orari di questo servizio?')){
     const r=S[e].rows[id],b=e+'.rows.'+id+'.';
     if(r.c2&&r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null);
@@ -574,7 +619,7 @@ panelsEl.addEventListener('click',ev=>{
 
 /* trascinamento righe (servizi e pausa) */
 let drag=null;
-panelsEl.addEventListener('mousedown',ev=>{const h=ev.target.closest('td.hd');if(h)h.closest('tr').draggable=true;});
+panelsEl.addEventListener('mousedown',ev=>{const h=ev.target.closest('td.hd');if(h&&!h.closest('tr').classList.contains('barrato'))h.closest('tr').draggable=true;});
 document.addEventListener('mouseup',()=>{if(!drag)document.querySelectorAll('tr[draggable=true]').forEach(t=>t.draggable=false);});
 panelsEl.addEventListener('dragstart',ev=>{
   const tr=ev.target.closest&&ev.target.closest('tr');
@@ -586,13 +631,13 @@ panelsEl.addEventListener('dragstart',ev=>{
 function clearOver(){document.querySelectorAll('.ovt,.ovb').forEach(t=>t.classList.remove('ovt','ovb'));}
 panelsEl.addEventListener('dragover',ev=>{
   if(!drag)return;
-  const tr=ev.target.closest('tr[data-id]');if(!tr||tr.dataset.e!==drag.e)return;
+  const tr=ev.target.closest('tr[data-id]');if(!tr||tr.dataset.e!==drag.e||tr.classList.contains('barrato'))return;
   ev.preventDefault();clearOver();
   const r=tr.getBoundingClientRect();tr.classList.add(ev.clientY<r.top+r.height/2?'ovt':'ovb');
 });
 panelsEl.addEventListener('drop',ev=>{
   if(!drag)return;
-  const tr=ev.target.closest('tr[data-id]');if(!tr||tr.dataset.e!==drag.e)return;
+  const tr=ev.target.closest('tr[data-id]');if(!tr||tr.dataset.e!==drag.e||tr.classList.contains('barrato'))return;
   ev.preventDefault();
   const tid=tr.dataset.id;if(tid===drag.id)return;
   const r=tr.getBoundingClientRect(),after=ev.clientY>=r.top+r.height/2;
@@ -634,7 +679,7 @@ $('#addM').onkeydown=e=>{if(e.key==='Enter')addName(e.target,'montatori');};
 $('#bPanel').onclick=()=>$('#ov').classList.add('on');
 $('#bClose').onclick=()=>$('#ov').classList.remove('on');
 $('#ov').onclick=e=>{if(e.target.id==='ov')$('#ov').classList.remove('on');};
-$('#admChk').onchange=e=>document.body.classList.toggle('admin',e.target.checked);
+$('#admChk').onchange=e=>{document.body.classList.toggle('admin',e.target.checked);sync();};
 $('#bReset').onclick=()=>{
   if(!confirm('Azzerare TUTTA la scaletta del '+longDate(curDay)+' (Prima Tivvù, Telenostra e attività extra)? Non si può annullare.'))return;
   dayRef.delete().catch(showErr);
@@ -688,8 +733,8 @@ db.collection('statistiche').onSnapshot(qs=>{
 $('#bPrint').onclick=()=>window.print();
 window.addEventListener('beforeprint',()=>{
   document.querySelectorAll('.pdate').forEach(x=>x.textContent=longDate(curDay));
-  document.querySelectorAll('td.pt').forEach(t=>t.colSpan=4);
-  const rows=Math.max(1,S[active].order.length);
+  document.querySelectorAll('td.pt').forEach(t=>t.colSpan=5);
+  const rows=Math.max(1,S[active].order.filter(id=>id==='P'||!S[active].rows[id].x).length);
   const rh=Math.min(10,170/rows);
   const r=document.documentElement.style;
   r.setProperty('--rh',rh.toFixed(2)+'mm');
