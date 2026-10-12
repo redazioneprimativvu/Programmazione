@@ -160,6 +160,8 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .mo.on{background:var(--navy);color:#fff}
 .mbody{padding:26px 32px;overflow:auto}
 .mbody h2{margin:0 0 16px;font-size:24px;text-transform:capitalize}
+.sth{display:flex;align-items:center;gap:18px;margin-bottom:16px;flex-wrap:wrap}
+.sth h2{margin:0}
 .xclose{position:absolute;top:12px;right:14px;border:0;background:#eef1f6;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;color:var(--ink)}
 .xclose:hover{background:var(--red);color:#fff}
 .sum{display:flex;gap:14px;margin-bottom:22px;flex-wrap:wrap}
@@ -203,6 +205,13 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   select.vuoto{color:transparent}
   tr.pausa td{background:var(--tint)!important}
   td.pt{letter-spacing:6px;font-size:var(--pf,12px);padding:0!important}
+  /* stampa della finestra Andamento */
+  body.pstats main,body.pstats header{display:none!important}
+  body.pstats #stOv{display:block!important;position:static;background:#fff}
+  body.pstats .modal{display:block;width:auto;height:auto;box-shadow:none;border-radius:0;overflow:visible}
+  body.pstats .mlist,body.pstats .xclose,.nopr{display:none!important}
+  body.pstats .mbody{padding:0;overflow:visible}
+  body.pstats .mbody h2{font-size:22px}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -696,7 +705,7 @@ function renderStats(){
   $('#stMonths').innerHTML=months.map(m=>`<button class="mo${m===stSel?' on':''}" data-m="${m}">${esc(monthLabel(m)).replace(/^./,c=>c.toUpperCase())}</button>`).join('');
   const d=ST[stSel],map=(d&&d.m)||{};
   const arr=Object.values(map).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n);
-  let h=`<h2>${esc(monthLabel(stSel))}</h2>`;
+  let h=`<div class="sth"><h2>Andamento · ${esc(monthLabel(stSel))}</h2><button class="btn primary nopr" data-print="1">🖨️ Stampa questo mese</button></div>`;
   if(!arr.length){
     h+='<div class="empty">Nessun servizio montato in questo mese.</div>';
   }else{
@@ -711,11 +720,12 @@ function renderStats(){
     });
     h+='<p class="snote">Il tempo è calcolato dalla spunta "Consegnato" alla spunta "Completato" di ogni servizio.</p>';
   }
-  if(d)h+='<button class="btn danger" data-reset="1" style="margin-top:14px">Azzera i dati di questo mese</button>';
+  if(d)h+='<button class="btn danger nopr" data-reset="1" style="margin-top:14px">Azzera i dati di questo mese</button>';
   $('#stBody').innerHTML=h;
 }
 $('#stMonths').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){stSel=b.dataset.m;renderStats();}});
 $('#stBody').addEventListener('click',e=>{
+  if(e.target.closest('[data-print]')){document.body.classList.add('pstats');window.print();return;}
   if(!e.target.closest('[data-reset]'))return;
   if(confirm('Cancellare i dati di Andamento di '+monthLabel(stSel)+'? Non si può annullare.'))
     db.collection('statistiche').doc(stSel).delete().catch(showErr);
@@ -740,7 +750,7 @@ window.addEventListener('beforeprint',()=>{
   r.setProperty('--rh',rh.toFixed(2)+'mm');
   r.setProperty('--pf',rh>=7.5?'13px':rh>=6?'11px':'9px');
 });
-window.addEventListener('afterprint',()=>{document.querySelectorAll('td.pt').forEach(t=>t.colSpan=9);});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('pstats');document.querySelectorAll('td.pt').forEach(t=>t.colSpan=9);});
 
 /* ---------- giorni ---------- */
 function updateDateUI(){
