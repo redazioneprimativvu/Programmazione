@@ -11,7 +11,38 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
 .topbar{background:#1e293b;color:white;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.topbar h1{font-size:1.1rem;font-weight:700;margin-right:auto}
+.topbar h1{font-size:1.1rem;font-weight:700;margin-right:0}
+.btn-andamento{background:#f59e0b;color:white;font-weight:700;margin-right:auto}
+.modal.modal-andamento{max-width:1100px}
+.and-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.and-head h2{margin:0 auto 0 0}
+.and-nav{display:flex;align-items:center;gap:6px}
+.and-nav button{background:#e2e8f0;color:#1e293b;border:none;padding:5px 11px;border-radius:6px;cursor:pointer;font-size:.9rem;font-weight:700}
+.and-nav button:hover{background:#cbd5e1}
+.and-month{font-size:.95rem;font-weight:800;min-width:130px;text-align:center;text-transform:capitalize}
+.and-info{font-size:.76rem;color:#64748b;margin-bottom:10px}
+.and-scroll{overflow:auto;max-height:64vh;border:1px solid #e2e8f0;border-radius:10px}
+.and-table{border-collapse:separate;border-spacing:0;width:100%;font-size:.8rem}
+.and-table th{position:sticky;top:0;z-index:2;background:#f8fafc;padding:8px 6px;text-align:center;font-size:.72rem;font-weight:800;color:#475569;border-bottom:2px solid #e2e8f0;vertical-align:bottom;min-width:92px}
+.and-table th:first-child{left:0;z-index:3;text-align:left;padding-left:10px;min-width:150px}
+.and-table td{padding:6px;text-align:center;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.and-table td:first-child{position:sticky;left:0;z-index:1;background:white;text-align:left;padding-left:10px;white-space:nowrap;border-right:1px solid #e2e8f0}
+.and-table tr:hover td{background:#f8fafc}
+.and-table tr:hover td:first-child{background:#f8fafc}
+.and-table tr.and-group td{border-top:6px solid #f0f2f5}
+.and-table tfoot td{position:sticky;bottom:0;background:#f8fafc;font-weight:800;border-top:2px solid #e2e8f0;border-bottom:none}
+.and-table tfoot td:first-child{background:#f8fafc;z-index:2}
+.and-th-prog{display:flex;flex-direction:column;align-items:center;gap:4px;line-height:1.15}
+.and-th-prog .dot{width:12px;height:12px;border-radius:50%}
+.and-th-prog span.nm{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.and-num{display:inline-flex;min-width:36px;height:30px;padding:0 6px;border-radius:8px;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;border:2px solid;color:#0f172a}
+.and-zero{color:#cbd5e1;font-weight:600}
+.and-bar-wrap{min-width:78px}
+.and-bar-label{font-size:.78rem;color:#64748b;margin-bottom:3px}
+.and-bar-label b{font-size:.95rem;color:#0f172a}
+.and-bar{height:7px;border-radius:4px;background:#e2e8f0;overflow:hidden}
+.and-bar>div{height:100%;border-radius:4px}
+.and-tot{font-size:1rem;font-weight:800;color:#0f172a}
 .week-nav{display:flex;align-items:center;gap:6px}
 .week-nav button{background:#334155;color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:.85rem}
 .week-nav button:hover{background:#475569}
@@ -300,6 +331,7 @@ const S={
   presetReorder:null,
   modalStaff:false, modalProg:false, editProg:null,
   modalFerie:false,
+  modalAndamento:false, andMonth:null,
   cellModal:null, removePrompt:null,
   presetMenu:null,
   dragging:null,
@@ -729,6 +761,7 @@ function buildHTML(){
     (S.modalStaff?modalStaff():'')+
     (S.modalProg?modalProg():'')+
     (S.modalFerie?modalFerie():'')+
+    (S.modalAndamento?modalAndamento():'')+
     (S.cellModal?cellModal():'')+
     (S.removePrompt?removePrompt():'')+
     (S.presetMenu?presetMenu():'');
@@ -739,6 +772,7 @@ function topBar(){
     :'';
   return`<div class="topbar">
   <h1>📺 Gestione Turni</h1>
+  <button class="btn btn-andamento" onclick="openAndamento()" title="Statistiche del mese: presenze per programma, lunedì e domeniche (consultabile da tutti)">📊 Andamento</button>
   <span id="sync-status" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:12px;font-size:.72rem;font-weight:700;background:#64748b;color:#fff;white-space:nowrap">● …</span>
   <div class="week-nav">
     <button onclick="prevWeek()">‹</button>
@@ -889,6 +923,103 @@ function modalStaff(){
     <button class="btn btn-primary" style="width:100%" onclick="addStaff()">Aggiungi</button>
   </div>
   <div class="modal-footer"><button class="btn btn-secondary" onclick="S.modalStaff=false;render()">Chiudi</button></div>
+</div></div>`;
+}
+// ── ANDAMENTO (statistiche mensili, consultabili da tutti: nessun codice richiesto) ──
+const MESI_FULL=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+function openAndamento(){const n=new Date();S.andMonth={y:n.getFullYear(),m:n.getMonth()};S.modalAndamento=true;render();}
+function closeAndamento(){S.modalAndamento=false;render();}
+function andamentoMese(delta){
+  if(!S.andMonth){andamentoOggi();return;}
+  let{y,m}=S.andMonth;m+=delta;
+  while(m<0){m+=12;y--;}
+  while(m>11){m-=12;y++;}
+  S.andMonth={y,m};render();
+}
+function andamentoOggi(){const n=new Date();S.andMonth={y:n.getFullYear(),m:n.getMonth()};render();}
+// Conta, per ogni persona della categoria attiva, i giorni con turno nel mese:
+// totali, per programma, lunedì e domeniche. "Assente" e ferie non contano come lavorati.
+function andamentoCalcola(cat,y,m){
+  const people=staffSorted(cat);
+  const nGiorni=new Date(y,m+1,0).getDate();
+  let nDom=0;
+  for(let d=1;d<=nGiorni;d++){if(new Date(y,m,d).getDay()===0)nDom++;}
+  const stat={};
+  people.forEach(p=>{stat[p.id]={dom:0,prog:{}};});
+  const usati={};
+  Object.keys(S.turni).forEach(k=>{
+    const parti=k.split('|');
+    if(parti.length<3||parti[2]!==cat)return;
+    const pid=parti[0],iso=parti[1];
+    const st=stat[pid];if(!st)return;
+    const dt=fromISO(iso);
+    if(dt.getFullYear()!==y||dt.getMonth()!==m)return;
+    const sh=S.turni[k];
+    if(!sh||sh.blocked||sh.eventoId==='riposo')return;
+    if(isOnFerie(pid,iso))return;
+    if(dt.getDay()===0)st.dom++;
+    if(sh.eventoId&&!BUILTIN_IDS.has(sh.eventoId)){
+      const pg=byId(S.programmi,sh.eventoId);
+      if(pg&&pg.isRealProg!==false&&!eTurnoBase(pg)){st.prog[pg.id]=(st.prog[pg.id]||0)+1;usati[pg.id]=pg;}
+    }
+  });
+  const progs=Object.values(usati).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+  return{people,stat,progs,nDom};
+}
+// Turni base "Mattina" e "Pomeriggio" (anche se rinominati/modificati dai preset): non sono programmi particolari.
+function eTurnoBase(pg){
+  const n=(pg.nome||'').trim().toLowerCase();
+  return pg.replacesBuiltin==='mattina'||pg.replacesBuiltin==='pomeriggio'||n==='turno mattina'||n==='turno pomeriggio';
+}
+function modalAndamento(){
+  if(!S.andMonth){const n=new Date();S.andMonth={y:n.getFullYear(),m:n.getMonth()};}
+  const{y,m}=S.andMonth;
+  const R=andamentoCalcola(S.cat,y,m);
+  const titolo=S.cat==='giornalisti'?'Giornalisti':'Tecnici';
+  const COL_DOM='#f97316';
+  const bar=(v,tot,col)=>`<div class="and-bar-wrap"><div class="and-bar-label"><b>${v}</b> / ${tot}</div><div class="and-bar"><div style="width:${tot?Math.round(v/tot*100):0}%;background:${col}"></div></div></div>`;
+  let corpo;
+  if(!R.people.length){
+    corpo=`<div class="empty-state">Nessun personale in questa categoria.</div>`;
+  }else{
+    const maxProg={};
+    R.progs.forEach(pg=>{maxProg[pg.id]=Math.max(1,...R.people.map(p=>R.stat[p.id].prog[pg.id]||0));});
+    const thProg=R.progs.map(pg=>`<th title="${esc(pg.nome)}"><div class="and-th-prog"><div class="dot" style="background:${pg.colore||'#6366f1'}"></div><span class="nm">${esc(pg.nome)}</span></div></th>`).join('');
+    const righe=R.people.map((p,idx)=>{
+      const st=R.stat[p.id];
+      const nuovoGruppo=idx>0&&R.people[idx-1].ruolo!==p.ruolo;
+      const celleProg=R.progs.map(pg=>{
+        const c=st.prog[pg.id]||0;
+        if(!c)return`<td><span class="and-zero">–</span></td>`;
+        const col=pg.colore||'#6366f1';
+        return`<td><span class="and-num" style="border-color:${col};background:${hexToRgba(col,.12+.38*c/maxProg[pg.id])}">${c}</span></td>`;
+      }).join('');
+      return`<tr${nuovoGruppo?' class="and-group"':''}>
+        <td><div style="font-weight:700;font-size:.82rem">${esc(p.cognome)} ${esc(p.nome)}</div><div class="role-badge">${esc(p.ruolo)}</div></td>
+        <td>${bar(st.dom,R.nDom,COL_DOM)}</td>
+        ${celleProg}
+      </tr>`;
+    }).join('');
+    corpo=`<div class="and-scroll"><table class="and-table">
+      <thead><tr><th>Nome</th><th>Domeniche<div style="font-weight:500;color:#94a3b8">su ${R.nDom} nel mese</div></th>${thProg}</tr></thead>
+      <tbody>${righe}</tbody>
+    </table></div>`;
+    if(!R.progs.length)corpo+=`<div class="and-info" style="margin-top:10px">Nessun programma assegnato a questa categoria nel mese selezionato.</div>`;
+  }
+  return`<div class="modal-overlay" onclick="if(event.target===this){closeAndamento()}">
+<div class="modal modal-wide modal-andamento" onclick="event.stopPropagation()">
+  <div class="and-head">
+    <h2>📊 Andamento — ${titolo}</h2>
+    <div class="and-nav">
+      <button onclick="andamentoMese(-1)">‹</button>
+      <span class="and-month">${MESI_FULL[m]} ${y}</span>
+      <button onclick="andamentoMese(1)">›</button>
+      <button onclick="andamentoOggi()" style="font-size:.72rem">Oggi</button>
+    </div>
+  </div>
+  <div class="and-info">Domeniche con un turno assegnato e volte in cui la persona ha lavorato su ciascun programma nel mese (Assente e Ferie esclusi; i turni base Mattina e Pomeriggio non sono conteggiati). Le celle dei programmi sono più scure dove la persona ha lavorato di più.</div>
+  ${corpo}
+  <div class="modal-footer"><button class="btn btn-secondary" onclick="closeAndamento()">Chiudi</button></div>
 </div></div>`;
 }
 function modalFerie(){
@@ -1496,6 +1627,7 @@ function bindDrag(){
 // ── ESPOSIZIONE FUNZIONI USATE NEGLI ATTRIBUTI onclick ──
 window.prevWeek=prevWeek;window.nextWeek=nextWeek;window.goToday=goToday;window.setTab=setTab;
 window.copiaSettimanaSuccessiva=copiaSettimanaSuccessiva;
+window.openAndamento=openAndamento;window.closeAndamento=closeAndamento;window.andamentoMese=andamentoMese;window.andamentoOggi=andamentoOggi;
 window.openStaff=openStaff;window.openProg=openProg;window.openCell=openCell;window.onCellClick=onCellClick;
 window.dropOnCell=dropOnCell;window.addStaff=addStaff;window.removeStaff=removeStaff;window.changeStaffRole=changeStaffRole;
 window.updateRuoloOpts=updateRuoloOpts;window.startNewProg=startNewProg;window.startEditProg=startEditProg;
@@ -1531,14 +1663,14 @@ function avviaAscoltoCloud(){
     if(_bloccaAggiornamento)return;     // stiamo salvando proprio adesso
     // Se c'è un pannello aperto non si ridisegna sotto le mani di chi sta
     // lavorando: si riprova fra qualche secondo.
-    const occupato = S.modalStaff || S.modalProg || S.modalFerie || S.cellModal || S.removePrompt || S.presetMenu || S.presetReorder || S.dragging;
+    const occupato = S.modalStaff || S.modalProg || S.modalFerie || S.modalAndamento || S.cellModal || S.removePrompt || S.presetMenu || S.presetReorder || S.dragging;
     if(occupato){ setTimeout(()=>avviaAscoltoCloudRitenta(raw),4000); return; }
     applicaAggiornamentoCloud(raw);
   });
 }
 
 function avviaAscoltoCloudRitenta(raw){
-  const occupato = S.modalStaff || S.modalProg || S.modalFerie || S.cellModal || S.removePrompt || S.presetMenu || S.presetReorder || S.dragging;
+  const occupato = S.modalStaff || S.modalProg || S.modalFerie || S.modalAndamento || S.cellModal || S.removePrompt || S.presetMenu || S.presetReorder || S.dragging;
   if(occupato){ setTimeout(()=>avviaAscoltoCloudRitenta(raw),4000); return; }
   if(raw.ts<=_lastTs)return;
   applicaAggiornamentoCloud(raw);
