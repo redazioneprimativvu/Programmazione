@@ -377,9 +377,10 @@ function showErr(e){
 }
 
 /* statistiche mensili (permanenti): pezzi montati e tempo di lavorazione per montatore */
-function statsAdd(name,ym,sign,ms){
+function statsAdd(name,ym,sign,ms,extra){
   const upd={nome:name,n:INC(sign)};
-  if(ms!=null&&ms>=0){upd.ms=INC(sign*ms);upd.nt=INC(sign);}
+  if(extra)upd.ex=INC(sign);                       // attività extra (contano come cose fatte, senza tempo)
+  if(ms!=null&&ms>=0){upd.ms=INC(sign*ms);upd.nt=INC(sign);upd.h={[String(Math.round(ms/60000))]:INC(sign)};}   // istogramma dei minuti per la moda
   db.collection('statistiche').doc(ym).set({m:{[mkey(name)]:upd}},{merge:true}).catch(showErr);
 }
 
@@ -564,7 +565,12 @@ sideEl.addEventListener('click',ev=>{
 sideEl.addEventListener('change',ev=>{
   const li=ev.target.closest('.xr');if(!li)return;
   const base='extras.'+li.dataset.k+'.'+li.dataset.id+'.';
-  if(ev.target.classList.contains('xk'))patch({[base+'d']:ev.target.checked});
+  if(ev.target.classList.contains('xk')){
+    const k=li.dataset.k,x=(S.extras[k]||{})[li.dataset.id]||{},now=ev.target.checked;
+    const name=CFG.montatori.find(n=>mkey(n)===k);
+    patch({[base+'d']:now});
+    if(name&&String(x.t||'').trim()&&!!x.d!==now)statsAdd(name,monthOf(Date.now()),now?1:-1,null,true);
+  }
   if(ev.target.classList.contains('xt')){clearTimeout(ev.target._t);patch({[base+'t']:ev.target.value.trim()});}
 });
 sideEl.addEventListener('input',ev=>{
@@ -709,16 +715,20 @@ function renderStats(){
   if(!arr.length){
     h+='<div class="empty">Nessun servizio montato in questo mese.</div>';
   }else{
-    const tot=arr.reduce((s,x)=>s+x.n,0),totMs=arr.reduce((s,x)=>s+(x.ms||0),0),totNt=arr.reduce((s,x)=>s+(x.nt||0),0);
-    const avgs=arr.map(x=>x.nt>0?x.ms/x.nt:null),maxN=Math.max(...arr.map(x=>x.n)),maxA=Math.max(1,...avgs.filter(a=>a!=null));
-    h+=`<div class="sum"><div><small>Pezzi montati</small><b>${tot}</b></div><div><small>Tempo medio</small><b>${totNt?fmtDur(totMs/totNt):'—'}</b></div></div>
-    <div class="sh"><span>Montatore</span><span>Pezzi montati</span><span>Tempo medio per pezzo</span></div>`;
+    const modeOf=hh=>{let best=null,bc=0;Object.keys(hh||{}).map(Number).sort((a,b)=>a-b).forEach(m=>{const c=hh[m];if(c>bc){bc=c;best=m;}});return best;};
+    const tot=arr.reduce((s,x)=>s+x.n,0),totEx=arr.reduce((s,x)=>s+(x.ex>0?x.ex:0),0);
+    const all={};arr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
+    const totMode=modeOf(all);
+    const modes=arr.map(x=>modeOf(x.h)),maxN=Math.max(...arr.map(x=>x.n)),maxA=Math.max(1,...modes.filter(a=>a!=null));
+    h+=`<div class="sum"><div><small>Cose fatte</small><b>${tot}</b></div><div><small>di cui extra</small><b>${totEx}</b></div><div><small>Tempo più frequente</small><b>${totMode!=null?fmtDur(totMode*60000):'—'}</b></div></div>
+    <div class="sh"><span>Montatore</span><span>Cose fatte (servizi + extra)</span><span>Tempo più frequente (moda)</span></div>`;
     arr.forEach((x,i)=>{
+      const ex=x.ex>0?x.ex:0;
       h+=`<div class="srow"><div class="sn">${esc(x.nome||'')}</div>
-        <div class="sb"><div class="bar b1" style="width:${Math.max(2,x.n/maxN*80)}%"></div><b>${x.n}</b></div>
-        <div class="sb">${avgs[i]!=null?`<div class="bar b2" style="width:${Math.max(2,avgs[i]/maxA*80)}%"></div><b>${fmtDur(avgs[i])}</b>`:'<b>—</b>'}</div></div>`;
+        <div class="sb"><div class="bar b1" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}${ex?` <small style="font-weight:500;color:var(--muted)">(${ex} extra)</small>`:''}</b></div>
+        <div class="sb">${modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,modes[i]/maxA*80)}%"></div><b>${fmtDur(modes[i]*60000)}</b>`:'<b>—</b>'}</div></div>`;
     });
-    h+='<p class="snote">Il tempo è calcolato dalla spunta "Consegnato" alla spunta "Completato" di ogni servizio.</p>';
+    h+='<p class="snote">Le cose fatte sono i servizi completati più le attività extra spuntate. Il tempo è quello che è comparso più spesso, da "Consegnato" a "Completato", arrotondato al minuto; le attività extra non hanno tempo. I dati registrati prima di questo aggiornamento non hanno la moda.</p>';
   }
   if(d)h+='<button class="btn danger nopr" data-reset="1" style="margin-top:14px">Azzera i dati di questo mese</button>';
   $('#stBody').innerHTML=h;
