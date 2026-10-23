@@ -191,6 +191,8 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   #syncTxt{display:none}
   header .btn{order:4;width:44px;height:44px;padding:0;font-size:20px;display:flex;align-items:center;justify-content:center}
   header .btn .bt{display:none}
+  header #bStats{width:auto;padding:0 12px;gap:4px;font-size:14px}
+  header #bStats .bt{display:inline}
   .tabs{order:5;flex:1 1 100%;margin:0;gap:8px}
   .tab{flex:1;padding:11px 6px}
   main{margin:12px 0;padding:0 12px}
@@ -662,32 +664,57 @@ function renderPanels(ml,c,stato,txt){
   });
   if([...side.children].map(t=>t.dataset.k).join()!==keys.join())keys.forEach(k=>side.appendChild(PAN[k].el));
 }
+
+/* Conteggio "Andamento" delle attività extra: un extra conta se è spuntato e ha un testo.
+   Lo stato di conteggio è salvato nel campo s, così ogni variazione viene contata una sola volta. */
+function xReconcile(k,id,d,text){
+  const x=(S.extras[k]||{})[id]||{};
+  const name=CFG.montatori.find(n=>mkey(n)===k);
+  const t=String(text||'').trim();
+  const should=!!d&&t!=='';
+  const was=!!x.s;
+  if(name&&should!==was)statsAdd(name,monthOf(Date.now()),should?1:-1,null,true);
+  const base='extras.'+k+'.'+id+'.';
+  patch({[base+'d']:!!d,[base+'t']:t,[base+'s']:should});
+}
+
 const sideEl=$('#mpanels');
 sideEl.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-x]');if(!b)return;
   const k=b.closest('.mp').dataset.k;
   if(b.dataset.x==='add'){
     const id=uid('x');
-    patch({['extras.'+k+'.'+id]:{t:'',d:false}});
+    patch({['extras.'+k+'.'+id]:{t:'',d:false,s:false}});
     const t=PAN[k].rows[id]&&PAN[k].rows[id].querySelector('.xt');if(t)t.focus();
   }
-  if(b.dataset.x==='del'){const id=b.closest('.xr').dataset.id;patch({['extras.'+k+'.'+id]:DEL});}
+  if(b.dataset.x==='del'){
+    const id=b.closest('.xr').dataset.id;
+    const x=(S.extras[k]||{})[id]||{};
+    const name=CFG.montatori.find(n=>mkey(n)===k);
+    if(x.s&&name)statsAdd(name,monthOf(Date.now()),-1,null,true);   // se l'extra era contato, lo tolgo dall'Andamento
+    patch({['extras.'+k+'.'+id]:DEL});
+  }
 });
 sideEl.addEventListener('change',ev=>{
   const li=ev.target.closest('.xr');if(!li)return;
-  const base='extras.'+li.dataset.k+'.'+li.dataset.id+'.';
+  const k=li.dataset.k,id=li.dataset.id;
   if(ev.target.classList.contains('xk')){
-    const k=li.dataset.k,x=(S.extras[k]||{})[li.dataset.id]||{},now=ev.target.checked;
-    const name=CFG.montatori.find(n=>mkey(n)===k);
-    patch({[base+'d']:now});
-    if(name&&String(x.t||'').trim()&&!!x.d!==now)statsAdd(name,monthOf(Date.now()),now?1:-1,null,true);
+    xReconcile(k,id,ev.target.checked,li.querySelector('.xt').value);
   }
-  if(ev.target.classList.contains('xt')){clearTimeout(ev.target._t);patch({[base+'t']:ev.target.value.trim()});}
+  if(ev.target.classList.contains('xt')){
+    clearTimeout(ev.target._t);
+    const x=(S.extras[k]||{})[id]||{};
+    xReconcile(k,id,!!x.d,ev.target.value);
+  }
 });
 sideEl.addEventListener('input',ev=>{
   const el=ev.target;if(!el.classList.contains('xt'))return;
-  const li=el.closest('.xr'),base='extras.'+li.dataset.k+'.'+li.dataset.id+'.';
-  clearTimeout(el._t);el._t=setTimeout(()=>patch({[base+'t']:el.value.trim()}),500);
+  const li=el.closest('.xr'),k=li.dataset.k,id=li.dataset.id;
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>{
+    const x=(S.extras[k]||{})[id]||{};
+    xReconcile(k,id,!!x.d,el.value);
+  },500);
 });
 
 /* ---------- eventi tabella ---------- */
@@ -729,6 +756,8 @@ function delRow(e,id){
   const r=S[e].rows[id];
   if(r&&r.c2&&!adminOn())return;
   if(r&&(r.nome||r.titolo||r.g||r.m||r.c1)&&!confirm('Eliminare questo servizio?'))return;
+  // se il servizio era già completato e contato, lo tolgo dall'Andamento
+  if(r&&r.c2&&r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null);
   patch({[e+'.rows.'+id]:DEL,[e+'.order']:S[e].order.filter(x=>x!==id)});
 }
 panelsEl.addEventListener('click',ev=>{
@@ -867,7 +896,7 @@ function renderStats(){
   $('#stMonths').innerHTML=months.map(m=>`<button class="mo${m===stSel?' on':''}" data-m="${m}">${esc(monthLabel(m)).replace(/^./,c=>c.toUpperCase())}</button>`).join('');
   const d=ST[stSel],map=(d&&d.m)||{};
   const arr=Object.values(map).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n);
-  let h=`<div class="sth"><h2>Andamento · ${esc(monthLabel(stSel))}</h2><button class="btn primary nopr" data-print="1">🖨️ Stampa questo mese</button></div>`;
+  let h=`<div class="sth"><h2>Andamento · ${esc(monthLabel(stSel))}</h2><button class="btn primary nopr" data-print="1">🖨️ Stampa questo mese</button><button class="btn nopr" data-recalc="1">🔄 Ricalcola dalle scalette</button></div>`;
   if(!arr.length){
     h+='<div class="empty">Nessun servizio montato in questo mese.</div>';
   }else{
@@ -892,10 +921,51 @@ function renderStats(){
 $('#stMonths').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){stSel=b.dataset.m;renderStats();}});
 $('#stBody').addEventListener('click',e=>{
   if(e.target.closest('[data-print]')){document.body.classList.add('pstats');window.print();return;}
+  if(e.target.closest('[data-recalc]')){recalcMonth(stSel);return;}
   if(!e.target.closest('[data-reset]'))return;
   if(confirm('Cancellare i dati di Andamento di '+monthLabel(stSel)+'? Non si può annullare.'))
     db.collection('statistiche').doc(stSel).delete().catch(showErr);
 });
+/* ricalcolo del mese dalle scalette salvate: servizi completati + attività extra spuntate */
+const keyName=k=>{try{const h=k.slice(1).match(/../g)||[];return new TextDecoder().decode(new Uint8Array(h.map(x=>parseInt(x,16))));}catch(e){return '';}};
+async function recalcMonth(ym){
+  if(!ym)return;
+  if(ym+'-01'<oldestDay()&&!confirm('Le scalette dei primi giorni di '+monthLabel(ym)+' sono già state eliminate (si conservano '+RETENTION_DAYS+' giorni): il ricalcolo conterà solo i giorni rimasti. Continuare?'))return;
+  if(!confirm('Ricalcolare l\'Andamento di '+monthLabel(ym)+' dalle scalette salvate? I valori attuali del mese verranno sostituiti.'))return;
+  try{
+    const qs=await db.collection('scalette').where(firebase.firestore.FieldPath.documentId(),'>=',ym+'-01').where(firebase.firestore.FieldPath.documentId(),'<=',ym+'-31').get();
+    const m={};
+    const get=name=>{const k=mkey(name);return m[k]||(m[k]={nome:name,n:0,ex:0,ms:0,nt:0,h:{}});};
+    const ups=[];let tot=0,totEx=0;
+    qs.forEach(doc=>{
+      const d=doc.data()||{};
+      EM.forEach(e=>{
+        const rows=(d[e.id]&&d[e.id].rows)||{};
+        Object.values(rows).forEach(r=>{
+          if(r&&r.c2&&r.m&&r.t2&&monthOf(r.t2)===ym){
+            const o=get(r.m);o.n++;tot++;
+            if(r.t1&&r.t2>=r.t1){const ms=r.t2-r.t1;o.ms+=ms;o.nt++;const b=String(Math.round(ms/60000));o.h[b]=(o.h[b]||0)+1;}
+          }
+        });
+      });
+      const ex=d.extras||{};
+      Object.keys(ex).forEach(k=>{
+        const name=CFG.montatori.find(n=>mkey(n)===k)||keyName(k);
+        Object.keys(ex[k]||{}).forEach(id=>{
+          const x=ex[k][id];if(!x||typeof x!=='object')return;
+          const ok=!!x.d&&String(x.t||'').trim()!=='';
+          if(ok&&name){const o=get(name);o.n++;o.ex++;tot++;totEx++;}
+          if(!!x.s!==ok)ups.push([doc.ref,{['extras.'+k+'.'+id+'.s']:ok}]);   // allinea il segno di "già contata"
+        });
+      });
+    });
+    await db.collection('statistiche').doc(ym).set({m});
+    for(let i=0;i<ups.length;i+=400){
+      const b=db.batch();ups.slice(i,i+400).forEach(u=>b.update(u[0],u[1]));await b.commit();
+    }
+    alert('Ricalcolo completato: '+tot+' cose fatte, di cui '+totEx+' attività extra.');
+  }catch(err){showErr(err);}
+}
 $('#bStats').onclick=()=>{renderStats();$('#stOv').classList.add('on');};
 $('#stClose').onclick=()=>$('#stOv').classList.remove('on');
 $('#stOv').onclick=e=>{if(e.target.id==='stOv')$('#stOv').classList.remove('on');};
