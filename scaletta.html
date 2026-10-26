@@ -179,8 +179,18 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .mo.on{background:var(--navy);color:#fff}
 .mbody{padding:26px 32px;overflow:auto}
 .mbody h2{margin:0 0 16px;font-size:24px;text-transform:capitalize}
-.sth{display:flex;align-items:center;gap:18px;margin-bottom:16px;flex-wrap:wrap}
-.sth h2{margin:0}
+.sth{display:flex;align-items:center;gap:14px;margin-bottom:4px;padding-right:38px}
+.sth h2{margin:0;flex:1;min-width:0}
+.sact{display:flex;gap:8px;flex:0 0 auto}
+.ib{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:15px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;transition:.15s}
+.ib:hover{background:var(--navy);border-color:var(--navy);color:#fff}
+.ssec{margin-top:26px}
+.sh3{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+.sh3::after{content:"";flex:1;height:1px;background:var(--line)}
+.dt{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dt.b1{background:#2f6bff}.dt.b3{background:#14a38b}
+.lk{display:block;margin:28px 0 4px;padding:0;border:0;background:none;color:var(--muted);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
+.lk:hover{color:var(--red)}
 .xclose{position:absolute;top:12px;right:14px;border:0;background:#eef1f6;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;color:var(--ink)}
 .xclose:hover{background:var(--red);color:#fff}
 .sum{display:flex;gap:14px;margin-bottom:22px;flex-wrap:wrap}
@@ -193,9 +203,10 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .sn{font-weight:800;font-size:15px;overflow:hidden;text-overflow:ellipsis}
 .sb{display:flex;align-items:center;gap:10px}
 .bar{height:22px;border-radius:6px;min-width:4px;transition:width .4s}
-.bar.b1{background:#2f6bff}.bar.b2{background:var(--amber)}
+.bar.b1{background:#2f6bff}.bar.b2{background:var(--amber)}.bar.b3{background:#14a38b}
 .sb b{font-variant-numeric:tabular-nums;white-space:nowrap}
 .snote{font-size:12px;color:var(--muted);margin-top:18px;line-height:1.5}
+.sh.g,.srow.g{grid-template-columns:130px 1fr}
 
 /* ===== telefono e tablet: ogni servizio diventa una scheda ===== */
 @media screen and (max-width:1100px){
@@ -302,6 +313,9 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   .sb::before{flex:0 0 64px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
   .srow>.sb:nth-child(2)::before{content:"Fatte"}
   .srow>.sb:nth-child(3)::before{content:"Tempo"}
+  .srow.g{grid-template-columns:1fr}
+  .srow.g>.sb:nth-child(2)::before{content:"Servizi"}
+  .sth{padding-right:0}
   .sum{gap:8px}
   .sum div{min-width:0;flex:1 1 90px;padding:10px 12px}
   .sum b{font-size:22px}
@@ -548,6 +562,12 @@ function statsAdd(name,ym,sign,ms,extra){
   if(extra)upd.ex=INC(sign);                       // attività extra (contano come cose fatte, senza tempo)
   if(ms!=null&&ms>=0){upd.ms=INC(sign*ms);upd.nt=INC(sign);upd.h={[String(Math.round(ms/60000))]:INC(sign)};}   // istogramma dei minuti per la moda
   db.collection('statistiche').doc(ym).set({m:{[mkey(name)]:upd}},{merge:true}).catch(showErr);
+}
+
+/* servizi assegnati a un giornalista, per mese (il mese è quello del giorno della scaletta) */
+function statsG(name,ym,sign){
+  if(!name||!ym)return;
+  db.collection('statistiche').doc(ym).set({g:{[mkey(name)]:{nome:name,n:INC(sign)}}},{merge:true}).catch(showErr);
 }
 
 /* ---------- tabelle ---------- */
@@ -859,7 +879,11 @@ panelsEl.addEventListener('change',ev=>{
     if(v!==(r.du||0))patch({[b+'du']:v});else sync();
     el.value=v?fmtMS(v):'';
   }
-  else if(f==='g')patch({[b+'g']:el.value});
+  else if(f==='g'){
+    const old=r.g,nv=el.value;
+    patch({[b+'g']:nv});
+    if(old!==nv){const ym=curDay.slice(0,7);if(old)statsG(old,ym,-1);if(nv)statsG(nv,ym,1);}
+  }
   else if(f==='m'){
     const old=r.m,wasDone=r.c2&&r.t2,ym=wasDone?monthOf(r.t2):null,ms=(r.t1&&r.t2)?r.t2-r.t1:null;
     patch({[b+'m']:el.value});
@@ -885,6 +909,7 @@ function delRow(e,id){
   if(r&&(r.nome||r.titolo||r.g||r.m||r.c1||r.du)&&!confirm('Eliminare questo servizio?'))return;
   // se il servizio era già completato e contato, lo tolgo dall'Andamento
   if(r&&r.c2&&r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null);
+  if(r&&r.g)statsG(r.g,curDay.slice(0,7),-1);
   patch({[e+'.rows.'+id]:DEL,[e+'.order']:S[e].order.filter(x=>x!==id)});
 }
 panelsEl.addEventListener('click',ev=>{
@@ -1021,9 +1046,13 @@ function renderStats(){
   const months=Array.from(new Set([...Object.keys(ST),cur])).sort().reverse();
   if(!stSel||!months.includes(stSel))stSel=cur;
   $('#stMonths').innerHTML=months.map(m=>`<button class="mo${m===stSel?' on':''}" data-m="${m}">${esc(monthLabel(m)).replace(/^./,c=>c.toUpperCase())}</button>`).join('');
-  const d=ST[stSel],map=(d&&d.m)||{};
+  const d=ST[stSel],map=(d&&d.m)||{},gmap=(d&&d.g)||{};
   const arr=Object.values(map).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n);
-  let h=`<div class="sth"><h2>Andamento · ${esc(monthLabel(stSel))}</h2><button class="btn primary nopr" data-print="1">🖨️ Stampa questo mese</button><button class="btn nopr" data-recalc="1">🔄 Ricalcola dalle scalette</button></div>`;
+  const garr=Object.values(gmap).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n||byName(a.nome||'',b.nome||''));
+  let h=`<div class="sth"><h2>Andamento · ${esc(monthLabel(stSel))}</h2><div class="sact nopr"><button class="ib" data-print="1" title="Stampa questo mese" aria-label="Stampa questo mese">🖨️</button><button class="ib" data-recalc="1" title="Ricalcola dalle scalette salvate" aria-label="Ricalcola dalle scalette salvate">↻</button></div></div>`;
+
+  /* sezione montatori */
+  h+='<section class="ssec"><h3 class="sh3"><i class="dt b1"></i>Montatori</h3>';
   if(!arr.length){
     h+='<div class="empty">Nessun servizio montato in questo mese.</div>';
   }else{
@@ -1051,7 +1080,23 @@ function renderStats(){
     });
     h+='<p class="snote">Le cose fatte sono i servizi completati più le attività extra spuntate. Il tempo è la fascia da 5 minuti in cui cadono più servizi (moda), da "Consegnato" a "Completato"; per le attività extra va dal primo al secondo clic. I dati registrati prima di questo aggiornamento non hanno la moda.</p>';
   }
-  if(d)h+='<button class="btn danger nopr" data-reset="1" style="margin-top:14px">Azzera i dati di questo mese</button>';
+  h+='</section>';
+
+  /* sezione giornalisti */
+  h+='<section class="ssec"><h3 class="sh3"><i class="dt b3"></i>Giornalisti</h3>';
+  if(!garr.length){
+    h+='<div class="empty">Nessun servizio assegnato a un giornalista in questo mese. Per includere i giorni già compilati usa il pulsante ↻ in alto a destra.</div>';
+  }else{
+    const gt=garr.reduce((s,x)=>s+x.n,0),gmax=Math.max(...garr.map(x=>x.n));
+    h+=`<div class="sum"><div><small>Servizi assegnati</small><b>${gt}</b></div><div><small>Giornalisti attivi</small><b>${garr.length}</b></div></div>
+    <div class="sh g"><span>Giornalista</span><span>Servizi</span></div>`;
+    garr.forEach(x=>{
+      h+=`<div class="srow g"><div class="sn">${esc(x.nome||'')}</div><div class="sb"><div class="bar b3" style="width:${Math.max(2,x.n/gmax*80)}%"></div><b>${x.n}</b></div></div>`;
+    });
+    h+='<p class="snote">Ogni servizio con il nome del giornalista conta uno, anche se poi non va in onda.</p>';
+  }
+  h+='</section>';
+  if(d)h+='<button class="lk nopr" data-reset="1">Azzera i dati di questo mese</button>';
   $('#stBody').innerHTML=h;
 }
 $('#stMonths').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){stSel=b.dataset.m;renderStats();}});
@@ -1070,7 +1115,8 @@ async function recalcMonth(ym){
   if(!confirm('Ricalcolare l\'Andamento di '+monthLabel(ym)+' dalle scalette salvate? I valori attuali del mese verranno sostituiti.'))return;
   try{
     const qs=await db.collection('scalette').where(firebase.firestore.FieldPath.documentId(),'>=',ym+'-01').where(firebase.firestore.FieldPath.documentId(),'<=',ym+'-31').get();
-    const m={};
+    const m={},gm={};let gtot=0;
+    const getG=name=>{const k=mkey(name);return gm[k]||(gm[k]={nome:name,n:0});};
     const get=name=>{const k=mkey(name);return m[k]||(m[k]={nome:name,n:0,ex:0,ms:0,nt:0,h:{}});};
     const ups=[];let tot=0,totEx=0;
     qs.forEach(doc=>{
@@ -1078,6 +1124,7 @@ async function recalcMonth(ym){
       EM.forEach(e=>{
         const rows=(d[e.id]&&d[e.id].rows)||{};
         Object.values(rows).forEach(r=>{
+          if(r&&r.g){getG(r.g).n++;gtot++;}
           if(r&&r.c2&&r.m&&r.t2&&monthOf(r.t2)===ym){
             const o=get(r.m);o.n++;tot++;
             if(r.t1&&r.t2>=r.t1){const ms=r.t2-r.t1;o.ms+=ms;o.nt++;const b=String(Math.round(ms/60000));o.h[b]=(o.h[b]||0)+1;}
@@ -1098,11 +1145,11 @@ async function recalcMonth(ym){
         });
       });
     });
-    await db.collection('statistiche').doc(ym).set({m});
+    await db.collection('statistiche').doc(ym).set({m,g:gm});
     for(let i=0;i<ups.length;i+=400){
       const b=db.batch();ups.slice(i,i+400).forEach(u=>b.update(u[0],u[1]));await b.commit();
     }
-    alert('Ricalcolo completato: '+tot+' cose fatte, di cui '+totEx+' attività extra.');
+    alert('Ricalcolo completato. Cose fatte dai montatori '+tot+' (di cui '+totEx+' extra). Servizi assegnati ai giornalisti '+gtot+'.');
   }catch(err){showErr(err);}
 }
 $('#bStats').onclick=()=>{renderStats();$('#stOv').classList.add('on');};
