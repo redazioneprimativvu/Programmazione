@@ -531,7 +531,7 @@ function makeRow(e,id){
   const tr=document.createElement('tr');tr.dataset.e=e;tr.dataset.id=id;
   if(id==='P'){
     tr.className='pausa';
-    tr.innerHTML=`<td class="hd np" title="Trascina per spostare">⠿</td><td class="pt" colspan="9">PAUSA</td><td class="ac np"><button class="tb b-add" data-act="add" title="Inserisci un servizio sotto">＋</button></td>`;
+    tr.innerHTML=`<td class="hd np" title="Trascina per spostare">⠿</td><td class="n"></td><td class="pt" colspan="8">PAUSA</td><td class="ac np"><button class="tb b-add" data-act="add" title="Inserisci un servizio sotto">＋</button></td>`;
   }else{
     tr.innerHTML=`
       <td class="hd np" title="Trascina per spostare">⠿</td>
@@ -602,7 +602,7 @@ function sync(){
     if([...tb.children].map(key).join()!==els.map(key).join())els.forEach(t=>tb.appendChild(t));
     let n=0;
     st.order.forEach(id=>{
-      if(id==='P')return;
+      if(id==='P'){n++;const pn=map[id].querySelector('.n');if(pn)pn.textContent=n;return;}   // la pausa ha il suo numero e la numerazione continua
       const tr=map[id],r=st.rows[id];
       if(!r.x)n++;
       tr.classList.toggle('barrato',!!r.x);tr.classList.toggle('np',!!r.x);
@@ -956,20 +956,29 @@ function renderStats(){
   if(!arr.length){
     h+='<div class="empty">Nessun servizio montato in questo mese.</div>';
   }else{
-    const modeOf=hh=>{let best=null,bc=0;Object.keys(hh||{}).map(Number).sort((a,b)=>a-b).forEach(m=>{const c=hh[m];if(c>bc){bc=c;best=m;}});return best;};
+    // moda per fasce da 5 minuti: i minuti registrati vengono raggruppati (0–5, 5–10, 10–15…) e vince la fascia più frequente
+    const BIN=5;
+    const modeOf=hh=>{
+      const bins={};
+      Object.entries(hh||{}).forEach(([m,c])=>{if(c>0){const k=Math.floor(Number(m)/BIN)*BIN;bins[k]=(bins[k]||0)+c;}});
+      let best=null,bc=0;
+      Object.keys(bins).map(Number).sort((a,b)=>a-b).forEach(k=>{if(bins[k]>bc){bc=bins[k];best=k;}});
+      return best;
+    };
+    const binTxt=lo=>lo+'–'+(lo+BIN)+' min';
     const tot=arr.reduce((s,x)=>s+x.n,0),totEx=arr.reduce((s,x)=>s+(x.ex>0?x.ex:0),0);
     const all={};arr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
     const totMode=modeOf(all);
-    const modes=arr.map(x=>modeOf(x.h)),maxN=Math.max(...arr.map(x=>x.n)),maxA=Math.max(1,...modes.filter(a=>a!=null));
-    h+=`<div class="sum"><div><small>Cose fatte</small><b>${tot}</b></div><div><small>di cui extra</small><b>${totEx}</b></div><div><small>Tempo più frequente</small><b>${totMode!=null?fmtDur(totMode*60000):'—'}</b></div></div>
-    <div class="sh"><span>Montatore</span><span>Cose fatte (servizi + extra)</span><span>Tempo più frequente (moda)</span></div>`;
+    const modes=arr.map(x=>modeOf(x.h)),maxN=Math.max(...arr.map(x=>x.n)),maxA=Math.max(BIN,...modes.filter(a=>a!=null).map(a=>a+BIN));
+    h+=`<div class="sum"><div><small>Cose fatte</small><b>${tot}</b></div><div><small>di cui extra</small><b>${totEx}</b></div><div><small>Tempo più frequente</small><b>${totMode!=null?binTxt(totMode):'—'}</b></div></div>
+    <div class="sh"><span>Montatore</span><span>Cose fatte (servizi + extra)</span><span>Tempo più frequente (fascia da 5 min)</span></div>`;
     arr.forEach((x,i)=>{
       const ex=x.ex>0?x.ex:0;
       h+=`<div class="srow"><div class="sn">${esc(x.nome||'')}</div>
         <div class="sb"><div class="bar b1" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}${ex?` <small style="font-weight:500;color:var(--muted)">(${ex} extra)</small>`:''}</b></div>
-        <div class="sb">${modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,modes[i]/maxA*80)}%"></div><b>${fmtDur(modes[i]*60000)}</b>`:'<b>—</b>'}</div></div>`;
+        <div class="sb">${modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,(modes[i]+BIN)/maxA*80)}%"></div><b>${binTxt(modes[i])}</b>`:'<b>—</b>'}</div></div>`;
     });
-    h+='<p class="snote">Le cose fatte sono i servizi completati più le attività extra spuntate. Il tempo è quello che è comparso più spesso, da "Consegnato" a "Completato", arrotondato al minuto; per le attività extra va dal primo al secondo clic. I dati registrati prima di questo aggiornamento non hanno la moda.</p>';
+    h+='<p class="snote">Le cose fatte sono i servizi completati più le attività extra spuntate. Il tempo è la fascia da 5 minuti in cui cadono più servizi (moda), da "Consegnato" a "Completato"; per le attività extra va dal primo al secondo clic. I dati registrati prima di questo aggiornamento non hanno la moda.</p>';
   }
   if(d)h+='<button class="btn danger nopr" data-reset="1" style="margin-top:14px">Azzera i dati di questo mese</button>';
   $('#stBody').innerHTML=h;
@@ -1038,14 +1047,14 @@ db.collection('statistiche').onSnapshot(qs=>{
 $('#bPrint').onclick=()=>window.print();
 window.addEventListener('beforeprint',()=>{
   document.querySelectorAll('.pdate').forEach(x=>x.textContent=longDate(curDay));
-  document.querySelectorAll('td.pt').forEach(t=>t.colSpan=5);
+  document.querySelectorAll('td.pt').forEach(t=>t.colSpan=4);
   const rows=Math.max(1,S[active].order.filter(id=>id==='P'||!S[active].rows[id].x).length);
   const rh=Math.min(10,170/rows);
   const r=document.documentElement.style;
   r.setProperty('--rh',rh.toFixed(2)+'mm');
   r.setProperty('--pf',rh>=7.5?'13px':rh>=6?'11px':'9px');
 });
-window.addEventListener('afterprint',()=>{document.body.classList.remove('pstats');document.querySelectorAll('td.pt').forEach(t=>t.colSpan=9);});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('pstats');document.querySelectorAll('td.pt').forEach(t=>t.colSpan=8);});
 
 /* ---------- giorni ---------- */
 function updateDateUI(){
