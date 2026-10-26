@@ -62,7 +62,7 @@ main{max-width:none;margin:22px 0;padding:0 20px}
 .card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(20,30,60,.08);overflow:hidden}
 table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:clamp(11px,.62vw,14px)}
 thead th{background:#f4f6fb;color:var(--muted);font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:11px 3px;text-align:center;border-bottom:2px solid var(--accent);white-space:nowrap;overflow:hidden}
-th.hd{width:24px}th.wn{width:34px}th.wnm{width:16em}th.wg{width:15em}th.wm{width:15em}th.wc{width:96px}th.wo{width:62px}th.ac{width:158px}
+th.hd{width:24px}th.wn{width:34px}th.wnm{width:16em}th.wg{width:15em}th.wm{width:15em}th.wc{width:96px}th.wo{width:62px}th.wd{width:100px}th.ac{width:158px}
 td.ac{padding-left:4px;padding-right:4px}
 .th-p{display:none}
 tbody td{padding:6px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
@@ -85,6 +85,14 @@ select:focus{outline:0;border-color:var(--accent)}
 .ck:disabled{cursor:not-allowed;opacity:1}
 .ck.lock{outline:2px solid #bfe3cb;outline-offset:2px;border-radius:4px}
 td.t{width:64px;font-variant-numeric:tabular-nums;font-weight:700;color:var(--navy)}
+td.du{width:100px;border-left:1px solid var(--line)}
+input.du{text-align:center;font-weight:700;font-size:1.1em;font-variant-numeric:tabular-nums;letter-spacing:.3px}
+input.du::placeholder{font-weight:500;color:#b3bacb}
+tfoot td{background:var(--tint-soft);border-top:2px solid var(--accent);padding:10px 8px}
+tfoot td.tl{text-align:right;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;font-size:12px;color:var(--tint-ink)}
+tfoot td.tl small{display:block;font-weight:600;letter-spacing:.4px;text-transform:none;color:#a56a00;margin-top:2px}
+tfoot td.tl small:empty{display:none}
+tfoot td.tv{text-align:center;font-weight:800;font-size:1.4em;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
 td.g{border-left:1px solid var(--line)}
 td.ac{width:158px;white-space:nowrap}
 .rb{border:0;background:transparent;cursor:pointer;color:var(--muted);font-size:15px;padding:5px 7px;border-radius:6px}
@@ -193,15 +201,15 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 @media screen and (max-width:1100px){
   html{-webkit-text-size-adjust:100%}
   button{touch-action:manipulation}
-  header{position:sticky;top:0;z-index:6;padding:8px 12px;gap:8px}
-  header h1{order:1;font-size:17px}
+  header{position:sticky;top:0;z-index:6;padding:8px 12px;gap:6px}
+  header h1{order:1;font-size:15px;white-space:nowrap}
   header h1 small{display:none}
   header .sp{order:2}
   header .sync{order:3}
   #syncTxt{display:none}
   header .btn{order:4;width:44px;height:44px;padding:0;font-size:20px;display:flex;align-items:center;justify-content:center}
   header .btn .bt{display:none}
-  header #bStats{width:auto;padding:0 12px;gap:4px;font-size:14px}
+  header #bStats{width:auto;padding:0 10px;gap:4px;font-size:13px}
   header #bStats .bt{display:inline}
   .tabs{order:5;flex:1 1 100%;margin:0;gap:8px}
   .tab{flex:1;padding:11px 6px}
@@ -216,7 +224,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   .chip{min-width:0}
 
   .card{background:transparent;box-shadow:none;border-radius:0;overflow:visible}
-  table,tbody{display:block;width:100%}
+  table,tbody,tfoot{display:block;width:100%}
   thead{display:none}
   tbody tr{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px 6px;align-items:center;padding:10px;margin-bottom:10px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(20,30,60,.1)}
   tbody tr td{display:block;padding:0;border:0!important;width:auto!important;min-width:0!important;text-align:left}
@@ -231,7 +239,10 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   tbody tr:not(.pausa):not(.nonair)>td:nth-child(8){grid-column:span 4}
   tbody tr:not(.pausa):not(.nonair)>td:nth-child(9){grid-column:span 2;display:flex;justify-content:center}
   tbody tr:not(.pausa):not(.nonair)>td:nth-child(10){grid-column:span 4}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(11){grid-column:1/-1}
+  tbody tr:not(.pausa):not(.nonair)>td:nth-child(11){grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  tbody tr:not(.pausa):not(.nonair)>td:nth-child(11)::before{content:"Durata";font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+  tbody tr:not(.pausa):not(.nonair)>td:nth-child(11) input{flex:0 0 55%;width:55%;text-align:center;font-size:20px;font-weight:800}
+  tbody tr:not(.pausa):not(.nonair)>td:nth-child(12){grid-column:1/-1}
   tbody tr:not(.pausa):not(.nonair)>td:nth-child(8)::before,
   tbody tr:not(.pausa):not(.nonair)>td:nth-child(10)::before{display:block;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
   tbody tr:not(.pausa):not(.nonair)>td:nth-child(8)::before{content:"Consegnato"}
@@ -256,6 +267,11 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   tr.pausa td.ac .tb{flex:0 0 60px}
   tbody tr.nonair{display:block;background:#f9d9d9;box-shadow:none;padding:10px}
   tbody tr.nonair td{text-align:center;padding:0!important}
+  tfoot tr.tot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;margin-bottom:10px;background:var(--tint);border-radius:14px}
+  tfoot tr.tot td{display:block;padding:0;border:0!important;background:transparent;width:auto!important}
+  tfoot tr.tot td.ac{display:none}
+  tfoot tr.tot td.tl{text-align:left;flex:1}
+  tfoot tr.tot td.tv{font-size:26px}
   tbody tr.barrato{background:#fde3e3}
   tbody tr.dragging{opacity:.4}
   tbody tr.ovt{box-shadow:0 -4px 0 var(--accent)}
@@ -305,15 +321,20 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   table{table-layout:fixed;border-collapse:collapse;width:100%;break-inside:avoid}
   th,td{border:.7px solid #444!important;text-align:center!important;vertical-align:middle!important}
   thead th{padding:3px 4px;font-size:10px;letter-spacing:.4px;background:#e9ecf2!important;color:#111}
-  th.wn{width:8%}th.wnm{width:34%}th.wg{width:22%}th.wm{width:22%}th.wo{width:14%}
+  th.wn{width:7%}th.wnm{width:30%}th.wg{width:20%}th.wm{width:20%}th.wo{width:11%}th.wd{width:12%}
   .th-s{display:none}.th-p{display:inline}
   td.t{width:auto;font-weight:600}
   tbody tr{break-inside:avoid;page-break-inside:avoid}
-  tbody td{height:var(--rh,8mm);padding:0 4px;font-size:var(--pf,12px);line-height:1.2}
+  tbody td,tfoot td{height:var(--rh,8mm);padding:0 4px;font-size:var(--pf,12px);line-height:1.2}
+  tfoot{break-inside:avoid}
+  tfoot td{background:#e9ecf2!important;color:#000;font-weight:800}
+  tfoot td.tl{letter-spacing:1px}
+  tfoot td.tv{font-size:calc(var(--pf,12px) + 2px)}
+  td.du{width:auto}
   td.n{width:auto;font-size:var(--pf,12px)}
   td.nm,td.tt{width:auto;min-width:0}
   input[type=text]{display:block;width:100%;margin:0;border:0!important;padding:0;font:inherit;font-size:var(--pf,12px);line-height:1.2;text-align:center;background:transparent!important;box-shadow:none!important;height:auto}
-  input::placeholder{color:transparent}
+  input::placeholder,input.du::placeholder{color:transparent}
   select{display:block;width:100%;margin:0;appearance:none;-webkit-appearance:none;border:0;background:transparent!important;color:#000;font:inherit;font-weight:600;font-size:var(--pf,12px);line-height:1.2;padding:0;min-width:0;text-align:center;text-align-last:center}
   select.vuoto{color:transparent}
   tr.pausa td{background:var(--tint)!important}
@@ -428,7 +449,29 @@ const latestDay=todayId;                 // l'ultima scaletta è sempre quella d
 const oldestDay=()=>addDays(todayId(),-RETENTION_DAYS);
 
 /* ---------- stato ---------- */
-const newRow=()=>({nome:'',titolo:'',g:'',m:'',c1:false,o1:'',t1:0,c2:false,o2:'',t2:0,x:false});
+const newRow=()=>({nome:'',titolo:'',g:'',m:'',c1:false,o1:'',t1:0,c2:false,o2:'',t2:0,x:false,du:0});
+
+/* durata dei servizi, salvata in secondi. Si scrive solo con le cifre: 130 diventa 1:30, 45 diventa 0:45, 3 diventa 3:00.
+   Vanno bene anche 1:30, 1.30 e 1'30. */
+function parseDur(str){
+  let s=String(str==null?'':str).trim().replace(/[^0-9]+$/,'');
+  if(!s)return 0;
+  let sec;
+  if(/^\d+$/.test(s)){
+    if(s.length===1)sec=parseInt(s,10)*60;
+    else if(s.length===2)sec=parseInt(s,10);
+    else sec=parseInt(s.slice(0,-2),10)*60+parseInt(s.slice(-2),10);
+  }else{
+    const p=s.split(/[^0-9]+/).map(x=>x===''?0:parseInt(x,10)).slice(0,3);
+    sec=p.length===3?p[0]*3600+p[1]*60+p[2]:p[0]*60+(p[1]||0);
+  }
+  return Math.min(Math.max(0,sec||0),359999);
+}
+function fmtMS(sec){
+  sec=Math.round(sec||0);if(sec<=0)return '';
+  const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),x=sec%60,pad=n=>String(n).padStart(2,'0');
+  return h?h+':'+pad(m)+':'+pad(x):m+':'+pad(x);
+}
 const adminOn=()=>document.body.classList.contains('admin');
 const NO_LABEL='NON IN ONDA';
 /* telefono/tablet: il titolo può andare a capo e il campo si allunga da solo */
@@ -440,7 +483,7 @@ function fit(el){
 }
 function fitAll(){document.querySelectorAll('textarea.ti').forEach(fit);}
 window.addEventListener('resize',fitAll);
-MQ.addEventListener('change',fitAll);
+if(MQ.addEventListener)MQ.addEventListener('change',fitAll);else if(MQ.addListener)MQ.addListener(fitAll);
 function blank(){
   const s={extras:{}};
   EM.forEach(e=>{
@@ -508,7 +551,7 @@ function statsAdd(name,ym,sign,ms,extra){
 }
 
 /* ---------- tabelle ---------- */
-const tabsEl=$('#tabs'),panelsEl=$('#panels'),TB={},ROW={};
+const tabsEl=$('#tabs'),panelsEl=$('#panels'),TB={},TT={},ROW={};
 EM.forEach(e=>{
   const b=document.createElement('button');b.className='tab';b.textContent=e.nome;b.dataset.e=e.id;
   b.onclick=()=>{active=e.id;showTab();};tabsEl.appendChild(b);
@@ -516,10 +559,11 @@ EM.forEach(e=>{
   const p=document.createElement('section');p.className='panel';p.dataset.e=e.id;
   p.innerHTML=`<div class="printhead"><h1>${e.nome} — <span class="pdate"></span></h1></div>
   <div class="card"><table>
-    <thead><tr><th class="hd np"></th><th class="wn">N°</th><th class="wnm">Nome servizio</th><th class="wtt np">Titolo servizio</th><th class="wg">Giornalista</th><th class="wm">Montatore</th><th class="wc np">Consegnato</th><th class="wo"><span class="th-s">Orario</span><span class="th-p">Ora consegna</span></th><th class="wc np">Completato</th><th class="wo np">Orario</th><th class="ac np"></th></tr></thead>
-    <tbody></tbody></table></div>`;
+    <thead><tr><th class="hd np"></th><th class="wn">N°</th><th class="wnm">Nome servizio</th><th class="wtt np">Titolo servizio</th><th class="wg">Giornalista</th><th class="wm">Montatore</th><th class="wc np">Consegnato</th><th class="wo"><span class="th-s">Orario</span><span class="th-p">Ora consegna</span></th><th class="wc np">Completato</th><th class="wo np">Orario</th><th class="wd">Durata</th><th class="ac np"></th></tr></thead>
+    <tbody></tbody>
+    <tfoot><tr class="tot"><td class="tl" colspan="10"><span>Durata totale</span><small class="np tmiss"></small></td><td class="tv" data-tot>0:00</td><td class="ac np"></td></tr></tfoot></table></div>`;
   panelsEl.appendChild(p);
-  TB[e.id]=p.querySelector('tbody');ROW[e.id]={};
+  TB[e.id]=p.querySelector('tbody');TT[e.id]=p;ROW[e.id]={};
 });
 function showTab(){
   document.body.classList.toggle('tn',active==='tn');
@@ -531,7 +575,7 @@ function makeRow(e,id){
   const tr=document.createElement('tr');tr.dataset.e=e;tr.dataset.id=id;
   if(id==='P'){
     tr.className='pausa';
-    tr.innerHTML=`<td class="hd np" title="Trascina per spostare">⠿</td><td class="n"></td><td class="pt" colspan="8">PAUSA</td><td class="ac np"><button class="tb b-add" data-act="add" title="Inserisci un servizio sotto">＋</button></td>`;
+    tr.innerHTML=`<td class="hd np" title="Trascina per spostare">⠿</td><td class="n"></td><td class="pt" colspan="9">PAUSA</td><td class="ac np"><button class="tb b-add" data-act="add" title="Inserisci un servizio sotto">＋</button></td>`;
   }else{
     tr.innerHTML=`
       <td class="hd np" title="Trascina per spostare">⠿</td>
@@ -544,6 +588,7 @@ function makeRow(e,id){
       <td class="t" data-f="o1"></td>
       <td class="g np"><input type="checkbox" class="ck" data-f="c2"></td>
       <td class="t np" data-f="o2"></td>
+      <td class="du"><input type="text" class="du" data-f="du" inputmode="numeric" enterkeyhint="next" autocomplete="off" maxlength="8" placeholder="m:ss" title="Durata del servizio. Scrivi 130 per 1:30, 45 per 0:45, 3 per 3:00"></td>
       <td class="ac np"><button class="tb b-rst adm" data-act="reset" title="Sblocca spunte e orari">↺</button><button class="tb b-add" data-act="add" title="Inserisci un servizio sotto">＋</button><button class="tb b-no" data-act="no" title="Non va più in onda: barra la riga">⊘</button><button class="tb b-del" data-act="del" title="Elimina riga">🗑</button></td>`;
   }
   return tr;
@@ -551,7 +596,7 @@ function makeRow(e,id){
 const DIV={};
 EM.forEach(e=>{
   const d=document.createElement('tr');d.className='nonair np';d.dataset.div='1';
-  d.innerHTML=`<td colspan="11">${NO_LABEL} · restano in scaletta per i dati, non vengono stampati</td>`;
+  d.innerHTML=`<td colspan="12">${NO_LABEL} · restano in scaletta per i dati, non vengono stampati</td>`;
   DIV[e.id]=d;
 });
 function fillSelect(sel,list,val){
@@ -600,11 +645,11 @@ function sync(){
     else if(DIV[em.id].parentNode)DIV[em.id].remove();
     const key=t=>t.dataset.id||'__x';
     if([...tb.children].map(key).join()!==els.map(key).join())els.forEach(t=>tb.appendChild(t));
-    let n=0;
+    let n=0,totSec=0,miss=0;
     st.order.forEach(id=>{
       if(id==='P'){n++;const pn=map[id].querySelector('.n');if(pn)pn.textContent=n;return;}   // la pausa ha il suo numero e la numerazione continua
       const tr=map[id],r=st.rows[id];
-      if(!r.x)n++;
+      if(!r.x){n++;totSec+=r.du||0;if(!r.du)miss++;}
       tr.classList.toggle('barrato',!!r.x);tr.classList.toggle('np',!!r.x);
       tr.querySelector('.n').textContent=r.x?'':n;
       tr.querySelectorAll('[data-f]').forEach(el=>{
@@ -617,6 +662,7 @@ function sync(){
         else if(f==='m')fillSelect(el,ml,r.m);
         else if(f==='c1'){el.checked=r.c1;el.disabled=r.c1||!!r.x;el.classList.toggle('lock',r.c1);}
         else if(f==='c2'){el.checked=r.c2;el.disabled=r.c2||!r.c1||!!r.x;el.classList.toggle('lock',r.c2);}
+        else if(f==='du'){if(document.activeElement!==el)el.value=r.du?fmtMS(r.du):'';}
         else el.textContent=r[f];
       });
       const no=tr.querySelector('[data-act=no]');
@@ -626,6 +672,9 @@ function sync(){
       del.disabled=lock;
       del.title=lock?'Servizio completato: non eliminabile (usa ⊘ se non va più in onda)':'Elimina riga';
     });
+    const pan=TT[em.id];
+    pan.querySelector('[data-tot]').textContent=fmtMS(totSec)||'0:00';
+    pan.querySelector('.tmiss').textContent=miss?(miss===1?'manca 1 durata':'mancano '+miss+' durate'):'';
   });
   const {c,pres}=counts();
   const stato=m=>(c[m]||0)>0?'busy':(pres.has(m)?'free':'idle');
@@ -769,6 +818,8 @@ function flushTxt(){
   document.querySelectorAll('#mpanels .xt').forEach(el=>{
     if(el._t){clearTimeout(el._t);el._t=0;const li=el.closest('.xr');if(li)xApply(li.dataset.k,li.dataset.id,{},el.value);}
   });
+  const a=document.activeElement;
+  if(a&&a.dataset&&a.dataset.f==='du')a.dispatchEvent(new Event('change',{bubbles:true}));
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushTxt();});
 window.addEventListener('pagehide',flushTxt);
@@ -776,6 +827,7 @@ window.addEventListener('pagehide',flushTxt);
 /* ---------- eventi tabella ---------- */
 panelsEl.addEventListener('input',ev=>{
   const el=ev.target,f=el.dataset.f;
+  if(f==='du'){el.value=el.value.replace(/[^0-9:.,;'’"]/g,'');return;}
   if(f!=='nome'&&f!=='titolo')return;
   const s=el.selectionStart,e=el.selectionEnd;
   el.value=el.value.replace(/[\r\n]+/g,' ').toUpperCase().slice(0,f==='nome'?MAX_NOME:MAX_TITOLO);
@@ -783,11 +835,30 @@ panelsEl.addEventListener('input',ev=>{
   if(f==='titolo'){const c=el.closest('.cw').querySelector('.cnt');c.textContent=el.value.length+'/'+MAX_TITOLO;c.classList.toggle('max',el.value.length>=MAX_TITOLO);fit(el);}
   clearTimeout(el._t);el._t=setTimeout(()=>{el._t=0;saveTxt(el);},350);   // salva dopo una breve pausa di scrittura
 });
-panelsEl.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target.tagName==='TEXTAREA'){ev.preventDefault();ev.target.blur();}});
+panelsEl.addEventListener('keydown',ev=>{
+  const el=ev.target;
+  if(el.dataset&&el.dataset.f==='du'&&(ev.key==='Enter'||ev.key==='ArrowDown'||ev.key==='ArrowUp')){
+    ev.preventDefault();
+    const all=[...el.closest('tbody').querySelectorAll('tr:not(.barrato) input[data-f=du]')];
+    const i=all.indexOf(el),nx=all[ev.key==='ArrowUp'?i-1:i+1];
+    if(nx)nx.focus();else el.blur();
+    return;
+  }
+  if(ev.key==='Enter'&&el.tagName==='TEXTAREA'){ev.preventDefault();el.blur();}
+});
+panelsEl.addEventListener('focusin',ev=>{
+  const el=ev.target;
+  if(el.dataset&&el.dataset.f==='du')setTimeout(()=>{try{el.select();}catch(x){}},0);
+});
 panelsEl.addEventListener('change',ev=>{
   const el=ev.target,f=el.dataset.f;if(!f)return;
   const tr=el.closest('tr'),e=tr.dataset.e,id=tr.dataset.id,b=e+'.rows.'+id+'.',r=S[e].rows[id];
   if(f==='nome'||f==='titolo'){clearTimeout(el._t);el._t=0;saveTxt(el);sync();}
+  else if(f==='du'){
+    const v=parseDur(el.value);
+    if(v!==(r.du||0))patch({[b+'du']:v});else sync();
+    el.value=v?fmtMS(v):'';
+  }
   else if(f==='g')patch({[b+'g']:el.value});
   else if(f==='m'){
     const old=r.m,wasDone=r.c2&&r.t2,ym=wasDone?monthOf(r.t2):null,ms=(r.t1&&r.t2)?r.t2-r.t1:null;
@@ -811,7 +882,7 @@ function addRow(e,afterId){
 function delRow(e,id){
   const r=S[e].rows[id];
   if(r&&r.c2&&!adminOn())return;
-  if(r&&(r.nome||r.titolo||r.g||r.m||r.c1)&&!confirm('Eliminare questo servizio?'))return;
+  if(r&&(r.nome||r.titolo||r.g||r.m||r.c1||r.du)&&!confirm('Eliminare questo servizio?'))return;
   // se il servizio era già completato e contato, lo tolgo dall'Andamento
   if(r&&r.c2&&r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null);
   patch({[e+'.rows.'+id]:DEL,[e+'.order']:S[e].order.filter(x=>x!==id)});
@@ -1047,14 +1118,15 @@ db.collection('statistiche').onSnapshot(qs=>{
 $('#bPrint').onclick=()=>window.print();
 window.addEventListener('beforeprint',()=>{
   document.querySelectorAll('.pdate').forEach(x=>x.textContent=longDate(curDay));
-  document.querySelectorAll('td.pt').forEach(t=>t.colSpan=4);
-  const rows=Math.max(1,S[active].order.filter(id=>id==='P'||!S[active].rows[id].x).length);
+  document.querySelectorAll('td.pt').forEach(t=>t.colSpan=5);
+  document.querySelectorAll('td.tl').forEach(t=>t.colSpan=5);
+  const rows=Math.max(1,S[active].order.filter(id=>id==='P'||!S[active].rows[id].x).length)+1;   // +1 per la riga del totale
   const rh=Math.min(10,170/rows);
   const r=document.documentElement.style;
   r.setProperty('--rh',rh.toFixed(2)+'mm');
   r.setProperty('--pf',rh>=7.5?'13px':rh>=6?'11px':'9px');
 });
-window.addEventListener('afterprint',()=>{document.body.classList.remove('pstats');document.querySelectorAll('td.pt').forEach(t=>t.colSpan=8);});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('pstats');document.querySelectorAll('td.pt').forEach(t=>t.colSpan=9);document.querySelectorAll('td.tl').forEach(t=>t.colSpan=10);});
 
 /* ---------- giorni ---------- */
 function updateDateUI(){
@@ -1071,6 +1143,7 @@ function setStatus(m){
   $('#syncTxt').textContent=m.hasPendingWrites?'Salvataggio…':(m.fromCache?'Connessione…':'Sincronizzato');
 }
 function openDay(id){
+  if(dayRef)flushTxt();
   if(unsubDay)unsubDay();
   curDay=id;S=blank();hasData={};sync();updateDateUI();
   dayRef=db.collection('scalette').doc(id);
