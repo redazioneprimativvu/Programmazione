@@ -125,11 +125,21 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .mh .mn{font-weight:800;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mh .mst{font-size:11px;font-weight:600;white-space:nowrap}
 .ml{padding:6px 10px 0}
-.xr{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--line)}
+.xr{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:3px 8px;padding:8px 0;border-bottom:1px solid var(--line)}
 .xr:last-child{border-bottom:0}
-.xr .xk{width:22px;height:22px;flex:0 0 22px}
+.xk{width:30px;height:30px;border-radius:50%;border:2px solid var(--grey);background:#fff;cursor:pointer;padding:0;color:#fff;font-weight:800;line-height:1;display:flex;align-items:center;justify-content:center;transition:.15s}
+.xk:hover{border-color:var(--accent)}
+.xr.run .xk{background:var(--amber);border-color:var(--amber)}
+.xr.run .xk::after{content:"▶";font-size:11px;margin-left:2px}
+.xr.fatto .xk{background:var(--green);border-color:var(--green);cursor:default}
+.xr.fatto .xk::after{content:"✓";font-size:16px}
 .xr input.xt{padding:6px 8px}
 .xr.fatto input.xt{text-decoration:line-through;color:var(--muted)}
+.xi{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:6px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.xi:empty{display:none}
+.xi span{border-radius:20px;padding:2px 10px;background:#fff0d1;color:#a56a00}
+.xi .g{background:#e0f3e7;color:#1c7a3c}
+.xi .d{background:var(--tint);color:var(--tint-ink)}
 .mp .add{margin:8px 10px 12px;width:calc(100% - 20px);padding:8px 10px;font-size:13px;background:var(--tint);color:var(--tint-ink)}
 .mp .add:hover{filter:brightness(.95);background:var(--tint)}
 .xe{color:var(--muted);font-size:13px;padding:8px 4px}
@@ -253,8 +263,9 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 
   #mpanels{grid-template-columns:1fr}
   .mp .add{min-height:44px}
-  .xr{gap:8px;padding:6px 0}
-  .xr .xk{width:26px;height:26px;flex:0 0 26px}
+  .xr{grid-template-columns:36px minmax(0,1fr) auto;gap:4px 8px;padding:9px 0}
+  .xk{width:36px;height:36px}
+  .xi{font-size:12px}
   .rb{padding:10px 12px}
 
   .drawer{padding:16px;width:100%}
@@ -566,7 +577,10 @@ function counts(){
   CFG.montatori.forEach(n=>{
     const ex=S.extras[mkey(n)]||{};
     Object.values(ex).forEach(x=>{
-      if(x&&String(x.t||'').trim()){pres.add(n);if(!x.d)c[n]=(c[n]||0)+1;}
+      if(x&&String(x.t||'').trim()){
+        if(x.t1||x.d)pres.add(n);
+        if(x.t1&&!x.d)c[n]=(c[n]||0)+1;      // in carico solo dopo il primo clic (inizio lavoro)
+      }
     });
   });
   return {c,pres};
@@ -628,7 +642,7 @@ function sync(){
 const PAN={};
 function makeExtra(k,id){
   const d=document.createElement('div');d.className='xr';d.dataset.id=id;d.dataset.k=k;
-  d.innerHTML=`<input type="checkbox" class="ck xk" title="Concluso"><input type="text" class="xt" placeholder="Cosa sta facendo?" autocomplete="off"><button class="rb del" data-x="del" title="Elimina riga">✕</button>`;
+  d.innerHTML=`<button type="button" class="xk" data-x="tick"></button><input type="text" class="xt" placeholder="Cosa sta facendo?" autocomplete="off"><button class="rb del" data-x="del" title="Elimina riga">✕</button><div class="xi"></div>`;
   return d;
 }
 function renderPanels(ml,c,stato,txt){
@@ -649,9 +663,17 @@ function renderPanels(ml,c,stato,txt){
     Object.keys(p.rows).forEach(id=>{if(!ids.includes(id)){p.rows[id].remove();delete p.rows[id];}});
     ids.forEach(id=>{
       let li=p.rows[id];if(!li){li=makeExtra(k,id);p.rows[id]=li;p.list.appendChild(li);}
-      const x=ex[id],t=li.querySelector('.xt'),ck=li.querySelector('.xk');
+      const x=ex[id],t=li.querySelector('.xt'),ck=li.querySelector('.xk'),inf=li.querySelector('.xi');
       if(document.activeElement!==t)t.value=x.t||'';
-      ck.checked=!!x.d;li.classList.toggle('fatto',!!x.d);
+      const done=!!x.d,run=!!x.t1&&!done;
+      li.classList.toggle('fatto',done);li.classList.toggle('run',run);
+      ck.title=done?(adminOn()?'Concluso, clicca per riaprire':'Concluso'):(run?'In corso, clicca per concludere':'Clicca per iniziare');
+      let h='';
+      if(x.o1)h+=`<span>Inizio ${esc(x.o1)}</span>`;
+      if(done&&x.o2)h+=`<span class="g">Fine ${esc(x.o2)}</span>`;
+      if(done&&x.t1&&x.t2&&x.t2>=x.t1)h+=`<span class="d">${fmtDur(x.t2-x.t1)}</span>`;
+      else if(done&&!x.o1)h+='<span class="g">Concluso</span>';
+      if(inf._h!==h){inf._h=h;inf.innerHTML=h;}
     });
     if([...p.list.querySelectorAll('.xr')].map(t=>t.dataset.id).join()!==ids.join())ids.forEach(id=>p.list.appendChild(p.rows[id]));
     const emp=p.list.querySelector('.xe');
@@ -665,56 +687,69 @@ function renderPanels(ml,c,stato,txt){
   if([...side.children].map(t=>t.dataset.k).join()!==keys.join())keys.forEach(k=>side.appendChild(PAN[k].el));
 }
 
-/* Conteggio "Andamento" delle attività extra: un extra conta se è spuntato e ha un testo.
-   Lo stato di conteggio è salvato nel campo s, così ogni variazione viene contata una sola volta. */
-function xReconcile(k,id,d,text){
-  const x=(S.extras[k]||{})[id]||{};
+/* Attività extra con tempo. Primo clic = inizio lavoro (t1, o1), secondo clic = fine lavoro (t2, o2, d).
+   Un extra entra nell'Andamento quando è concluso e ha un testo. Il campo s ricorda che è già stato contato,
+   così ogni variazione viene registrata una sola volta. */
+function xApply(k,id,over,text){
+  const prev=(S.extras[k]||{})[id]||{};
+  const x=Object.assign({},prev,over);
+  const t=String(text!=null?text:(prev.t||'')).trim();
   const name=CFG.montatori.find(n=>mkey(n)===k);
-  const t=String(text||'').trim();
-  const should=!!d&&t!=='';
-  const was=!!x.s;
-  if(name&&should!==was)statsAdd(name,monthOf(Date.now()),should?1:-1,null,true);
-  const base='extras.'+k+'.'+id+'.';
-  patch({[base+'d']:!!d,[base+'t']:t,[base+'s']:should});
+  const should=!!x.d&&t!=='';
+  const was=!!prev.s;
+  if(name&&should!==was){
+    const src=should?x:prev;
+    const ms=(src.t1&&src.t2&&src.t2>=src.t1)?src.t2-src.t1:null;
+    statsAdd(name,monthOf(src.t2||Date.now()),should?1:-1,ms,true);
+  }
+  const base='extras.'+k+'.'+id+'.',upd={};
+  Object.keys(over).forEach(f=>{upd[base+f]=over[f];});
+  upd[base+'t']=t;upd[base+'s']=should;
+  patch(upd);
 }
 
 const sideEl=$('#mpanels');
 sideEl.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-x]');if(!b)return;
   const k=b.closest('.mp').dataset.k;
+  if(b.dataset.x==='tick'){
+    const li=b.closest('.xr'),id=li.dataset.id,inp=li.querySelector('.xt');
+    const x=(S.extras[k]||{})[id]||{},txt=inp.value.trim();
+    if(x.d){
+      if(adminOn())xApply(k,id,{d:false,t1:0,o1:'',t2:0,o2:''},txt);   // solo in modalità amministratore si riapre
+      return;
+    }
+    if(!txt){inp.focus();return;}                                      // serve prima scrivere cosa si fa
+    if(!x.t1)xApply(k,id,{t1:Date.now(),o1:nowHM()},txt);
+    else xApply(k,id,{d:true,t2:Date.now(),o2:nowHM()},txt);
+    return;
+  }
   if(b.dataset.x==='add'){
     const id=uid('x');
-    patch({['extras.'+k+'.'+id]:{t:'',d:false,s:false}});
+    patch({['extras.'+k+'.'+id]:{t:'',d:false,s:false,t1:0,o1:'',t2:0,o2:''}});
     const t=PAN[k].rows[id]&&PAN[k].rows[id].querySelector('.xt');if(t)t.focus();
   }
   if(b.dataset.x==='del'){
     const id=b.closest('.xr').dataset.id;
     const x=(S.extras[k]||{})[id]||{};
     const name=CFG.montatori.find(n=>mkey(n)===k);
-    if(x.s&&name)statsAdd(name,monthOf(Date.now()),-1,null,true);   // se l'extra era contato, lo tolgo dall'Andamento
+    if(x.s&&name)statsAdd(name,monthOf(x.t2||Date.now()),-1,(x.t1&&x.t2&&x.t2>=x.t1)?x.t2-x.t1:null,true);   // se l'extra era contato, lo tolgo dall'Andamento
     patch({['extras.'+k+'.'+id]:DEL});
   }
 });
 sideEl.addEventListener('change',ev=>{
   const li=ev.target.closest('.xr');if(!li)return;
   const k=li.dataset.k,id=li.dataset.id;
-  if(ev.target.classList.contains('xk')){
-    xReconcile(k,id,ev.target.checked,li.querySelector('.xt').value);
-  }
   if(ev.target.classList.contains('xt')){
     clearTimeout(ev.target._t);
-    const x=(S.extras[k]||{})[id]||{};
-    xReconcile(k,id,!!x.d,ev.target.value);
+    xApply(k,id,{},ev.target.value);
   }
 });
 sideEl.addEventListener('input',ev=>{
   const el=ev.target;if(!el.classList.contains('xt'))return;
   const li=el.closest('.xr'),k=li.dataset.k,id=li.dataset.id;
   clearTimeout(el._t);
-  el._t=setTimeout(()=>{
-    const x=(S.extras[k]||{})[id]||{};
-    xReconcile(k,id,!!x.d,el.value);
-  },500);
+  el._t=setTimeout(()=>xApply(k,id,{},el.value),500);
 });
 
 /* ---------- eventi tabella ---------- */
@@ -913,7 +948,7 @@ function renderStats(){
         <div class="sb"><div class="bar b1" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}${ex?` <small style="font-weight:500;color:var(--muted)">(${ex} extra)</small>`:''}</b></div>
         <div class="sb">${modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,modes[i]/maxA*80)}%"></div><b>${fmtDur(modes[i]*60000)}</b>`:'<b>—</b>'}</div></div>`;
     });
-    h+='<p class="snote">Le cose fatte sono i servizi completati più le attività extra spuntate. Il tempo è quello che è comparso più spesso, da "Consegnato" a "Completato", arrotondato al minuto; le attività extra non hanno tempo. I dati registrati prima di questo aggiornamento non hanno la moda.</p>';
+    h+='<p class="snote">Le cose fatte sono i servizi completati più le attività extra spuntate. Il tempo è quello che è comparso più spesso, da "Consegnato" a "Completato", arrotondato al minuto; per le attività extra va dal primo al secondo clic. I dati registrati prima di questo aggiornamento non hanno la moda.</p>';
   }
   if(d)h+='<button class="btn danger nopr" data-reset="1" style="margin-top:14px">Azzera i dati di questo mese</button>';
   $('#stBody').innerHTML=h;
@@ -954,7 +989,10 @@ async function recalcMonth(ym){
         Object.keys(ex[k]||{}).forEach(id=>{
           const x=ex[k][id];if(!x||typeof x!=='object')return;
           const ok=!!x.d&&String(x.t||'').trim()!=='';
-          if(ok&&name){const o=get(name);o.n++;o.ex++;tot++;totEx++;}
+          if(ok&&name){
+            const o=get(name);o.n++;o.ex++;tot++;totEx++;
+            if(x.t1&&x.t2&&x.t2>=x.t1){const ms=x.t2-x.t1;o.ms+=ms;o.nt++;const b=String(Math.round(ms/60000));o.h[b]=(o.h[b]||0)+1;}
+          }
           if(!!x.s!==ok)ups.push([doc.ref,{['extras.'+k+'.'+id+'.s']:ok}]);   // allinea il segno di "già contata"
         });
       });
