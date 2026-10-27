@@ -103,9 +103,7 @@ td.ac{width:158px;white-space:nowrap}
 .tb.b-add{background:var(--tint);color:var(--tint-ink);border-color:var(--accent)}
 .tb.b-no{background:#fff3d6;color:#a56a00;border-color:#e9b949}
 .tb.b-del{background:#fdeaea;color:#c62828;border-color:#e57373}
-.tb.b-rst{background:#eef1f6;color:var(--ink);border-color:#aab3c5}
 .tb:disabled{opacity:.28;cursor:not-allowed}
-.adm{display:none}body.admin .adm{display:inline-block}
 textarea{width:100%;display:block;border:1px solid transparent;background:transparent;padding:8px 10px;border-radius:8px;font:inherit;color:var(--ink);resize:none;overflow:hidden;line-height:1.3}
 textarea:hover{background:#f1f4fa}
 textarea:focus{outline:0;border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
@@ -148,6 +146,8 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .xi span{border-radius:20px;padding:2px 10px;background:#fff0d1;color:#a56a00}
 .xi .g{background:#e0f3e7;color:#1c7a3c}
 .xi .d{background:var(--tint);color:var(--tint-ink)}
+.xi .un{cursor:pointer}
+.xi .un:hover{background:#fdeaea;color:#b3261e}
 .mp .add{margin:8px 10px 12px;width:calc(100% - 20px);padding:8px 10px;font-size:13px;background:var(--tint);color:var(--tint-ink)}
 .mp .add:hover{filter:brightness(.95);background:var(--tint)}
 .xe{color:var(--muted);font-size:13px;padding:8px 4px}
@@ -414,7 +414,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
     <div class="tags" id="tagM"></div>
 
     <h3>Strumenti</h3>
-    <label class="opt"><input type="checkbox" id="admChk"> Mostra il pulsante ↺ (sblocca spunte) e permetti di eliminare i servizi già completati</label>
+    <label class="opt"><input type="checkbox" id="admChk"> Modalità modifica. Permette di togliere le spunte di Consegnato e Completato, anche una alla volta, e di eliminare i servizi già completati</label>
     <button class="btn danger" id="bReset">🗑️ Azzera la scaletta di questo giorno</button>
     <p class="fb">L'azzeramento cancella servizi, spunte, orari e attività extra del giorno selezionato. Le liste di nomi e i dati di "Andamento" restano. I giorni più vecchi di 30 giorni vengono eliminati automaticamente.</p>
 
@@ -609,7 +609,7 @@ function makeRow(e,id){
       <td class="g np"><input type="checkbox" class="ck" data-f="c2"></td>
       <td class="t np" data-f="o2"></td>
       <td class="du"><input type="text" class="du" data-f="du" inputmode="numeric" enterkeyhint="next" autocomplete="off" maxlength="8" placeholder="m:ss" title="Durata del servizio. Scrivi 130 per 1:30, 45 per 0:45, 3 per 3:00"></td>
-      <td class="ac np"><button class="tb b-rst adm" data-act="reset" title="Sblocca spunte e orari">↺</button><button class="tb b-add" data-act="add" title="Inserisci un servizio sotto">＋</button><button class="tb b-no" data-act="no" title="Non va più in onda: barra la riga">⊘</button><button class="tb b-del" data-act="del" title="Elimina riga">🗑</button></td>`;
+      <td class="ac np"><button class="tb b-add" data-act="add" title="Inserisci un servizio sotto">＋</button><button class="tb b-no" data-act="no" title="Non va più in onda: barra la riga">⊘</button><button class="tb b-del" data-act="del" title="Elimina riga">🗑</button></td>`;
   }
   return tr;
 }
@@ -680,8 +680,8 @@ function sync(){
         }
         else if(f==='g')fillSelect(el,gl,r.g);
         else if(f==='m')fillSelect(el,ml,r.m);
-        else if(f==='c1'){el.checked=r.c1;el.disabled=r.c1||!!r.x;el.classList.toggle('lock',r.c1);}
-        else if(f==='c2'){el.checked=r.c2;el.disabled=r.c2||!r.c1||!!r.x;el.classList.toggle('lock',r.c2);}
+        else if(f==='c1'){el.checked=r.c1;el.disabled=(r.c1&&!adminOn())||!!r.x;el.classList.toggle('lock',r.c1&&!adminOn());el.title=(r.c1&&adminOn()&&!r.x)?'Clicca per togliere la spunta':'';}
+        else if(f==='c2'){el.checked=r.c2;el.disabled=(r.c2&&!adminOn())||!r.c1||!!r.x;el.classList.toggle('lock',r.c2&&!adminOn());el.title=(r.c2&&adminOn()&&!r.x)?'Clicca per togliere la spunta':'';}
         else if(f==='du'){if(document.activeElement!==el)el.value=r.du?fmtMS(r.du):'';}
         else el.textContent=r[f];
       });
@@ -736,9 +736,9 @@ function renderPanels(ml,c,stato,txt){
       if(document.activeElement!==t)t.value=x.t||'';
       const done=!!x.d,run=!!x.t1&&!done;
       li.classList.toggle('fatto',done);li.classList.toggle('run',run);
-      ck.title=done?(adminOn()?'Concluso, clicca per riaprire':'Concluso'):(run?'In corso, clicca per concludere':'Clicca per iniziare');
+      ck.title=done?(adminOn()?'Concluso, clicca per togliere la fine':'Concluso'):(run?'In corso, clicca per concludere':'Clicca per iniziare');
       let h='';
-      if(x.o1)h+=`<span>Inizio ${esc(x.o1)}</span>`;
+      if(x.o1)h+=(adminOn()&&!done)?`<span class="un" data-x="undo1" title="Togli l'inizio">Inizio ${esc(x.o1)} ✕</span>`:`<span>Inizio ${esc(x.o1)}</span>`;
       if(done&&x.o2)h+=`<span class="g">Fine ${esc(x.o2)}</span>`;
       if(done&&x.t1&&x.t2&&x.t2>=x.t1)h+=`<span class="d">${fmtDur(x.t2-x.t1)}</span>`;
       else if(done&&!x.o1)h+='<span class="g">Concluso</span>';
@@ -785,12 +785,17 @@ sideEl.addEventListener('click',ev=>{
     const li=b.closest('.xr'),id=li.dataset.id,inp=li.querySelector('.xt');
     const x=(S.extras[k]||{})[id]||{},txt=inp.value.trim();
     if(x.d){
-      if(adminOn())xApply(k,id,{d:false,t1:0,o1:'',t2:0,o2:''},txt);   // solo in modalità amministratore si riapre
+      if(adminOn())xApply(k,id,{d:false,t2:0,o2:''},txt);   // in modalità modifica toglie solo la fine, l'inizio resta
       return;
     }
     if(!txt){inp.focus();return;}                                      // serve prima scrivere cosa si fa
     if(!x.t1)xApply(k,id,{t1:Date.now(),o1:nowHM()},txt);
     else xApply(k,id,{d:true,t2:Date.now(),o2:nowHM()},txt);
+    return;
+  }
+  if(b.dataset.x==='undo1'){
+    const li=b.closest('.xr'),id=li.dataset.id,x=(S.extras[k]||{})[id]||{};
+    if(adminOn()&&!x.d)xApply(k,id,{t1:0,o1:''},li.querySelector('.xt').value);
     return;
   }
   if(b.dataset.x==='add'){
@@ -889,6 +894,20 @@ panelsEl.addEventListener('change',ev=>{
     patch({[b+'m']:el.value});
     if(wasDone){if(old)statsAdd(old,ym,-1,ms);if(el.value)statsAdd(el.value,ym,1,ms);}
   }
+  else if(f==='c2'&&!el.checked&&r.c2&&adminOn()){
+    // toglie solo Completato: Consegnato resta, e il servizio esce dall'Andamento
+    if(r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null);
+    patch({[b+'c2']:false,[b+'o2']:'',[b+'t2']:0});
+  }
+  else if(f==='c1'&&!el.checked&&r.c1&&adminOn()){
+    // toglie Consegnato. Se c'era anche Completato, va tolto con lui
+    const upd={[b+'c1']:false,[b+'o1']:'',[b+'t1']:0};
+    if(r.c2){
+      if(r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null);
+      Object.assign(upd,{[b+'c2']:false,[b+'o2']:'',[b+'t2']:0});
+    }
+    patch(upd);
+  }
   else if(f==='c1'&&el.checked&&!r.c1)patch({[b+'c1']:true,[b+'o1']:nowHM(),[b+'t1']:Date.now()});
   else if(f==='c2'&&el.checked&&!r.c2&&r.c1){
     const t2=Date.now();
@@ -918,11 +937,6 @@ panelsEl.addEventListener('click',ev=>{
   if(a==='add')addRow(e,id);
   if(a==='del'&&!bt.disabled)delRow(e,id);
   if(a==='no')patch({[e+'.rows.'+id+'.x']:!S[e].rows[id].x});
-  if(a==='reset'&&confirm('Sbloccare e azzerare le spunte e gli orari di questo servizio?')){
-    const r=S[e].rows[id],b=e+'.rows.'+id+'.';
-    if(r.c2&&r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null);
-    patch({[b+'c1']:false,[b+'o1']:'',[b+'t1']:0,[b+'c2']:false,[b+'o2']:'',[b+'t2']:0});
-  }
 });
 
 /* trascinamento righe (servizi e pausa) */
