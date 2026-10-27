@@ -177,6 +177,14 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .mo{display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;color:var(--ink)}
 .mo:hover{background:#e4e9f4}
 .mo.on{background:var(--navy);color:#fff}
+.mo:not(:first-child){margin-top:12px}
+.dy{display:flex;align-items:center;gap:8px;width:100%;margin-top:2px;border:0;background:transparent;padding:7px 10px 7px 28px;border-radius:8px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer;text-align:left;position:relative}
+.dy::before{content:"";position:absolute;left:16px;top:50%;width:5px;height:5px;margin-top:-2px;border-radius:50%;background:#b9c2d6}
+.dy:hover{background:#e4e9f4}
+.dy .dd{flex:1;text-transform:capitalize}
+.dy .dc{font-size:11px;font-weight:700;color:var(--muted);background:#e4e9f4;border-radius:10px;padding:1px 8px}
+.dy.on{background:#dbe3f5;font-weight:700}
+.dy.on .dc{background:#fff}
 .mbody{padding:26px 32px;overflow:auto}
 .mbody h2{margin:0 0 16px;font-size:24px;text-transform:capitalize}
 .sth{display:flex;align-items:center;gap:14px;margin-bottom:4px;padding-right:38px}
@@ -305,6 +313,11 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   .mlist h3{display:none}
   #stMonths{display:flex;gap:6px}
   .mo{width:auto;white-space:nowrap;flex:0 0 auto}
+  .mo:not(:first-child){margin-top:0}
+  .dy{width:auto;flex:0 0 auto;white-space:nowrap;margin-top:0;padding:10px 12px;background:#e4e9f4}
+  .dy::before{display:none}
+  .dy.on{background:var(--navy);color:#fff}
+  .dy.on .dc{background:rgba(255,255,255,.25);color:#fff}
   .mbody{padding:16px}
   .mbody h2{font-size:20px}
   .xclose{width:40px;height:40px;top:8px;right:8px;z-index:2}
@@ -425,7 +438,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 <div class="overlay center" id="stOv">
   <div class="modal">
     <button class="xclose" id="stClose" title="Chiudi">✕</button>
-    <nav class="mlist"><h3>Mesi</h3><div id="stMonths"></div></nav>
+    <nav class="mlist"><h3>Mesi e giorni</h3><div id="stMonths"></div></nav>
     <section class="mbody" id="stBody"></section>
   </div>
 </div>
@@ -1053,53 +1066,89 @@ $('#bReset').onclick=()=>{
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('#ov').classList.remove('on');$('#stOv').classList.remove('on');}});
 
 /* ---------- andamento (statistiche) ---------- */
-const ST={};let stSel=null;
+const ST={};let stSel=null,stDay=null;
 const fmtDur=ms=>{const m=Math.round(ms/60000);if(m<1)return '< 1 min';if(m<60)return m+' min';return Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')+' min';};
-function renderStats(){
-  const cur=todayId().slice(0,7);
-  const months=Array.from(new Set([...Object.keys(ST),cur])).sort().reverse();
-  if(!stSel||!months.includes(stSel))stSel=cur;
-  $('#stMonths').innerHTML=months.map(m=>`<button class="mo${m===stSel?' on':''}" data-m="${m}">${esc(monthLabel(m)).replace(/^./,c=>c.toUpperCase())}</button>`).join('');
-  const d=ST[stSel],map=(d&&d.m)||{},gmap=(d&&d.g)||{};
-  const arr=Object.values(map).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n);
+/* scalette dei singoli giorni (si conservano 30 giorni), lette solo quando si apre Andamento */
+const SC={};let scOn=false;
+function ensureSC(){
+  if(scOn)return;scOn=true;
+  db.collection('scalette').onSnapshot(qs=>{
+    Object.keys(SC).forEach(k=>delete SC[k]);
+    qs.forEach(doc=>{SC[doc.id]=doc.data()||{};});
+    if($('#stOv').classList.contains('on'))renderStats();
+  },e=>{scOn=false;showErr(e);});
+}
+/* riassunto di un giorno, ricavato direttamente dalla sua scaletta */
+function aggDay(d){
+  const m={},g={};
+  const gm=n=>{const k=mkey(n);return m[k]||(m[k]={nome:n,n:0,ex:0,ms:0,nt:0});};
+  EM.forEach(e=>{
+    const rows=(d[e.id]&&d[e.id].rows)||{};
+    Object.values(rows).forEach(r=>{
+      if(!r||typeof r!=='object')return;
+      if(r.g){const k=mkey(r.g);(g[k]||(g[k]={nome:r.g,n:0})).n++;}
+      if(r.c2&&r.m){const o=gm(r.m);o.n++;if(r.t1&&r.t2>=r.t1){o.ms+=r.t2-r.t1;o.nt++;}}
+    });
+  });
+  const exs=d.extras||{};
+  Object.keys(exs).forEach(k=>{
+    const name=CFG.montatori.find(n=>mkey(n)===k)||keyName(k);
+    Object.keys(exs[k]||{}).forEach(id=>{
+      const x=exs[k][id];
+      if(!x||typeof x!=='object'||!x.d||!String(x.t||'').trim()||!name)return;
+      const o=gm(name);o.n++;o.ex++;if(x.t1&&x.t2>=x.t1){o.ms+=x.t2-x.t1;o.nt++;}
+    });
+  });
+  return {m,g};
+}
+/* sezioni Montatori e Giornalisti, uguali per il mese e per il singolo giorno */
+function statSections(map,gmap,day){
+  const arr=Object.values(map).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n||byName(a.nome||'',b.nome||''));
   const garr=Object.values(gmap).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n||byName(a.nome||'',b.nome||''));
-  let h=`<div class="sth"><h2>Andamento · ${esc(monthLabel(stSel))}</h2><div class="sact nopr"><button class="ib" data-print="1" title="Stampa questo mese" aria-label="Stampa questo mese">🖨️</button><button class="ib" data-recalc="1" title="Ricalcola dalle scalette salvate" aria-label="Ricalcola dalle scalette salvate">↻</button></div></div>`;
-
-  /* sezione montatori */
-  h+='<section class="ssec"><h3 class="sh3"><i class="dt b1"></i>Montatori</h3>';
+  let h='<section class="ssec"><h3 class="sh3"><i class="dt b1"></i>Montatori</h3>';
   if(!arr.length){
-    h+='<div class="empty">Nessun servizio montato in questo mese.</div>';
+    h+=`<div class="empty">${day?'Nessun servizio completato in questo giorno.':'Nessun servizio montato in questo mese.'}</div>`;
   }else{
-    // moda per fasce da 5 minuti: i minuti registrati vengono raggruppati (0–5, 5–10, 10–15…) e vince la fascia più frequente
-    const BIN=5;
-    const modeOf=hh=>{
-      const bins={};
-      Object.entries(hh||{}).forEach(([m,c])=>{if(c>0){const k=Math.floor(Number(m)/BIN)*BIN;bins[k]=(bins[k]||0)+c;}});
-      let best=null,bc=0;
-      Object.keys(bins).map(Number).sort((a,b)=>a-b).forEach(k=>{if(bins[k]>bc){bc=bins[k];best=k;}});
-      return best;
-    };
-    const binTxt=lo=>lo+'–'+(lo+BIN)+' min';
-    const tot=arr.reduce((s,x)=>s+x.n,0),totEx=arr.reduce((s,x)=>s+(x.ex>0?x.ex:0),0);
-    const all={};arr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
-    const totMode=modeOf(all);
-    const modes=arr.map(x=>modeOf(x.h)),maxN=Math.max(...arr.map(x=>x.n)),maxA=Math.max(BIN,...modes.filter(a=>a!=null).map(a=>a+BIN));
-    h+=`<div class="sum"><div><small>Cose fatte</small><b>${tot}</b></div><div><small>di cui extra</small><b>${totEx}</b></div><div><small>Tempo più frequente</small><b>${totMode!=null?binTxt(totMode):'—'}</b></div></div>
-    <div class="sh"><span>Montatore</span><span>Cose fatte (servizi + extra)</span><span>Tempo più frequente (fascia da 5 min)</span></div>`;
+    const tot=arr.reduce((s,x)=>s+x.n,0),totEx=arr.reduce((s,x)=>s+(x.ex>0?x.ex:0),0),maxN=Math.max(...arr.map(x=>x.n));
+    let tile,colHead,third,note;
+    if(day){
+      const msAll=arr.reduce((s,x)=>s+(x.ms||0),0),ntAll=arr.reduce((s,x)=>s+(x.nt||0),0);
+      const avgs=arr.map(x=>x.nt>0?x.ms/x.nt:null),maxAvg=Math.max(1,...avgs.filter(a=>a!=null));
+      tile=['Tempo medio',ntAll?fmtDur(msAll/ntAll):'—'];
+      colHead='Tempo medio per servizio';
+      third=i=>avgs[i]!=null?`<div class="bar b2" style="width:${Math.max(2,avgs[i]/maxAvg*80)}%"></div><b>${fmtDur(avgs[i])}</b>`:'<b>—</b>';
+      note='Le cose fatte sono i servizi completati più le attività extra spuntate. Il tempo va da "Consegnato" a "Completato"; per le attività extra dal primo al secondo clic.';
+    }else{
+      // moda per fasce da 5 minuti: i minuti registrati vengono raggruppati (0–5, 5–10, 10–15…) e vince la fascia più frequente
+      const BIN=5;
+      const modeOf=hh=>{
+        const bins={};
+        Object.entries(hh||{}).forEach(([m,c])=>{if(c>0){const k=Math.floor(Number(m)/BIN)*BIN;bins[k]=(bins[k]||0)+c;}});
+        let best=null,bc=0;
+        Object.keys(bins).map(Number).sort((a,b)=>a-b).forEach(k=>{if(bins[k]>bc){bc=bins[k];best=k;}});
+        return best;
+      };
+      const binTxt=lo=>lo+'–'+(lo+BIN)+' min';
+      const all={};arr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
+      const totMode=modeOf(all),modes=arr.map(x=>modeOf(x.h)),maxA=Math.max(BIN,...modes.filter(a=>a!=null).map(a=>a+BIN));
+      tile=['Tempo più frequente',totMode!=null?binTxt(totMode):'—'];
+      colHead='Tempo più frequente (fascia da 5 min)';
+      third=i=>modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,(modes[i]+BIN)/maxA*80)}%"></div><b>${binTxt(modes[i])}</b>`:'<b>—</b>';
+      note='Le cose fatte sono i servizi completati più le attività extra spuntate. Il tempo è la fascia da 5 minuti in cui cadono più servizi (moda), da "Consegnato" a "Completato"; per le attività extra va dal primo al secondo clic. I dati registrati prima di questo aggiornamento non hanno la moda.';
+    }
+    h+=`<div class="sum"><div><small>Cose fatte</small><b>${tot}</b></div><div><small>di cui extra</small><b>${totEx}</b></div><div><small>${tile[0]}</small><b>${tile[1]}</b></div></div>
+    <div class="sh"><span>Montatore</span><span>Cose fatte (servizi + extra)</span><span>${colHead}</span></div>`;
     arr.forEach((x,i)=>{
       const ex=x.ex>0?x.ex:0;
       h+=`<div class="srow"><div class="sn">${esc(x.nome||'')}</div>
         <div class="sb"><div class="bar b1" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}${ex?` <small style="font-weight:500;color:var(--muted)">(${ex} extra)</small>`:''}</b></div>
-        <div class="sb">${modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,(modes[i]+BIN)/maxA*80)}%"></div><b>${binTxt(modes[i])}</b>`:'<b>—</b>'}</div></div>`;
+        <div class="sb">${third(i)}</div></div>`;
     });
-    h+='<p class="snote">Le cose fatte sono i servizi completati più le attività extra spuntate. Il tempo è la fascia da 5 minuti in cui cadono più servizi (moda), da "Consegnato" a "Completato"; per le attività extra va dal primo al secondo clic. I dati registrati prima di questo aggiornamento non hanno la moda.</p>';
+    h+=`<p class="snote">${note}</p>`;
   }
-  h+='</section>';
-
-  /* sezione giornalisti */
-  h+='<section class="ssec"><h3 class="sh3"><i class="dt b3"></i>Giornalisti</h3>';
+  h+='</section><section class="ssec"><h3 class="sh3"><i class="dt b3"></i>Giornalisti</h3>';
   if(!garr.length){
-    h+='<div class="empty">Nessun servizio assegnato a un giornalista in questo mese. Per includere i giorni già compilati usa il pulsante ↻ in alto a destra.</div>';
+    h+=`<div class="empty">${day?'Nessun servizio assegnato a un giornalista in questo giorno.':'Nessun servizio assegnato a un giornalista in questo mese. Per includere i giorni già compilati usa il pulsante ↻ in alto a destra.'}</div>`;
   }else{
     const gt=garr.reduce((s,x)=>s+x.n,0),gmax=Math.max(...garr.map(x=>x.n));
     h+=`<div class="sum"><div><small>Servizi assegnati</small><b>${gt}</b></div><div><small>Giornalisti attivi</small><b>${garr.length}</b></div></div>
@@ -1109,11 +1158,41 @@ function renderStats(){
     });
     h+='<p class="snote">Ogni servizio con il nome del giornalista conta uno, anche se poi non va in onda.</p>';
   }
-  h+='</section>';
-  if(d)h+='<button class="lk nopr" data-reset="1">Azzera i dati di questo mese</button>';
+  return h+'</section>';
+}
+function renderStats(){
+  const cur=todayId().slice(0,7);
+  /* giorni con qualcosa da mostrare, dal più recente */
+  const act=[];
+  Object.keys(SC).filter(id=>/^\d{4}-\d{2}-\d{2}$/.test(id)).sort().reverse().forEach(id=>{
+    const a=aggDay(SC[id]);
+    const n=Object.values(a.m).reduce((s,x)=>s+x.n,0),gn=Object.values(a.g).reduce((s,x)=>s+x.n,0);
+    if(n>0||gn>0)act.push({id,a,n});
+  });
+  const byM={};act.forEach(x=>{const k=x.id.slice(0,7);(byM[k]=byM[k]||[]).push(x);});
+  const months=Array.from(new Set([...Object.keys(ST),...Object.keys(byM),cur])).sort().reverse();
+  if(stDay&&!act.some(x=>x.id===stDay))stDay=null;
+  if(stDay)stSel=stDay.slice(0,7);
+  if(!stSel||!months.includes(stSel))stSel=cur;
+  const wd=id=>new Date(id+'T12:00:00Z').toLocaleDateString('it-IT',{weekday:'short',timeZone:'UTC'});
+  $('#stMonths').innerHTML=months.map(m=>{
+    let b=`<button class="mo${m===stSel&&!stDay?' on':''}" data-m="${m}">${esc(monthLabel(m)).replace(/^./,c=>c.toUpperCase())}</button>`;
+    (byM[m]||[]).forEach(x=>{b+=`<button class="dy${x.id===stDay?' on':''}" data-d="${x.id}"><span class="dd">${esc(wd(x.id))} ${+x.id.slice(8)}</span>${x.n?`<span class="dc">${x.n}</span>`:''}</button>`;});
+    return b;
+  }).join('');
+  const day=stDay?act.find(x=>x.id===stDay):null,d=ST[stSel];
+  const map=day?day.a.m:((d&&d.m)||{}),gmap=day?day.a.g:((d&&d.g)||{});
+  let h=`<div class="sth"><h2>Andamento · ${esc(day?longDate(stDay):monthLabel(stSel))}</h2><div class="sact nopr"><button class="ib" data-print="1" title="Stampa" aria-label="Stampa">🖨️</button>${day?'':'<button class="ib" data-recalc="1" title="Ricalcola dalle scalette salvate" aria-label="Ricalcola dalle scalette salvate">↻</button>'}</div></div>`;
+  h+=statSections(map,gmap,!!day);
+  if(!day&&d)h+='<button class="lk nopr" data-reset="1">Azzera i dati di questo mese</button>';
   $('#stBody').innerHTML=h;
 }
-$('#stMonths').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){stSel=b.dataset.m;renderStats();}});
+$('#stMonths').addEventListener('click',e=>{
+  const bd=e.target.closest('[data-d]');
+  if(bd){stDay=bd.dataset.d;renderStats();return;}
+  const b=e.target.closest('[data-m]');
+  if(b){stSel=b.dataset.m;stDay=null;renderStats();}
+});
 $('#stBody').addEventListener('click',e=>{
   if(e.target.closest('[data-print]')){document.body.classList.add('pstats');window.print();return;}
   if(e.target.closest('[data-recalc]')){recalcMonth(stSel);return;}
@@ -1166,7 +1245,7 @@ async function recalcMonth(ym){
     alert('Ricalcolo completato. Cose fatte dai montatori '+tot+' (di cui '+totEx+' extra). Servizi assegnati ai giornalisti '+gtot+'.');
   }catch(err){showErr(err);}
 }
-$('#bStats').onclick=()=>{renderStats();$('#stOv').classList.add('on');};
+$('#bStats').onclick=()=>{ensureSC();renderStats();$('#stOv').classList.add('on');};
 $('#stClose').onclick=()=>$('#stOv').classList.remove('on');
 $('#stOv').onclick=e=>{if(e.target.id==='stOv')$('#stOv').classList.remove('on');};
 db.collection('statistiche').onSnapshot(qs=>{
