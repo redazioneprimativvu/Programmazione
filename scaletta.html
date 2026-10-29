@@ -10,6 +10,23 @@
   --navy:#111a2e; --red:#e53935; --green:#2e9e4f; --amber:#f5a524; --grey:#9aa3b5;
   --accent:#2f6bff; --tint:#cfe0f7; --tint-line:#b5cdee; --tint-ink:#1f4a86; --tint-soft:#e8eefc;
 }
+body.so{
+  --accent:#8b5cf6; --tint:#e4dcfb; --tint-line:#cdbff4; --tint-ink:#4b2fa3; --tint-soft:#f0ebfd;
+}
+body.so .editors,body.so #xside{display:none}
+body:not(.so) #socSide{display:none}
+body.so .layout{grid-template-columns:minmax(0,1fr) 340px}
+body.so .layout .side{position:sticky;max-height:calc(100vh - 28px)}
+body.so #socSide .ssec{margin-top:0}
+body.so #socSide .sum{gap:8px}
+body.so #socSide .sum>div{padding:10px 12px;min-width:0;flex:1 1 90px}
+body.so #socSide .sh{grid-template-columns:1fr 70px}
+body.so #socSide .sh span:nth-child(3),body.so #socSide .srow>.sb:nth-child(3){display:none}
+body.so #socSide .srow{grid-template-columns:minmax(0,1fr) 90px;gap:10px}
+.sw{display:flex;gap:6px;margin-bottom:14px}
+.sw button{flex:1;border:1px solid var(--tint-line);background:#fff;border-radius:8px;padding:6px 8px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;color:var(--tint-ink)}
+.sw button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+@media(max-width:1000px){body.so .layout{grid-template-columns:1fr}body.so .layout .side{position:static;max-height:none}}
 body.tn{
   --accent:#1f9d63; --tint:#cdeedb; --tint-line:#a9dcc0; --tint-ink:#15683f; --tint-soft:#e6f6ed;
 }
@@ -62,7 +79,7 @@ main{max-width:none;margin:22px 0;padding:0 20px}
 .card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(20,30,60,.08);overflow:hidden}
 table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:clamp(11px,.62vw,14px)}
 thead th{background:#f4f6fb;color:var(--muted);font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:11px 3px;text-align:center;border-bottom:2px solid var(--accent);white-space:nowrap;overflow:hidden}
-th.hd{width:24px}th.wn{width:34px}th.wnm{width:16em}th.wg{width:15em}th.wm{width:15em}th.wc{width:96px}th.wo{width:62px}th.wd{width:100px}th.ac{width:158px}
+th.hd{width:24px}th.wsg{width:140px}th.wst{width:105px}th.wss{width:112px}th.wsi,th.wsf{width:54px}th.wa3{width:108px}.panel[data-e=so] th.wc{width:60px}.panel[data-e=so] th.wn{width:40px}th.wn{width:34px}th.wnm{width:16em}th.wg{width:15em}th.wm{width:15em}th.wc{width:96px}th.wo{width:62px}th.wd{width:100px}th.ac{width:158px}
 td.ac{padding-left:4px;padding-right:4px}
 .th-p{display:none}
 tbody td{padding:6px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
@@ -200,7 +217,13 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .sh3{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
 .sh3::after{content:"";flex:1;height:1px;background:var(--line)}
 .dt{width:10px;height:10px;border-radius:50%;display:inline-block}
-.dt.b1{background:#2f6bff}.dt.b3{background:#14a38b}
+.dt.b1{background:#2f6bff}.dt.b3{background:#14a38b}.dt.b4{background:#8b5cf6}
+.bar.b4{background:#8b5cf6}
+.srow .kcs{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:-2px}
+.kc{display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:2px 10px;background:#e8eefc;color:#1f4a86}
+.kc.f{background:#fdecc8;color:#8a5a00}
+.kc.x{background:#eef1f6;color:var(--muted)}
+.sh4{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:20px 0 6px;padding-bottom:6px;border-bottom:2px solid var(--line)}
 .lk{display:block;margin:28px 0 4px;padding:0;border:0;background:none;color:var(--muted);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
 .lk:hover{color:var(--red)}
 .xclose{position:absolute;top:12px;right:14px;border:0;background:#eef1f6;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;color:var(--ink)}
@@ -252,24 +275,39 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   tbody tr{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px 6px;align-items:center;padding:10px;margin-bottom:10px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(20,30,60,.1)}
   tbody tr td{display:block;padding:0;border:0!important;width:auto!important;min-width:0!important;text-align:left}
   tbody tr:hover td{background:transparent}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(1){grid-column:span 2}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(2){grid-column:span 1}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(3){grid-column:span 9}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(4){grid-column:1/-1}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(5){grid-column:span 6}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(6){grid-column:span 6}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(7){grid-column:span 2;display:flex;justify-content:center}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(8){grid-column:span 4}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(9){grid-column:span 2;display:flex;justify-content:center}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(10){grid-column:span 4}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(11){grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(11)::before{content:"Durata";font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(11) input{flex:0 0 55%;width:55%;text-align:center;font-size:20px;font-weight:800}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(12){grid-column:1/-1}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(8)::before,
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(10)::before{display:block;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(8)::before{content:"Consegnato"}
-  tbody tr:not(.pausa):not(.nonair)>td:nth-child(10)::before{content:"Completato"}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(1){grid-column:span 2}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(2){grid-column:span 1}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(3){grid-column:span 9}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(4){grid-column:1/-1}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(5){grid-column:span 6}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(6){grid-column:span 6}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(7){grid-column:span 2;display:flex;justify-content:center}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(8){grid-column:span 4}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(9){grid-column:span 2;display:flex;justify-content:center}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(10){grid-column:span 4}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(11){grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(11)::before{content:"Durata";font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(11) input{flex:0 0 55%;width:55%;text-align:center;font-size:20px;font-weight:800}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(12){grid-column:1/-1}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(8)::before,
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(10)::before{display:block;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(8)::before{content:"Consegnato"}
+  tbody tr:not(.pausa):not(.nonair):not(.sr)>td:nth-child(10)::before{content:"Completato"}
+  tbody tr.sr>td:nth-child(1){grid-column:span 2}
+  tbody tr.sr>td:nth-child(2){grid-column:span 1}
+  tbody tr.sr>td:nth-child(3){grid-column:span 9}
+  tbody tr.sr>td:nth-child(4){grid-column:1/-1}
+  tbody tr.sr>td:nth-child(5){grid-column:span 6}
+  tbody tr.sr>td:nth-child(6){grid-column:span 6}
+  tbody tr.sr>td:nth-child(7){grid-column:span 2;display:flex;justify-content:center}
+  tbody tr.sr>td:nth-child(8){grid-column:span 4}
+  tbody tr.sr>td:nth-child(9){grid-column:span 2;display:flex;justify-content:center}
+  tbody tr.sr>td:nth-child(10){grid-column:span 4}
+  tbody tr.sr>td:nth-child(11){grid-column:1/-1}
+  tbody tr.sr>td:nth-child(8)::before,
+  tbody tr.sr>td:nth-child(10)::before{display:block;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+  tbody tr.sr>td:nth-child(8)::before{content:"Iniziato"}
+  tbody tr.sr>td:nth-child(10)::before{content:"Finito"}
   tbody tr td.t{font-size:15px;min-height:36px}
   tbody tr td.n{text-align:center;font-size:18px}
   tbody tr td.hd{display:flex;align-items:center;justify-content:center;height:44px;font-size:26px}
@@ -332,6 +370,8 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   .srow>.sb:nth-child(3)::before{content:"Tempo"}
   .srow.g{grid-template-columns:1fr}
   .srow.g>.sb:nth-child(2)::before{content:"Servizi"}
+  .srow.g.p>.sb:nth-child(2)::before{content:"Post"}
+  .srow .kcs{grid-column:1}
   .sth{padding-right:0}
   .sum{gap:8px}
   .sum div{min-width:0;flex:1 1 90px;padding:10px 12px}
@@ -352,7 +392,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   table{table-layout:fixed;border-collapse:collapse;width:100%;break-inside:avoid}
   th,td{border:.7px solid #444!important;text-align:center!important;vertical-align:middle!important}
   thead th{padding:3px 4px;font-size:10px;letter-spacing:.4px;background:#e9ecf2!important;color:#111}
-  th.wn{width:7%}th.wnm{width:30%}th.wg{width:20%}th.wm{width:20%}th.wo{width:11%}th.wd{width:12%}
+  th.wn{width:7%}th.wnm{width:30%}th.wg{width:20%}th.wm{width:20%}th.wo{width:11%}th.wd{width:12%}th.wsg{width:18%}th.wsp{width:31%}th.wst{width:12%}th.wss{width:12%}th.wsi,th.wsf{width:10%}
   .th-s{display:none}.th-p{display:inline}
   td.t{width:auto;font-weight:600}
   tbody tr{break-inside:avoid;page-break-inside:avoid}
@@ -411,8 +451,11 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
       <div id="panels"></div>
     </div>
     <aside class="side">
-      <h2>Attività extra dei montatori</h2>
-      <div id="mpanels"></div>
+      <div id="xside">
+        <h2>Attività extra dei montatori</h2>
+        <div id="mpanels"></div>
+      </div>
+      <div id="socSide"></div>
     </aside>
   </div>
 </main>
@@ -429,6 +472,14 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
     <h3>Montatori</h3>
     <div class="addn"><input type="text" id="addM" placeholder="Nome montatore"><button class="btn" id="bAddM">Aggiungi</button></div>
     <div class="tags" id="tagM"></div>
+
+    <h3>Tipologie social</h3>
+    <div class="addn"><input type="text" id="addT" placeholder="Es. Reel"><button class="btn" id="bAddT">Aggiungi</button></div>
+    <div class="tags" id="tagT"></div>
+
+    <h3>Social network</h3>
+    <div class="addn"><input type="text" id="addS" placeholder="Es. Instagram"><button class="btn" id="bAddS">Aggiungi</button></div>
+    <div class="tags" id="tagS"></div>
 
     <h3>Strumenti</h3>
     <label class="opt"><input type="checkbox" id="admChk"> Modalità modifica. Permette di togliere le spunte di Consegnato e Completato, anche una alla volta, e di eliminare i servizi già completati</label>
@@ -461,7 +512,10 @@ const firebaseConfig = {
 };
 
 const MAX_NOME=20, MAX_TITOLO=52, RETENTION_DAYS=30;
-const EM=[{id:'pt',nome:'Prima Tivvù'},{id:'tn',nome:'Telenostra'}];
+const EM=[{id:'pt',nome:'Prima Tivvù'},{id:'tn',nome:'Telenostra'}];             // le scalette dei servizi
+const TABS=[...EM,{id:'so',nome:'Social',social:true}];                          // tutte le schede
+const DEF_TIP=['Post','Reel','Storia','Carosello','Video'],DEF_SOC=['Instagram','TikTok','Facebook','YouTube','X'];
+const MAX_POST=90;
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -481,6 +535,7 @@ const latestDay=todayId;                 // l'ultima scaletta è sempre quella d
 const oldestDay=()=>addDays(todayId(),-RETENTION_DAYS);
 
 /* ---------- stato ---------- */
+const newPost=()=>({g:'',post:'',tipo:'',soc:'',c1:false,o1:'',t1:0,c2:false,o2:'',t2:0,x:false});
 const newRow=()=>({nome:'',titolo:'',g:'',m:'',c1:false,o1:'',t1:0,c2:false,o2:'',t2:0,x:false,du:0});
 
 /* durata dei servizi, salvata in secondi. Si scrive solo con le cifre: 130 diventa 1:30, 45 diventa 0:45, 3 diventa 3:00.
@@ -518,29 +573,30 @@ window.addEventListener('resize',fitAll);
 if(MQ.addEventListener)MQ.addEventListener('change',fitAll);else if(MQ.addListener)MQ.addListener(fitAll);
 function blank(){
   const s={extras:{}};
-  EM.forEach(e=>{
+  TABS.forEach(e=>{
     const rows={},order=[];
-    for(let i=0;i<6;i++){const id='s'+i;rows[id]=newRow();order.push(id);if(i===2)order.push('P');}   // 3 servizi, pausa, 3 servizi
+    if(e.social){for(let i=0;i<5;i++){const id='s'+i;rows[id]=newPost();order.push(id);}}   // social, senza pausa
+    else for(let i=0;i<6;i++){const id='s'+i;rows[id]=newRow();order.push(id);if(i===2)order.push('P');}   // 3 servizi, pausa, 3 servizi
     s[e.id]={order,rows};
   });
   return s;
 }
 function merge(base,src){
   if(!src)return base;
-  EM.forEach(e=>{
+  TABS.forEach(e=>{
     const d=src[e.id];if(!d||!d.rows||typeof d.rows!=='object')return;
-    const rows={};
-    Object.keys(d.rows).forEach(id=>{if(d.rows[id]&&typeof d.rows[id]==='object')rows[id]=Object.assign(newRow(),d.rows[id]);});
+    const rows={},mk=e.social?newPost:newRow;
+    Object.keys(d.rows).forEach(id=>{if(d.rows[id]&&typeof d.rows[id]==='object')rows[id]=Object.assign(mk(),d.rows[id]);});
     const seen=new Set(),order=[];
     (Array.isArray(d.order)?d.order:[]).forEach(id=>{if(typeof id==='string'&&(id==='P'||rows[id])&&!seen.has(id)){seen.add(id);order.push(id);}});
     Object.keys(rows).sort().forEach(id=>{if(!seen.has(id)){seen.add(id);order.push(id);}});
-    if(!seen.has('P'))order.splice(Math.min(3,order.length),0,'P');
+    if(!e.social&&!seen.has('P'))order.splice(Math.min(3,order.length),0,'P');
     base[e.id]={order,rows};
   });
   base.extras=(src.extras&&typeof src.extras==='object')?src.extras:{};
   return base;
 }
-let S=blank(),CFG={giornalisti:[],montatori:[]},hasData={};
+let S=blank(),CFG={giornalisti:[],montatori:[],tipologie:DEF_TIP.slice(),social:DEF_SOC.slice()},hasData={};
 let active=EM[0].id,curDay=null,autoFollow=true,dayRef=null,unsubDay=null;
 
 firebase.initializeApp(firebaseConfig);
@@ -563,7 +619,7 @@ function patch(obj){
   Object.entries(obj).forEach(([k,v])=>applyLocal(k,v));
   const payload=nest(obj);
   new Set(Object.keys(obj).map(k=>k.split('.')[0])).forEach(root=>{
-    if(EM.some(e=>e.id===root)&&!hasData[root]){payload[root]=JSON.parse(JSON.stringify(S[root]));hasData[root]=true;}
+    if(TABS.some(e=>e.id===root)&&!hasData[root]){payload[root]=JSON.parse(JSON.stringify(S[root]));hasData[root]=true;}
   });
   sync();
   dayRef.set(payload,{merge:true}).catch(showErr);
@@ -575,11 +631,25 @@ function showErr(e){
 }
 
 /* statistiche mensili (permanenti): pezzi montati e tempo di lavorazione per montatore */
-function statsAdd(name,ym,sign,ms,extra){
+function statsAdd(name,ym,sign,ms,extra,nome){
   const upd={nome:name,n:INC(sign)};
-  if(extra)upd.ex=INC(sign);                       // attività extra (contano come cose fatte, senza tempo)
+  if(extra)upd.ex=INC(sign);                       // attività extra (contano come cose fatte)
+  else if(typeof nome==='string'){if(isFoto(nome))upd.fo=INC(sign);else upd.sv=INC(sign);}   // foto o servizio, dal nome
   if(ms!=null&&ms>=0){upd.ms=INC(sign*ms);upd.nt=INC(sign);upd.h={[String(Math.round(ms/60000))]:INC(sign)};}   // istogramma dei minuti per la moda
   db.collection('statistiche').doc(ym).set({m:{[mkey(name)]:upd}},{merge:true}).catch(showErr);
+}
+
+/* se il nome di un servizio già completato cambia da servizio a foto (o al contrario), sposto il conteggio */
+function statsKind(name,ym,was,now){
+  if(!name||was===now)return;
+  db.collection('statistiche').doc(ym).set({m:{[mkey(name)]:{nome:name,[was?'fo':'sv']:INC(-1),[now?'fo':'sv']:INC(1)}}},{merge:true}).catch(showErr);
+}
+/* un post social finito entra (o esce) dall'Andamento del mese in cui è stato finito, con giornalista, social, tipologia e tempo */
+function socStatsRow(r,sign){
+  const ym=monthOf(r.t2||Date.now()),g=r.g||NI,so=r.soc||NI,ti=r.tipo||NI;
+  const gu={nome:g,n:INC(sign)};
+  if(r.t1&&r.t2>=r.t1){const ms=r.t2-r.t1;gu.ms=INC(sign*ms);gu.nt=INC(sign);gu.h={[String(Math.round(ms/60000))]:INC(sign)};}
+  db.collection('statistiche').doc(ym).set({s:{n:INC(sign),g:{[mkey(g)]:gu},soc:{[mkey(so)]:{nome:so,n:INC(sign)}},tip:{[mkey(ti)]:{nome:ti,n:INC(sign)}}}},{merge:true}).catch(showErr);
 }
 
 /* servizi assegnati a un giornalista, per mese (il mese è quello del giorno della scaletta) */
@@ -590,12 +660,15 @@ function statsG(name,ym,sign){
 
 /* ---------- tabelle ---------- */
 const tabsEl=$('#tabs'),panelsEl=$('#panels'),TB={},TT={},ROW={};
-EM.forEach(e=>{
+TABS.forEach(e=>{
   const b=document.createElement('button');b.className='tab';b.textContent=e.nome;b.dataset.e=e.id;
   b.onclick=()=>{active=e.id;showTab();};tabsEl.appendChild(b);
 
   const p=document.createElement('section');p.className='panel';p.dataset.e=e.id;
-  p.innerHTML=`<div class="printhead"><h1>${e.nome} — <span class="pdate"></span></h1></div>
+  p.innerHTML=e.social?`<div class="printhead"><h1>${e.nome} — <span class="pdate"></span></h1></div>
+  <div class="card"><table>
+    <thead><tr><th class="hd np"></th><th class="wn">N°</th><th class="wsg">Giornalista</th><th class="wsp">Nome del post</th><th class="wst">Tipologia</th><th class="wss">Social</th><th class="wc np">Iniziato</th><th class="wsi"><span class="th-s">Orario</span><span class="th-p">Ora inizio</span></th><th class="wc np">Finito</th><th class="wsf"><span class="th-s">Orario</span><span class="th-p">Ora fine</span></th><th class="wa3 np"></th></tr></thead>
+    <tbody></tbody></table></div>`:`<div class="printhead"><h1>${e.nome} — <span class="pdate"></span></h1></div>
   <div class="card"><table>
     <thead><tr><th class="hd np"></th><th class="wn">N°</th><th class="wnm">Nome servizio</th><th class="wtt np">Titolo servizio</th><th class="wg">Giornalista</th><th class="wm">Montatore</th><th class="wc np">Consegnato</th><th class="wo"><span class="th-s">Orario</span><span class="th-p">Ora consegna</span></th><th class="wc np">Completato</th><th class="wo np">Orario</th><th class="wd">Durata</th><th class="ac np"></th></tr></thead>
     <tbody></tbody>
@@ -605,6 +678,8 @@ EM.forEach(e=>{
 });
 function showTab(){
   document.body.classList.toggle('tn',active==='tn');
+  document.body.classList.toggle('so',active==='so');
+  renderSocSide();
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.e===active));
   document.querySelectorAll('.panel').forEach(t=>t.classList.toggle('on',t.dataset.e===active));
   fitAll();
@@ -631,10 +706,26 @@ function makeRow(e,id){
   }
   return tr;
 }
+function makeSocRow(e,id){
+  const tr=document.createElement('tr');tr.dataset.e=e;tr.dataset.id=id;tr.className='sr';
+  tr.innerHTML=`
+    <td class="hd np" title="Trascina per spostare">⠿</td>
+    <td class="n"></td>
+    <td><select data-f="g"></select></td>
+    <td class="nm"><input type="text" class="nm" data-f="post" maxlength="${MAX_POST}" placeholder="Nome del post" autocomplete="off"></td>
+    <td><select data-f="tipo"></select></td>
+    <td><select data-f="soc"></select></td>
+    <td class="g np"><input type="checkbox" class="ck" data-f="c1"></td>
+    <td class="t" data-f="o1"></td>
+    <td class="g np"><input type="checkbox" class="ck" data-f="c2"></td>
+    <td class="t" data-f="o2"></td>
+    <td class="ac np"><button class="tb b-add" data-act="add" title="Inserisci un post sotto">＋</button><button class="tb b-no" data-act="no" title="Non verrà pubblicato: barra la riga">⊘</button><button class="tb b-del" data-act="del" title="Elimina riga">🗑</button></td>`;
+  return tr;
+}
 const DIV={};
-EM.forEach(e=>{
+TABS.forEach(e=>{
   const d=document.createElement('tr');d.className='nonair np';d.dataset.div='1';
-  d.innerHTML=`<td colspan="12">${NO_LABEL} · restano in scaletta per i dati, non vengono stampati</td>`;
+  d.innerHTML=e.social?`<td colspan="11">NON PUBBLICATI · restano in scaletta per i dati, non vengono stampati</td>`:`<td colspan="12">${NO_LABEL} · restano in scaletta per i dati, non vengono stampati</td>`;
   DIV[e.id]=d;
 });
 function fillSelect(sel,list,val){
@@ -669,10 +760,59 @@ function counts(){
   return {c,pres};
 }
 
+/* scheda Social */
+function syncSoc(em,gl){
+  const st=S[em.id],tb=TB[em.id],map=ROW[em.id];
+  Object.keys(map).forEach(id=>{if(!st.order.includes(id)){map[id].remove();delete map[id];}});
+  st.order.forEach(id=>{if(!map[id])map[id]=makeSocRow(em.id,id);});
+  const act=st.order.filter(id=>!st.rows[id].x),off=st.order.filter(id=>st.rows[id].x);
+  const els=act.map(id=>map[id]);
+  if(off.length){els.push(DIV[em.id]);off.forEach(id=>els.push(map[id]));}
+  else if(DIV[em.id].parentNode)DIV[em.id].remove();
+  const key=t=>t.dataset.id||'__x';
+  if([...tb.children].map(key).join()!==els.map(key).join())els.forEach(t=>tb.appendChild(t));
+  const tl=CFG.tipologie.slice().sort(byName),sl=CFG.social.slice().sort(byName);
+  let n=0;
+  st.order.forEach(id=>{
+    const tr=map[id],r=st.rows[id];
+    if(!r.x)n++;
+    tr.classList.toggle('barrato',!!r.x);tr.classList.toggle('np',!!r.x);
+    tr.querySelector('.n').textContent=r.x?'':n;
+    tr.querySelectorAll('[data-f]').forEach(el=>{
+      const f=el.dataset.f;
+      if(f==='post'){if(document.activeElement!==el)el.value=r.post;}
+      else if(f==='g')fillSelect(el,gl,r.g);
+      else if(f==='tipo')fillSelect(el,tl,r.tipo);
+      else if(f==='soc')fillSelect(el,sl,r.soc);
+      else if(f==='c1'){el.checked=r.c1;el.disabled=(r.c1&&!adminOn())||!!r.x;el.classList.toggle('lock',r.c1&&!adminOn());el.title=(r.c1&&adminOn()&&!r.x)?'Clicca per togliere la spunta':'';}
+      else if(f==='c2'){el.checked=r.c2;el.disabled=(r.c2&&!adminOn())||!r.c1||!!r.x;el.classList.toggle('lock',r.c2&&!adminOn());el.title=(r.c2&&adminOn()&&!r.x)?'Clicca per togliere la spunta':'';}
+      else el.textContent=r[f];
+    });
+    const no=tr.querySelector('[data-act=no]');
+    no.textContent=r.x?'↩':'⊘';
+    no.title=r.x?'Rimetti in scaletta al suo posto':'Non verrà pubblicato: barra la riga';
+    const del=tr.querySelector('[data-act=del]'),lock=r.c2&&!adminOn();
+    del.disabled=lock;
+    del.title=lock?'Post finito: non eliminabile (usa ⊘ se non viene pubblicato)':'Elimina riga';
+  });
+}
+/* statistiche social accanto alla scaletta, del giorno o del mese */
+let socMode='g';
+function renderSocSide(){
+  const box=$('#socSide');if(!box||active!=='so')return;
+  let sm;
+  if(socMode==='g'){sm=socNew();Object.values((S.so&&S.so.rows)||{}).forEach(r=>{if(r&&r.c2)socAcc(sm,r);});}
+  else{const d=ST[(curDay||todayId()).slice(0,7)];sm=d&&d.s;}
+  const lab=socMode==='g'?'del giorno':'del mese';
+  box.innerHTML=`<h2>Andamento social</h2><div class="sw"><button data-sm="g" class="${socMode==='g'?'on':''}">Giorno</button><button data-sm="m" class="${socMode==='m'?'on':''}">Mese</button></div>`+socSection(sm,socMode==='g').replace('</i>Social','</i>Social '+lab);
+}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-sm]');if(b){socMode=b.dataset.sm;renderSocSide();}});
 function sync(){
+  renderSocSide();
   const nextLbl=curDay?longDate(addDays(curDay,1)):'';
   const gl=CFG.giornalisti.slice().sort(byName),ml=CFG.montatori.slice().sort(byName);
-  EM.forEach(em=>{
+  TABS.forEach(em=>{
+    if(em.social){syncSoc(em,gl);return;}
     const st=S[em.id],tb=TB[em.id],map=ROW[em.id];
     Object.keys(map).forEach(id=>{if(!st.order.includes(id)){map[id].remove();delete map[id];}});
     st.order.forEach(id=>{if(!map[id])map[id]=makeRow(em.id,id);});
@@ -852,13 +992,17 @@ function saveTxt(el){
   const tr=el.closest('tr');if(!tr)return;
   const f=el.dataset.f,e=tr.dataset.e,id=tr.dataset.id;
   const row=S[e]&&S[e].rows[id];if(!row)return;
-  const v=el.value.replace(/[\r\n]+/g,' ').toUpperCase().slice(0,f==='nome'?MAX_NOME:MAX_TITOLO).trim();
+  let v=el.value.replace(/[\r\n]+/g,' ');
+  if(f==='post')v=v.slice(0,MAX_POST).trim();
+  else v=v.toUpperCase().slice(0,f==='nome'?MAX_NOME:MAX_TITOLO).trim();
   if(row[f]===v)return;
+  const old=row[f];
   patch({[e+'.rows.'+id+'.'+f]:v});
+  if(f==='nome'&&e!=='so'&&row.c2&&row.m)statsKind(row.m,monthOf(row.t2||Date.now()),isFoto(old),isFoto(v));
 }
 /* salva subito ciò che è in attesa (cambio app, blocco schermo, ricarica) */
 function flushTxt(){
-  document.querySelectorAll('#panels [data-f=nome],#panels [data-f=titolo]').forEach(el=>{
+  document.querySelectorAll('#panels [data-f=nome],#panels [data-f=titolo],#panels [data-f=post]').forEach(el=>{
     if(el._t){clearTimeout(el._t);el._t=0;saveTxt(el);}
   });
   document.querySelectorAll('#mpanels .xt').forEach(el=>{
@@ -874,6 +1018,7 @@ window.addEventListener('pagehide',flushTxt);
 panelsEl.addEventListener('input',ev=>{
   const el=ev.target,f=el.dataset.f;
   if(f==='du'){el.value=el.value.replace(/[^0-9:.,;'’"]/g,'');return;}
+  if(f==='post'){clearTimeout(el._t);el._t=setTimeout(()=>{el._t=0;saveTxt(el);},350);return;}
   if(f!=='nome'&&f!=='titolo')return;
   const s=el.selectionStart,e=el.selectionEnd;
   el.value=el.value.replace(/[\r\n]+/g,' ').toUpperCase().slice(0,f==='nome'?MAX_NOME:MAX_TITOLO);
@@ -890,7 +1035,7 @@ panelsEl.addEventListener('keydown',ev=>{
     if(nx)nx.focus();else el.blur();
     return;
   }
-  if(ev.key==='Enter'&&el.tagName==='TEXTAREA'){ev.preventDefault();el.blur();}
+  if(ev.key==='Enter'&&(el.tagName==='TEXTAREA'||(el.dataset&&el.dataset.f==='post'))){ev.preventDefault();el.blur();}
 });
 panelsEl.addEventListener('focusin',ev=>{
   const el=ev.target;
@@ -899,6 +1044,7 @@ panelsEl.addEventListener('focusin',ev=>{
 panelsEl.addEventListener('change',ev=>{
   const el=ev.target,f=el.dataset.f;if(!f)return;
   const tr=el.closest('tr'),e=tr.dataset.e,id=tr.dataset.id,b=e+'.rows.'+id+'.',r=S[e].rows[id];
+  if(e==='so'){socChange(el,id);return;}
   if(f==='nome'||f==='titolo'){clearTimeout(el._t);el._t=0;saveTxt(el);sync();}
   else if(f==='du'){
     const v=parseDur(el.value);
@@ -913,18 +1059,18 @@ panelsEl.addEventListener('change',ev=>{
   else if(f==='m'){
     const old=r.m,wasDone=r.c2&&r.t2,ym=wasDone?monthOf(r.t2):null,ms=(r.t1&&r.t2)?r.t2-r.t1:null;
     patch({[b+'m']:el.value});
-    if(wasDone){if(old)statsAdd(old,ym,-1,ms);if(el.value)statsAdd(el.value,ym,1,ms);}
+    if(wasDone){if(old)statsAdd(old,ym,-1,ms,false,r.nome);if(el.value)statsAdd(el.value,ym,1,ms,false,r.nome);}
   }
   else if(f==='c2'&&!el.checked&&r.c2&&adminOn()){
     // toglie solo Completato: Consegnato resta, e il servizio esce dall'Andamento
-    if(r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null);
+    if(r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null,false,r.nome);
     patch({[b+'c2']:false,[b+'o2']:'',[b+'t2']:0});
   }
   else if(f==='c1'&&!el.checked&&r.c1&&adminOn()){
     // toglie Consegnato. Se c'era anche Completato, va tolto con lui
     const upd={[b+'c1']:false,[b+'o1']:'',[b+'t1']:0};
     if(r.c2){
-      if(r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null);
+      if(r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null,false,r.nome);
       Object.assign(upd,{[b+'c2']:false,[b+'o2']:'',[b+'t2']:0});
     }
     patch(upd);
@@ -933,15 +1079,42 @@ panelsEl.addEventListener('change',ev=>{
   else if(f==='c2'&&el.checked&&!r.c2&&r.c1){
     const t2=Date.now();
     patch({[b+'c2']:true,[b+'o2']:nowHM(),[b+'t2']:t2});
-    if(r.m)statsAdd(r.m,monthOf(t2),1,r.t1?t2-r.t1:null);
+    if(r.m)statsAdd(r.m,monthOf(t2),1,r.t1?t2-r.t1:null,false,r.nome);
   }
   else sync();
 });
+/* modifiche nella scheda Social */
+function socChange(el,id){
+  const f=el.dataset.f,b='so.rows.'+id+'.',r=S.so.rows[id];
+  if(f==='post'){clearTimeout(el._t);el._t=0;saveTxt(el);sync();return;}
+  if(f==='g'||f==='tipo'||f==='soc'){
+    const old=Object.assign({},r);
+    patch({[b+f]:el.value});
+    if(r.c2&&old[f]!==el.value){socStatsRow(old,-1);socStatsRow(Object.assign({},r),1);}
+    return;
+  }
+  if(f==='c1'&&!el.checked&&r.c1&&adminOn()){
+    const old=Object.assign({},r),upd={[b+'c1']:false,[b+'o1']:'',[b+'t1']:0};
+    if(r.c2){socStatsRow(old,-1);Object.assign(upd,{[b+'c2']:false,[b+'o2']:'',[b+'t2']:0});}
+    patch(upd);return;
+  }
+  if(f==='c2'&&!el.checked&&r.c2&&adminOn()){
+    socStatsRow(Object.assign({},r),-1);
+    patch({[b+'c2']:false,[b+'o2']:'',[b+'t2']:0});return;
+  }
+  if(f==='c1'&&el.checked&&!r.c1){patch({[b+'c1']:true,[b+'o1']:nowHM(),[b+'t1']:Date.now()});return;}
+  if(f==='c2'&&el.checked&&!r.c2&&r.c1){
+    patch({[b+'c2']:true,[b+'o2']:nowHM(),[b+'t2']:Date.now()});
+    socStatsRow(Object.assign({},r),1);
+    return;
+  }
+  sync();
+}
 function addRow(e,afterId){
   const id=uid('n'),o=S[e].order.slice();
   const pos=afterId?o.indexOf(afterId)+1:o.length;o.splice(pos,0,id);
-  patch({[e+'.rows.'+id]:newRow(),[e+'.order']:o});
-  const inp=ROW[e][id]&&ROW[e][id].querySelector('[data-f=nome]');if(inp)inp.focus();
+  patch({[e+'.rows.'+id]:(e==='so'?newPost():newRow()),[e+'.order']:o});
+  const inp=ROW[e][id]&&ROW[e][id].querySelector(e==='so'?'[data-f=g]':'[data-f=nome]');if(inp)inp.focus();
 }
 /* piccolo avviso a comparsa */
 let toastT=0;
@@ -979,9 +1152,15 @@ async function copyNext(e,id){
 function delRow(e,id){
   const r=S[e].rows[id];
   if(r&&r.c2&&!adminOn())return;
+  if(e==='so'){
+    if(r&&(r.post||r.g||r.tipo||r.soc||r.c1)&&!confirm('Eliminare questo post?'))return;
+    if(r&&r.c2)socStatsRow(r,-1);
+    patch({[e+'.rows.'+id]:DEL,[e+'.order']:S[e].order.filter(x=>x!==id)});
+    return;
+  }
   if(r&&(r.nome||r.titolo||r.g||r.m||r.c1||r.du)&&!confirm('Eliminare questo servizio?'))return;
   // se il servizio era già completato e contato, lo tolgo dall'Andamento
-  if(r&&r.c2&&r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null);
+  if(r&&r.c2&&r.m)statsAdd(r.m,monthOf(r.t2||Date.now()),-1,(r.t1&&r.t2)?r.t2-r.t1:null,false,r.nome);
   if(r&&r.g)statsG(r.g,curDay.slice(0,7),-1);
   patch({[e+'.rows.'+id]:DEL,[e+'.order']:S[e].order.filter(x=>x!==id)});
 }
@@ -1085,7 +1264,7 @@ function drawTags(){
       t.appendChild(x);box.appendChild(t);
     });
   };
-  draw('#tagG','giornalisti');draw('#tagM','montatori');
+  draw('#tagG','giornalisti');draw('#tagM','montatori');draw('#tagT','tipologie');draw('#tagS','social');
 }
 function addName(inp,key){
   const v=inp.value.trim().replace(/\s+/g,' ');if(!v)return;
@@ -1097,12 +1276,16 @@ $('#bAddG').onclick=()=>addName($('#addG'),'giornalisti');
 $('#bAddM').onclick=()=>addName($('#addM'),'montatori');
 $('#addG').onkeydown=e=>{if(e.key==='Enter')addName(e.target,'giornalisti');};
 $('#addM').onkeydown=e=>{if(e.key==='Enter')addName(e.target,'montatori');};
+$('#bAddT').onclick=()=>addName($('#addT'),'tipologie');
+$('#bAddS').onclick=()=>addName($('#addS'),'social');
+$('#addT').onkeydown=e=>{if(e.key==='Enter')addName(e.target,'tipologie');};
+$('#addS').onkeydown=e=>{if(e.key==='Enter')addName(e.target,'social');};
 $('#bPanel').onclick=()=>$('#ov').classList.add('on');
 $('#bClose').onclick=()=>$('#ov').classList.remove('on');
 $('#ov').onclick=e=>{if(e.target.id==='ov')$('#ov').classList.remove('on');};
 $('#admChk').onchange=e=>{document.body.classList.toggle('admin',e.target.checked);sync();};
 $('#bReset').onclick=()=>{
-  if(!confirm('Azzerare TUTTA la scaletta del '+longDate(curDay)+' (Prima Tivvù, Telenostra e attività extra)? Non si può annullare.'))return;
+  if(!confirm('Azzerare TUTTA la scaletta del '+longDate(curDay)+' (Prima Tivvù, Telenostra, Social e attività extra)? Non si può annullare.'))return;
   dayRef.delete().catch(showErr);
 };
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('#ov').classList.remove('on');$('#stOv').classList.remove('on');}});
@@ -1120,16 +1303,40 @@ function ensureSC(){
     if($('#stOv').classList.contains('on'))renderStats();
   },e=>{scOn=false;showErr(e);});
 }
+/* fasce da 5 minuti per il tempo di montaggio, valide per il mese e per i singoli giorni */
+const BIN=5;
+function modeBin(hh){
+  const bins={};
+  Object.entries(hh||{}).forEach(([m,c])=>{if(c>0){const k=Math.floor(Number(m)/BIN)*BIN;bins[k]=(bins[k]||0)+c;}});
+  let best=null,bc=0;
+  Object.keys(bins).map(Number).sort((a,b)=>a-b).forEach(k=>{if(bins[k]>bc){bc=bins[k];best=k;}});
+  return best;
+}
+const binTxt=lo=>lo+'–'+(lo+BIN)+' min';
+/* un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") è una foto, tutti gli altri sono servizi */
+const isFoto=n=>/^FOTO/.test(String(n||'').trim().toUpperCase());
+const NI='(non indicato)';
+function socNew(){return {n:0,g:{},soc:{},tip:{}};}
+function socAcc(a,r){
+  const g=r.g||NI,so=r.soc||NI,ti=r.tipo||NI;
+  a.n++;
+  const o=a.g[mkey(g)]||(a.g[mkey(g)]={nome:g,n:0,ms:0,nt:0,h:{}});
+  o.n++;
+  if(r.t1&&r.t2>=r.t1){const ms=r.t2-r.t1;o.ms+=ms;o.nt++;const b=String(Math.round(ms/60000));o.h[b]=(o.h[b]||0)+1;}
+  (a.soc[mkey(so)]||(a.soc[mkey(so)]={nome:so,n:0})).n++;
+  (a.tip[mkey(ti)]||(a.tip[mkey(ti)]={nome:ti,n:0})).n++;
+}
 /* riassunto di un giorno, ricavato direttamente dalla sua scaletta */
 function aggDay(d){
-  const m={},g={};
-  const gm=n=>{const k=mkey(n);return m[k]||(m[k]={nome:n,n:0,ex:0,ms:0,nt:0});};
+  const m={},g={},s=socNew();
+  const gm=n=>{const k=mkey(n);return m[k]||(m[k]={nome:n,n:0,ex:0,sv:0,fo:0,ms:0,nt:0,h:{}});};
+  const tm=(o,t1,t2)=>{if(t1&&t2>=t1){const ms=t2-t1;o.ms+=ms;o.nt++;const b=String(Math.round(ms/60000));o.h[b]=(o.h[b]||0)+1;}};
   EM.forEach(e=>{
     const rows=(d[e.id]&&d[e.id].rows)||{};
     Object.values(rows).forEach(r=>{
       if(!r||typeof r!=='object')return;
       if(r.g){const k=mkey(r.g);(g[k]||(g[k]={nome:r.g,n:0})).n++;}
-      if(r.c2&&r.m){const o=gm(r.m);o.n++;if(r.t1&&r.t2>=r.t1){o.ms+=r.t2-r.t1;o.nt++;}}
+      if(r.c2&&r.m){const o=gm(r.m);o.n++;if(isFoto(r.nome))o.fo++;else o.sv++;tm(o,r.t1,r.t2);}
     });
   });
   const exs=d.extras||{};
@@ -1138,55 +1345,58 @@ function aggDay(d){
     Object.keys(exs[k]||{}).forEach(id=>{
       const x=exs[k][id];
       if(!x||typeof x!=='object'||!x.d||!String(x.t||'').trim()||!name)return;
-      const o=gm(name);o.n++;o.ex++;if(x.t1&&x.t2>=x.t1){o.ms+=x.t2-x.t1;o.nt++;}
+      const o=gm(name);o.n++;o.ex++;tm(o,x.t1,x.t2);
     });
   });
-  return {m,g};
+  Object.values((d.so&&d.so.rows)||{}).forEach(r=>{if(r&&typeof r==='object'&&r.c2)socAcc(s,r);});
+  return {m,g,s};
 }
-/* sezioni Montatori e Giornalisti, uguali per il mese e per il singolo giorno */
-function statSections(map,gmap,day){
+/* sezione Social */
+function socSection(sm,day){
+  let h='<section class="ssec"><h3 class="sh3"><i class="dt b4"></i>Social</h3>';
+  if(!sm||!(sm.n>0))return h+`<div class="empty">${day?'Nessun post finito in questo giorno.':'Nessun post finito in questo mese. Per includere i giorni già compilati usa il pulsante ↻ in Andamento.'}</div></section>`;
+  const by=o=>Object.values(o||{}).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n||byName(a.nome||'',b.nome||''));
+  const garr=by(sm.g),sarr=by(sm.soc),tarr=by(sm.tip);
+  const all={};garr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
+  const tm=modeBin(all),modes=garr.map(x=>modeBin(x.h)),maxN=Math.max(...garr.map(x=>x.n)),maxA=Math.max(BIN,...modes.filter(a=>a!=null).map(a=>a+BIN));
+  h+=`<div class="sum"><div><small>Post finiti</small><b>${sm.n}</b></div><div><small>Giornalisti</small><b>${garr.length}</b></div><div><small>Tempo più frequente</small><b>${tm!=null?binTxt(tm):'—'}</b></div></div>
+  <div class="sh"><span>Giornalista</span><span>Post finiti</span><span>Tempo più frequente (fascia da 5 min)</span></div>`;
+  garr.forEach((x,i)=>{
+    h+=`<div class="srow"><div class="sn">${esc(x.nome||'')}</div>
+      <div class="sb"><div class="bar b4" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}</b></div>
+      <div class="sb">${modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,(modes[i]+BIN)/maxA*80)}%"></div><b>${binTxt(modes[i])}</b>`:'<b>—</b>'}</div></div>`;
+  });
+  const list=(title,arr)=>{
+    const mx=Math.max(...arr.map(x=>x.n));
+    return `<div class="sh4">${title}</div>`+arr.map(x=>`<div class="srow g p"><div class="sn">${esc(x.nome||'')}</div><div class="sb"><div class="bar b4" style="width:${Math.max(2,x.n/mx*80)}%"></div><b>${x.n}</b></div></div>`).join('');
+  };
+  h+=list('Per social network',sarr)+list('Per tipologia',tarr);
+  h+='<p class="snote">Contano i post con la spunta "Finito". Il tempo va da "Iniziato" a "Finito".</p>';
+  return h+'</section>';
+}
+/* sezioni Montatori, Giornalisti e Social, uguali per il mese e per il singolo giorno */
+function statSections(map,gmap,smap,day){
   const arr=Object.values(map).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n||byName(a.nome||'',b.nome||''));
   const garr=Object.values(gmap).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n||byName(a.nome||'',b.nome||''));
   let h='<section class="ssec"><h3 class="sh3"><i class="dt b1"></i>Montatori</h3>';
   if(!arr.length){
     h+=`<div class="empty">${day?'Nessun servizio completato in questo giorno.':'Nessun servizio montato in questo mese.'}</div>`;
   }else{
-    const tot=arr.reduce((s,x)=>s+x.n,0),totEx=arr.reduce((s,x)=>s+(x.ex>0?x.ex:0),0),maxN=Math.max(...arr.map(x=>x.n));
-    let tile,colHead,third,note;
-    if(day){
-      const msAll=arr.reduce((s,x)=>s+(x.ms||0),0),ntAll=arr.reduce((s,x)=>s+(x.nt||0),0);
-      const avgs=arr.map(x=>x.nt>0?x.ms/x.nt:null),maxAvg=Math.max(1,...avgs.filter(a=>a!=null));
-      tile=['Tempo medio',ntAll?fmtDur(msAll/ntAll):'—'];
-      colHead='Tempo medio per servizio';
-      third=i=>avgs[i]!=null?`<div class="bar b2" style="width:${Math.max(2,avgs[i]/maxAvg*80)}%"></div><b>${fmtDur(avgs[i])}</b>`:'<b>—</b>';
-      note='Le cose fatte sono i servizi completati più le attività extra spuntate. Il tempo va da "Consegnato" a "Completato"; per le attività extra dal primo al secondo clic.';
-    }else{
-      // moda per fasce da 5 minuti: i minuti registrati vengono raggruppati (0–5, 5–10, 10–15…) e vince la fascia più frequente
-      const BIN=5;
-      const modeOf=hh=>{
-        const bins={};
-        Object.entries(hh||{}).forEach(([m,c])=>{if(c>0){const k=Math.floor(Number(m)/BIN)*BIN;bins[k]=(bins[k]||0)+c;}});
-        let best=null,bc=0;
-        Object.keys(bins).map(Number).sort((a,b)=>a-b).forEach(k=>{if(bins[k]>bc){bc=bins[k];best=k;}});
-        return best;
-      };
-      const binTxt=lo=>lo+'–'+(lo+BIN)+' min';
-      const all={};arr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
-      const totMode=modeOf(all),modes=arr.map(x=>modeOf(x.h)),maxA=Math.max(BIN,...modes.filter(a=>a!=null).map(a=>a+BIN));
-      tile=['Tempo più frequente',totMode!=null?binTxt(totMode):'—'];
-      colHead='Tempo più frequente (fascia da 5 min)';
-      third=i=>modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,(modes[i]+BIN)/maxA*80)}%"></div><b>${binTxt(modes[i])}</b>`:'<b>—</b>';
-      note='Le cose fatte sono i servizi completati più le attività extra spuntate. Il tempo è la fascia da 5 minuti in cui cadono più servizi (moda), da "Consegnato" a "Completato"; per le attività extra va dal primo al secondo clic. I dati registrati prima di questo aggiornamento non hanno la moda.';
-    }
-    h+=`<div class="sum"><div><small>Cose fatte</small><b>${tot}</b></div><div><small>di cui extra</small><b>${totEx}</b></div><div><small>${tile[0]}</small><b>${tile[1]}</b></div></div>
-    <div class="sh"><span>Montatore</span><span>Cose fatte (servizi + extra)</span><span>${colHead}</span></div>`;
+    const tot=arr.reduce((s,x)=>s+x.n,0),totEx=arr.reduce((s,x)=>s+(x.ex>0?x.ex:0),0);
+    const totSv=arr.reduce((s,x)=>s+Math.max(0,x.sv||0),0),totFo=arr.reduce((s,x)=>s+Math.max(0,x.fo||0),0);
+    const kinds=totSv+totFo>0,maxN=Math.max(...arr.map(x=>x.n));
+    const all={};arr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
+    const totMode=modeBin(all),modes=arr.map(x=>modeBin(x.h)),maxA=Math.max(BIN,...modes.filter(a=>a!=null).map(a=>a+BIN));
+    h+=`<div class="sum"><div><small>Cose fatte</small><b>${tot}</b></div>${kinds?`<div><small>Servizi</small><b>${totSv}</b></div><div><small>Foto</small><b>${totFo}</b></div>`:''}<div><small>Extra</small><b>${totEx}</b></div><div><small>Tempo più frequente</small><b>${totMode!=null?binTxt(totMode):'—'}</b></div></div>
+    <div class="sh"><span>Montatore</span><span>Cose fatte</span><span>Tempo più frequente (fascia da 5 min)</span></div>`;
     arr.forEach((x,i)=>{
-      const ex=x.ex>0?x.ex:0;
+      const ex=x.ex>0?x.ex:0,sv=Math.max(0,x.sv||0),fo=Math.max(0,x.fo||0);
+      const chips=(sv+fo>0?`<span class="kc">${sv} ${sv===1?'servizio':'servizi'}</span><span class="kc f">${fo} foto</span>`:'')+(ex?`<span class="kc x">${ex} extra</span>`:'');
       h+=`<div class="srow"><div class="sn">${esc(x.nome||'')}</div>
-        <div class="sb"><div class="bar b1" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}${ex?` <small style="font-weight:500;color:var(--muted)">(${ex} extra)</small>`:''}</b></div>
-        <div class="sb">${third(i)}</div></div>`;
+        <div class="sb"><div class="bar b1" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}</b></div>
+        <div class="sb">${modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,(modes[i]+BIN)/maxA*80)}%"></div><b>${binTxt(modes[i])}</b>`:'<b>—</b>'}</div>${chips?`<div class="kcs">${chips}</div>`:''}</div>`;
     });
-    h+=`<p class="snote">${note}</p>`;
+    h+='<p class="snote">Le cose fatte sono i servizi completati, le foto e le attività extra spuntate. Un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") conta come foto, gli altri come servizi. Il tempo è la fascia da 5 minuti in cui cadono più servizi (moda), da "Consegnato" a "Completato"; per le attività extra va dal primo al secondo clic.'+(day?'':' I dati registrati prima di questo aggiornamento non distinguono servizi e foto e non hanno la moda: usa il pulsante ↻ per ricalcolarli.')+'</p>';
   }
   h+='</section><section class="ssec"><h3 class="sh3"><i class="dt b3"></i>Giornalisti</h3>';
   if(!garr.length){
@@ -1198,7 +1408,7 @@ function statSections(map,gmap,day){
     garr.forEach(x=>{
       h+=`<div class="srow g"><div class="sn">${esc(x.nome||'')}</div><div class="sb"><div class="bar b3" style="width:${Math.max(2,x.n/gmax*80)}%"></div><b>${x.n}</b></div></div>`;
     });
-    h+='<p class="snote">Ogni servizio con il nome del giornalista conta uno, anche se poi non va in onda.</p>';
+    h+='<p class="snote">Ogni servizio con il nome del giornalista conta uno, anche se poi non va in onda. I post social hanno la loro sezione.</p>';
   }
   return h+'</section>';
 }
@@ -1223,9 +1433,9 @@ function renderStats(){
     return b;
   }).join('');
   const day=stDay?act.find(x=>x.id===stDay):null,d=ST[stSel];
-  const map=day?day.a.m:((d&&d.m)||{}),gmap=day?day.a.g:((d&&d.g)||{});
+  const map=day?day.a.m:((d&&d.m)||{}),gmap=day?day.a.g:((d&&d.g)||{}),smap=day?day.a.s:((d&&d.s)||null);
   let h=`<div class="sth"><h2>Andamento · ${esc(day?longDate(stDay):monthLabel(stSel))}</h2><div class="sact nopr"><button class="ib" data-print="1" title="Stampa" aria-label="Stampa">🖨️</button>${day?'':'<button class="ib" data-recalc="1" title="Ricalcola dalle scalette salvate" aria-label="Ricalcola dalle scalette salvate">↻</button>'}</div></div>`;
-  h+=statSections(map,gmap,!!day);
+  h+=statSections(map,gmap,smap,!!day);
   if(!day&&d)h+='<button class="lk nopr" data-reset="1">Azzera i dati di questo mese</button>';
   $('#stBody').innerHTML=h;
 }
@@ -1250,9 +1460,9 @@ async function recalcMonth(ym){
   if(!confirm('Ricalcolare l\'Andamento di '+monthLabel(ym)+' dalle scalette salvate? I valori attuali del mese verranno sostituiti.'))return;
   try{
     const qs=await db.collection('scalette').where(firebase.firestore.FieldPath.documentId(),'>=',ym+'-01').where(firebase.firestore.FieldPath.documentId(),'<=',ym+'-31').get();
-    const m={},gm={};let gtot=0;
+    const m={},gm={},sm=socNew();let gtot=0;
     const getG=name=>{const k=mkey(name);return gm[k]||(gm[k]={nome:name,n:0});};
-    const get=name=>{const k=mkey(name);return m[k]||(m[k]={nome:name,n:0,ex:0,ms:0,nt:0,h:{}});};
+    const get=name=>{const k=mkey(name);return m[k]||(m[k]={nome:name,n:0,ex:0,sv:0,fo:0,ms:0,nt:0,h:{}});};
     const ups=[];let tot=0,totEx=0;
     qs.forEach(doc=>{
       const d=doc.data()||{};
@@ -1261,11 +1471,12 @@ async function recalcMonth(ym){
         Object.values(rows).forEach(r=>{
           if(r&&r.g){getG(r.g).n++;gtot++;}
           if(r&&r.c2&&r.m&&r.t2&&monthOf(r.t2)===ym){
-            const o=get(r.m);o.n++;tot++;
+            const o=get(r.m);o.n++;tot++;if(isFoto(r.nome))o.fo++;else o.sv++;
             if(r.t1&&r.t2>=r.t1){const ms=r.t2-r.t1;o.ms+=ms;o.nt++;const b=String(Math.round(ms/60000));o.h[b]=(o.h[b]||0)+1;}
           }
         });
       });
+      Object.values((d.so&&d.so.rows)||{}).forEach(r=>{if(r&&typeof r==='object'&&r.c2&&r.t2&&monthOf(r.t2)===ym)socAcc(sm,r);});
       const ex=d.extras||{};
       Object.keys(ex).forEach(k=>{
         const name=CFG.montatori.find(n=>mkey(n)===k)||keyName(k);
@@ -1280,11 +1491,11 @@ async function recalcMonth(ym){
         });
       });
     });
-    await db.collection('statistiche').doc(ym).set({m,g:gm});
+    await db.collection('statistiche').doc(ym).set({m,g:gm,s:sm});
     for(let i=0;i<ups.length;i+=400){
       const b=db.batch();ups.slice(i,i+400).forEach(u=>b.update(u[0],u[1]));await b.commit();
     }
-    alert('Ricalcolo completato. Cose fatte dai montatori '+tot+' (di cui '+totEx+' extra). Servizi assegnati ai giornalisti '+gtot+'.');
+    alert('Ricalcolo completato. Cose fatte dai montatori '+tot+' (di cui '+totEx+' extra). Servizi assegnati ai giornalisti '+gtot+'. Post social finiti '+sm.n+'.');
   }catch(err){showErr(err);}
 }
 $('#bStats').onclick=()=>{ensureSC();renderStats();$('#stOv').classList.add('on');};
@@ -1293,7 +1504,7 @@ $('#stOv').onclick=e=>{if(e.target.id==='stOv')$('#stOv').classList.remove('on')
 db.collection('statistiche').onSnapshot(qs=>{
   Object.keys(ST).forEach(k=>delete ST[k]);
   qs.forEach(doc=>{ST[doc.id]=doc.data();});
-  renderStats();
+  renderStats();renderSocSide();
 },showErr);
 
 /* ---------- stampa: una pagina A4, righe adattate al numero di servizi ---------- */
@@ -1302,7 +1513,7 @@ window.addEventListener('beforeprint',()=>{
   document.querySelectorAll('.pdate').forEach(x=>x.textContent=longDate(curDay));
   document.querySelectorAll('td.pt').forEach(t=>t.colSpan=5);
   document.querySelectorAll('td.tl').forEach(t=>t.colSpan=5);
-  const rows=Math.max(1,S[active].order.filter(id=>id==='P'||!S[active].rows[id].x).length)+1;   // +1 per la riga del totale
+  const rows=Math.max(1,S[active].order.filter(id=>id==='P'||!S[active].rows[id].x).length)+(active==='so'?0:1);   // +1 per la riga del totale dei servizi
   const rh=Math.min(10,170/rows);
   const r=document.documentElement.style;
   r.setProperty('--rh',rh.toFixed(2)+'mm');
@@ -1331,7 +1542,7 @@ function openDay(id){
   dayRef=db.collection('scalette').doc(id);
   unsubDay=dayRef.onSnapshot({includeMetadataChanges:true},snap=>{
     const d=snap.exists?snap.data():null;
-    EM.forEach(e=>{hasData[e.id]=!!(d&&d[e.id]&&d[e.id].rows);});
+    TABS.forEach(e=>{hasData[e.id]=!!(d&&d[e.id]&&d[e.id].rows);});
     S=merge(blank(),d);setStatus(snap.metadata);sync();
   },showErr);
 }
@@ -1357,9 +1568,16 @@ async function cleanup(){
 
 /* ---------- avvio ---------- */
 showTab();
+let cfgSeeded=false;
 cfgRef.onSnapshot(s=>{
   const d=s.exists?s.data():{};
-  CFG={giornalisti:Array.isArray(d.giornalisti)?d.giornalisti:[],montatori:Array.isArray(d.montatori)?d.montatori:[]};
+  CFG={giornalisti:Array.isArray(d.giornalisti)?d.giornalisti:[],montatori:Array.isArray(d.montatori)?d.montatori:[],
+       tipologie:Array.isArray(d.tipologie)?d.tipologie:DEF_TIP.slice(),social:Array.isArray(d.social)?d.social:DEF_SOC.slice()};
+  // la prima volta scrivo gli elenchi di partenza, così si possono modificare dal pannello Gestione
+  const miss={};
+  if(!Array.isArray(d.tipologie))miss.tipologie=DEF_TIP;
+  if(!Array.isArray(d.social))miss.social=DEF_SOC;
+  if(Object.keys(miss).length&&!cfgSeeded){cfgSeeded=true;cfgRef.set(miss,{merge:true}).catch(showErr);}
   sync();
 },showErr);
 let lastToday=todayId();
