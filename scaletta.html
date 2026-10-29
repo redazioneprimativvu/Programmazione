@@ -103,6 +103,10 @@ td.ac{width:158px;white-space:nowrap}
 .tb.b-add{background:var(--tint);color:var(--tint-ink);border-color:var(--accent)}
 .tb.b-no{background:#fff3d6;color:#a56a00;border-color:#e9b949}
 .tb.b-del{background:#fdeaea;color:#c62828;border-color:#e57373}
+.tb.b-cp{background:#e0f3ee;color:#0f7a68;border-color:#14a38b}
+.tb svg{display:block;margin:auto}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 8px 28px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
 .tb:disabled{opacity:.28;cursor:not-allowed}
 textarea{width:100%;display:block;border:1px solid transparent;background:transparent;padding:8px 10px;border-radius:8px;font:inherit;color:var(--ink);resize:none;overflow:hidden;line-height:1.3}
 textarea:hover{background:#f1f4fa}
@@ -337,7 +341,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 @media print{
   @page{size:A4 landscape;margin:7mm}
   html,body{background:#fff}
-  header,.datebar,.editors,.overlay,.side,.np,#err{display:none!important}
+  header,.datebar,.editors,.overlay,.side,.np,#err,#toast{display:none!important}
   main{margin:0;max-width:none;padding:0}
   .layout{display:block}
   .panel{display:none!important}.panel.on{display:block!important}
@@ -443,6 +447,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   </div>
 </div>
 
+<div id="toast" role="status" aria-live="polite"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
@@ -622,7 +627,7 @@ function makeRow(e,id){
       <td class="g np"><input type="checkbox" class="ck" data-f="c2"></td>
       <td class="t np" data-f="o2"></td>
       <td class="du"><input type="text" class="du" data-f="du" inputmode="numeric" enterkeyhint="next" autocomplete="off" maxlength="8" placeholder="m:ss" title="Durata del servizio. Scrivi 130 per 1:30, 45 per 0:45, 3 per 3:00"></td>
-      <td class="ac np"><button class="tb b-add" data-act="add" title="Inserisci un servizio sotto">＋</button><button class="tb b-no" data-act="no" title="Non va più in onda: barra la riga">⊘</button><button class="tb b-del" data-act="del" title="Elimina riga">🗑</button></td>`;
+      <td class="ac np"><button class="tb b-add" data-act="add" title="Inserisci un servizio sotto">＋</button><button class="tb b-no" data-act="no" title="Non va più in onda: barra la riga">⊘</button><button class="tb b-del" data-act="del" title="Elimina riga">🗑</button><button class="tb b-cp" data-act="next" title="Copia sulla scaletta di domani"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button></td>`;
   }
   return tr;
 }
@@ -665,6 +670,7 @@ function counts(){
 }
 
 function sync(){
+  const nextLbl=curDay?longDate(addDays(curDay,1)):'';
   const gl=CFG.giornalisti.slice().sort(byName),ml=CFG.montatori.slice().sort(byName);
   EM.forEach(em=>{
     const st=S[em.id],tb=TB[em.id],map=ROW[em.id];
@@ -701,6 +707,8 @@ function sync(){
       const no=tr.querySelector('[data-act=no]');
       no.textContent=r.x?'↩':'⊘';
       no.title=r.x?'Rimetti in scaletta al suo posto':'Non va più in onda: barra la riga';
+      const cp=tr.querySelector('[data-act=next]');
+      if(cp){cp.disabled=!(r.nome||r.titolo);cp.title=cp.disabled?'Servizio vuoto, niente da copiare':'Copia sulla scaletta di '+nextLbl;}
       const del=tr.querySelector('[data-act=del]'),lock=r.c2&&!adminOn();
       del.disabled=lock;
       del.title=lock?'Servizio completato: non eliminabile (usa ⊘ se non va più in onda)':'Elimina riga';
@@ -935,6 +943,39 @@ function addRow(e,afterId){
   patch({[e+'.rows.'+id]:newRow(),[e+'.order']:o});
   const inp=ROW[e][id]&&ROW[e][id].querySelector('[data-f=nome]');if(inp)inp.focus();
 }
+/* piccolo avviso a comparsa */
+let toastT=0;
+function toast(msg){
+  const t=$('#toast');t.textContent=msg;t.classList.add('on');
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),3200);
+}
+/* copia un servizio sulla scaletta del giorno dopo (stessa testata). Si copiano nome, titolo, giornalista, montatore e durata.
+   Spunte e orari ripartono da zero. Il servizio va nella prima riga vuota, altrimenti in fondo. */
+async function copyNext(e,id){
+  flushTxt();
+  const src=S[e]&&S[e].rows[id];
+  if(!src)return;
+  if(!(src.nome||src.titolo)){toast('Il servizio è vuoto, niente da copiare');return;}
+  const day=addDays(curDay,1),ref=db.collection('scalette').doc(day);
+  try{
+    const snap=await ref.get();
+    const d=snap.exists?snap.data():null;
+    const had=!!(d&&d[e]&&d[e].rows);
+    const st=merge(blank(),d)[e];
+    const dup=Object.values(st.rows).some(x=>x&&x.nome===src.nome&&x.titolo===src.titolo);
+    if(dup&&!confirm('Nella scaletta di '+longDate(day)+' c\'è già un servizio uguale. Copiarlo comunque?'))return;
+    const row=Object.assign(newRow(),{nome:src.nome,titolo:src.titolo,g:src.g,m:src.m,du:src.du||0});
+    const vuota=x=>x&&!x.nome&&!x.titolo&&!x.g&&!x.m&&!x.c1&&!x.x&&!x.du;
+    let slot=st.order.find(i=>i!=='P'&&vuota(st.rows[i])),order=st.order,fine=false;
+    if(!slot){slot=uid('n');order=order.concat(slot);fine=true;}
+    const rows=Object.assign({},st.rows,{[slot]:row});
+    // se quel giorno non aveva ancora la scaletta, scrivo anche le righe predefinite
+    const payload=!had?{[e]:{order,rows}}:(fine?{[e]:{rows:{[slot]:row},order}}:{[e]:{rows:{[slot]:row}}});
+    await ref.set(payload,{merge:true});
+    if(row.g)statsG(row.g,day.slice(0,7),1);
+    toast('Copiato sulla scaletta di '+longDate(day));
+  }catch(err){showErr(err);}
+}
 function delRow(e,id){
   const r=S[e].rows[id];
   if(r&&r.c2&&!adminOn())return;
@@ -949,6 +990,7 @@ panelsEl.addEventListener('click',ev=>{
   const e=bt.closest('.panel').dataset.e,a=bt.dataset.act,tr=bt.closest('tr'),id=tr&&tr.dataset.id;
   if(a==='add')addRow(e,id);
   if(a==='del'&&!bt.disabled)delRow(e,id);
+  if(a==='next'&&!bt.disabled)copyNext(e,id);
   if(a==='no')patch({[e+'.rows.'+id+'.x']:!S[e].rows[id].x});
 });
 
