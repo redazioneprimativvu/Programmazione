@@ -13,20 +13,8 @@
 body.so{
   --accent:#8b5cf6; --tint:#e4dcfb; --tint-line:#cdbff4; --tint-ink:#4b2fa3; --tint-soft:#f0ebfd;
 }
-body.so .editors,body.so #xside{display:none}
-body:not(.so) #socSide{display:none}
-body.so .layout{grid-template-columns:minmax(0,1fr) 340px}
-body.so .layout .side{position:sticky;max-height:calc(100vh - 28px)}
-body.so #socSide .ssec{margin-top:0}
-body.so #socSide .sum{gap:8px}
-body.so #socSide .sum>div{padding:10px 12px;min-width:0;flex:1 1 90px}
-body.so #socSide .sh{grid-template-columns:1fr 70px}
-body.so #socSide .sh span:nth-child(3),body.so #socSide .srow>.sb:nth-child(3){display:none}
-body.so #socSide .srow{grid-template-columns:minmax(0,1fr) 90px;gap:10px}
-.sw{display:flex;gap:6px;margin-bottom:14px}
-.sw button{flex:1;border:1px solid var(--tint-line);background:#fff;border-radius:8px;padding:6px 8px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;color:var(--tint-ink)}
-.sw button.on{background:var(--accent);border-color:var(--accent);color:#fff}
-@media(max-width:1000px){body.so .layout{grid-template-columns:1fr}body.so .layout .side{position:static;max-height:none}}
+body.so .editors,body.so .side{display:none}
+body.so .layout{grid-template-columns:1fr}
 body.tn{
   --accent:#1f9d63; --tint:#cdeedb; --tint-line:#a9dcc0; --tint-ink:#15683f; --tint-soft:#e6f6ed;
 }
@@ -75,6 +63,9 @@ main{max-width:none;margin:22px 0;padding:0 20px}
 .empty{color:var(--muted);font-size:14px}
 
 .panel{display:none}.panel.on{display:block}
+#panels{max-width:1300px}
+.panel[data-e=so]{max-width:1060px}
+textarea.nm{font-weight:700;padding:7px 6px;line-height:1.25;overflow:hidden;resize:none}
 .printhead{display:none}
 .card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(20,30,60,.08);overflow:hidden}
 table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:clamp(11px,.62vw,14px)}
@@ -385,6 +376,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   main{margin:0;max-width:none;padding:0}
   .layout{display:block}
   .panel{display:none!important}.panel.on{display:block!important}
+  #panels,.panel[data-e=so]{max-width:none}
   .printhead{display:block;margin-bottom:5px;border-bottom:2px solid #111a2e;padding-bottom:3px}
   .printhead h1{margin:0;font-size:19px}
   .pdate{text-transform:capitalize}
@@ -451,11 +443,8 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
       <div id="panels"></div>
     </div>
     <aside class="side">
-      <div id="xside">
-        <h2>Attività extra dei montatori</h2>
-        <div id="mpanels"></div>
-      </div>
-      <div id="socSide"></div>
+      <h2>Attività extra dei montatori</h2>
+      <div id="mpanels"></div>
     </aside>
   </div>
 </main>
@@ -511,7 +500,7 @@ const firebaseConfig = {
   appId: "1:808519806697:web:4701c298639e068af14a78"
 };
 
-const MAX_NOME=20, MAX_TITOLO=52, RETENTION_DAYS=30;
+const MAX_TITOLO=52, RETENTION_DAYS=30;
 const EM=[{id:'pt',nome:'Prima Tivvù'},{id:'tn',nome:'Telenostra'}];             // le scalette dei servizi
 const TABS=[...EM,{id:'so',nome:'Social',social:true}];                          // tutte le schede
 const DEF_TIP=['Post','Reel','Storia','Carosello','Video'],DEF_SOC=['Instagram','TikTok','Facebook','YouTube','X'];
@@ -568,7 +557,9 @@ function fit(el){
   if(!el.offsetParent)return;
   el.style.height='auto';el.style.height=el.scrollHeight+'px';
 }
-function fitAll(){document.querySelectorAll('textarea.ti').forEach(fit);}
+function fitN(el){if(!el.offsetParent)return;el.style.height='auto';el.style.height=el.scrollHeight+'px';}   // il nome va a capo e il campo cresce
+function fitAll(){document.querySelectorAll('textarea.ti').forEach(fit);document.querySelectorAll('textarea.nm').forEach(fitN);}
+window.addEventListener('beforeprint',fitAll);
 window.addEventListener('resize',fitAll);
 if(MQ.addEventListener)MQ.addEventListener('change',fitAll);else if(MQ.addListener)MQ.addListener(fitAll);
 function blank(){
@@ -679,7 +670,6 @@ TABS.forEach(e=>{
 function showTab(){
   document.body.classList.toggle('tn',active==='tn');
   document.body.classList.toggle('so',active==='so');
-  renderSocSide();
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.e===active));
   document.querySelectorAll('.panel').forEach(t=>t.classList.toggle('on',t.dataset.e===active));
   fitAll();
@@ -693,7 +683,7 @@ function makeRow(e,id){
     tr.innerHTML=`
       <td class="hd np" title="Trascina per spostare">⠿</td>
       <td class="n"></td>
-      <td class="nm"><input type="text" class="nm up" data-f="nome" maxlength="${MAX_NOME}" placeholder="Nome servizio" autocomplete="off"></td>
+      <td class="nm"><textarea class="nm up" rows="1" data-f="nome" placeholder="Nome servizio" autocomplete="off" spellcheck="false"></textarea></td>
       <td class="tt np"><div class="cw"><textarea class="up ti" rows="1" wrap="off" data-f="titolo" maxlength="${MAX_TITOLO}" placeholder="Titolo del servizio" autocomplete="off" spellcheck="false"></textarea><span class="cnt"></span></div></td>
       <td><select data-f="g"></select></td>
       <td><select data-f="m"></select></td>
@@ -796,19 +786,7 @@ function syncSoc(em,gl){
     del.title=lock?'Post finito: non eliminabile (usa ⊘ se non viene pubblicato)':'Elimina riga';
   });
 }
-/* statistiche social accanto alla scaletta, del giorno o del mese */
-let socMode='g';
-function renderSocSide(){
-  const box=$('#socSide');if(!box||active!=='so')return;
-  let sm;
-  if(socMode==='g'){sm=socNew();Object.values((S.so&&S.so.rows)||{}).forEach(r=>{if(r&&r.c2)socAcc(sm,r);});}
-  else{const d=ST[(curDay||todayId()).slice(0,7)];sm=d&&d.s;}
-  const lab=socMode==='g'?'del giorno':'del mese';
-  box.innerHTML=`<h2>Andamento social</h2><div class="sw"><button data-sm="g" class="${socMode==='g'?'on':''}">Giorno</button><button data-sm="m" class="${socMode==='m'?'on':''}">Mese</button></div>`+socSection(sm,socMode==='g').replace('</i>Social','</i>Social '+lab);
-}
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-sm]');if(b){socMode=b.dataset.sm;renderSocSide();}});
 function sync(){
-  renderSocSide();
   const nextLbl=curDay?longDate(addDays(curDay,1)):'';
   const gl=CFG.giornalisti.slice().sort(byName),ml=CFG.montatori.slice().sort(byName);
   TABS.forEach(em=>{
@@ -836,6 +814,7 @@ function sync(){
         if(f==='nome'||f==='titolo'){
           if(document.activeElement!==el)el.value=r[f];
           if(f==='titolo'){const c=el.closest('.cw').querySelector('.cnt');c.textContent=el.value.length+'/'+MAX_TITOLO;c.classList.toggle('max',el.value.length>=MAX_TITOLO);fit(el);}
+          else fitN(el);
         }
         else if(f==='g')fillSelect(el,gl,r.g);
         else if(f==='m')fillSelect(el,ml,r.m);
@@ -994,7 +973,7 @@ function saveTxt(el){
   const row=S[e]&&S[e].rows[id];if(!row)return;
   let v=el.value.replace(/[\r\n]+/g,' ');
   if(f==='post')v=v.slice(0,MAX_POST).trim();
-  else v=v.toUpperCase().slice(0,f==='nome'?MAX_NOME:MAX_TITOLO).trim();
+  else v=v.toUpperCase().slice(0,f==='nome'?undefined:MAX_TITOLO).trim();
   if(row[f]===v)return;
   const old=row[f];
   patch({[e+'.rows.'+id+'.'+f]:v});
@@ -1021,9 +1000,10 @@ panelsEl.addEventListener('input',ev=>{
   if(f==='post'){clearTimeout(el._t);el._t=setTimeout(()=>{el._t=0;saveTxt(el);},350);return;}
   if(f!=='nome'&&f!=='titolo')return;
   const s=el.selectionStart,e=el.selectionEnd;
-  el.value=el.value.replace(/[\r\n]+/g,' ').toUpperCase().slice(0,f==='nome'?MAX_NOME:MAX_TITOLO);
+  el.value=el.value.replace(/[\r\n]+/g,' ').toUpperCase().slice(0,f==='nome'?undefined:MAX_TITOLO);
   try{el.setSelectionRange(s,e);}catch(x){}
   if(f==='titolo'){const c=el.closest('.cw').querySelector('.cnt');c.textContent=el.value.length+'/'+MAX_TITOLO;c.classList.toggle('max',el.value.length>=MAX_TITOLO);fit(el);}
+  else fitN(el);
   clearTimeout(el._t);el._t=setTimeout(()=>{el._t=0;saveTxt(el);},350);   // salva dopo una breve pausa di scrittura
 });
 panelsEl.addEventListener('keydown',ev=>{
@@ -1354,7 +1334,7 @@ function aggDay(d){
 /* sezione Social */
 function socSection(sm,day){
   let h='<section class="ssec"><h3 class="sh3"><i class="dt b4"></i>Social</h3>';
-  if(!sm||!(sm.n>0))return h+`<div class="empty">${day?'Nessun post finito in questo giorno.':'Nessun post finito in questo mese. Per includere i giorni già compilati usa il pulsante ↻ in Andamento.'}</div></section>`;
+  if(!sm||!(sm.n>0))return h+`<div class="empty">${day?'Nessun post finito in questo giorno.':'Nessun post finito in questo mese. Per includere i giorni già compilati usa il pulsante ↻ in alto a destra.'}</div></section>`;
   const by=o=>Object.values(o||{}).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n||byName(a.nome||'',b.nome||''));
   const garr=by(sm.g),sarr=by(sm.soc),tarr=by(sm.tip);
   const all={};garr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
@@ -1410,7 +1390,7 @@ function statSections(map,gmap,smap,day){
     });
     h+='<p class="snote">Ogni servizio con il nome del giornalista conta uno, anche se poi non va in onda. I post social hanno la loro sezione.</p>';
   }
-  return h+'</section>';
+  return h+'</section>'+socSection(smap,day);
 }
 function renderStats(){
   const cur=todayId().slice(0,7);
@@ -1419,7 +1399,7 @@ function renderStats(){
   Object.keys(SC).filter(id=>/^\d{4}-\d{2}-\d{2}$/.test(id)).sort().reverse().forEach(id=>{
     const a=aggDay(SC[id]);
     const n=Object.values(a.m).reduce((s,x)=>s+x.n,0),gn=Object.values(a.g).reduce((s,x)=>s+x.n,0);
-    if(n>0||gn>0)act.push({id,a,n});
+    if(n>0||gn>0||a.s.n>0)act.push({id,a,n:n||a.s.n});
   });
   const byM={};act.forEach(x=>{const k=x.id.slice(0,7);(byM[k]=byM[k]||[]).push(x);});
   const months=Array.from(new Set([...Object.keys(ST),...Object.keys(byM),cur])).sort().reverse();
@@ -1504,7 +1484,7 @@ $('#stOv').onclick=e=>{if(e.target.id==='stOv')$('#stOv').classList.remove('on')
 db.collection('statistiche').onSnapshot(qs=>{
   Object.keys(ST).forEach(k=>delete ST[k]);
   qs.forEach(doc=>{ST[doc.id]=doc.data();});
-  renderStats();renderSocSide();
+  renderStats();
 },showErr);
 
 /* ---------- stampa: una pagina A4, righe adattate al numero di servizi ---------- */
