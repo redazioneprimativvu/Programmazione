@@ -79,7 +79,8 @@ header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);backdro
 .row.giallo{--bar:var(--giallo-bar);background:var(--giallo-bg);border-color:#f3e29a}
 .row.arancione{--bar:var(--arancio-bar);background:var(--arancio-bg);border-color:#f6c68d}
 .row.rosso{--bar:var(--rosso-bar);background:var(--rosso-bg);border-color:#f2b3b3}
-.row.done{background:#f8fafc}
+.row.done{background:#f8fafc;border-color:var(--line)}
+.row.done .f,.row.done .end{opacity:.6}
 .row.done [data-f=descrizione]{text-decoration:line-through;color:var(--faint)}
 .row.done select.azienda{color:var(--faint)}
 .chk{grid-area:chk;display:flex;justify-content:center;cursor:pointer}
@@ -145,27 +146,6 @@ td.z{color:var(--line2)}
 tr.tot td{font-weight:650;border-bottom:none}
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;border:none;background:var(--ink);color:#fff;display:none;place-items:center;box-shadow:0 8px 22px rgba(15,23,42,.35);cursor:pointer;z-index:40}
 
-/* ---------- Completate ---------- */
-.panel.full{max-width:1100px}
-.dmonth{font-weight:650;font-size:13.5px;padding:14px 2px 6px;text-transform:capitalize}
-.dmonth small{font-weight:400;color:var(--muted);margin-left:8px;text-transform:none}
-.arow{display:grid;grid-template-columns:minmax(130px,1.2fr) minmax(110px,1fr) minmax(150px,2fr) minmax(90px,.9fr) 126px 100px 64px;grid-template-areas:"az co de te sc st act";gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:10px;margin-bottom:4px;background:#fafbfd}
-.arow .a-az{grid-area:az;display:flex;align-items:center;gap:8px;min-width:0;font-weight:650}
-.arow .a-az span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dot2{width:9px;height:9px;border-radius:3px;background:var(--c);flex:none}
-.arow .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);min-width:0}
-.a-co{grid-area:co}.a-de{grid-area:de}.a-te{grid-area:te}.a-sc{grid-area:sc}.a-st{grid-area:st}
-.a-act{grid-area:act;display:flex;justify-content:flex-end}
-.arow input[type=date]{width:100%;height:30px;border:1px solid var(--line);border-radius:7px;padding:0 6px;font-size:12.5px;background:#fff;outline:none}
-.arow input[type=date]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.14)}
-.st{font-size:11.5px;font-weight:600;border-radius:999px;padding:2px 9px;display:inline-block}
-.st.ok{background:#dcfce7;color:#166534}
-.st.late{background:#e2e8f0;color:#475569}
-@media (max-width:899px){
-  .arow{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto auto;grid-template-areas:"az az st act" "de de de de" "co co te te" "sc sc sc sc"}
-  .a-sc{max-width:160px}
-}
-
 /* ---------- Tablet ---------- */
 @media (max-width:1139px){
   .cols{display:none}
@@ -219,7 +199,6 @@ tr.tot td{font-weight:650;border-bottom:none}
     </div>
     <div class="actions">
       <button class="btn primary desk-only" id="btnAdd"><i data-ic="plus" data-s="16"></i>Nuovo lavoro</button>
-      <button class="btn ico" id="btnDone" title="Completate"><i data-ic="archive" data-s="17"></i><span class="lbl">Completate</span><span class="badge" id="doneCount"></span></button>
       <button class="btn ico" id="btnTrend" title="Andamento"><i data-ic="chart" data-s="17"></i><span class="lbl">Andamento</span></button>
       <button class="btn ico" id="btnSet" title="Impostazioni"><i data-ic="sliders" data-s="17"></i><span class="lbl">Impostazioni</span></button>
     </div>
@@ -251,14 +230,6 @@ tr.tot td{font-weight:650;border-bottom:none}
     <div><h3>Operatori</h3><div id="lTe"></div><div class="addrow"><input id="iTe" placeholder="Nuovo operatore"><button class="btn" data-add="tecnici" data-inp="iTe">Aggiungi</button></div></div>
   </div>
   <p class="hint" id="hintPurge"></p>
-</div></div>
-
-<!-- Completate -->
-<div class="modal" id="mDone"><div class="panel full">
-  <h2>Completate <button class="ib" id="xDone" aria-label="Chiudi"><i data-ic="x" data-s="18"></i></button></h2>
-  <label class="search" style="display:block;margin-bottom:10px"><i data-ic="search" data-s="16"></i><input id="qd" type="search" placeholder="Cerca tra le completate…" autocomplete="off"></label>
-  <div id="doneList"></div>
-  <p class="hint" id="hintDone"></p>
 </div></div>
 
 <!-- Andamento -->
@@ -410,7 +381,6 @@ function filtrate(skipUrg){
   const q = $('q').value.trim().toLowerCase();
   const fa=$('fAz').value, ft=$('fTe').value, fc=$('fCa').value;
   return lavori.filter(l=>{
-    if(isArchived(l)) return false;   // consegnati e scaduti stanno nella finestra "Completate"
     if(fa && l.azienda!==fa) return false;
     if(ft && l.tecnico!==ft) return false;
     if(fc && l.canale!==fc) return false;
@@ -461,19 +431,15 @@ function render(){
   let html = '';
   Object.keys(groups).sort().forEach(k=>{
     const items = groups[k];
-    if(k==='0000') items.sort((a,b)=>ts(b)-ts(a));
-    else items.sort((a,b)=>a.scadenza.localeCompare(b.scadenza) || ts(a)-ts(b));
+    // le righe completate vanno in fondo al proprio mese
+    const dn = (a,b) => (!!a.fatto - !!b.fatto);
+    if(k==='0000') items.sort((a,b)=>dn(a,b) || ts(b)-ts(a));
+    else items.sort((a,b)=>dn(a,b) || a.scadenza.localeCompare(b.scadenza) || ts(a)-ts(b));
     const title = k==='0000' ? 'Senza scadenza' : MESI[+k.slice(5,7)-1] + ' ' + k.slice(0,4);
     html += `<div class="month">${title}${k===nowKey?'<span class="now">Mese corrente</span>':''}<small>${items.length} ${items.length===1?'lavoro':'lavori'}</small></div>` + items.map(rowHtml).join('');
   });
   $('grid').innerHTML = html || `<div class="empty-state"><b>Nessun lavoro da mostrare</b>Premi “Nuovo lavoro” per aggiungerne uno, oppure azzera i filtri.</div>`;
   renderChips(); syncFilterStyles();
-  const nDone = lavori.filter(isArchived).length;
-  $('doneCount').textContent = nDone; $('doneCount').classList.toggle('on', nDone>0);
-  if($('mDone').classList.contains('open')){
-    const a = document.activeElement;
-    if(a && $('doneList').contains(a)) pendingDone = true; else renderDone();
-  }
   if(focusId){
     const r = document.querySelector(`.row[data-id="${focusId}"]`);
     if(r){ focusId = null; r.querySelector('select.azienda').focus({preventScroll:true}); }
@@ -534,6 +500,14 @@ $('grid').addEventListener('change', e=>{
   const v = t.type==='checkbox' ? t.checked : t.value;
   // Mentre scrivi l'anno a mano il browser genera date intermedie (es. 0002, 0202): le ignoro finché non è valida
   if(t.type==='date' && v && (+v.slice(0,4) < 2000 || +v.slice(0,4) > 2100)) return;
+  if(t.type==='checkbox'){
+    // check: la riga si spegne subito, poi scende in fondo al mese
+    row.classList.toggle('done', v);
+    if(v) row.classList.remove('giallo','arancione','rosso');
+    upd(row.dataset.id, 'fatto', v);
+    t.blur();
+    return;
+  }
   if(t.dataset.f==='azienda'){
     t.classList.toggle('empty', !v);
     row.querySelector('.cdot').style.setProperty('--c', aziendaColor(v));
@@ -609,73 +583,12 @@ function renderTrend(){
 }
 $('tabs').addEventListener('click', e=>{ if(e.target.dataset.d){ trendDim = e.target.dataset.d; renderTrend(); } });
 
-/* Completate: lavori consegnati oppure con scadenza già passata */
-let pendingDone = false;
-function isArchived(l){
-  if(l.fatto) return true;
-  const g = giorniA(l.scadenza);
-  return g!==null && g<0;
-}
-function doneRow(l){
-  const stato = l.fatto ? '<span class="st ok">Consegnata</span>' : '<span class="st late">Scaduta</span>';
-  const act = l.fatto
-    ? `<button class="ib" data-act="restore" title="Segna come non consegnata" aria-label="Segna come non consegnata">${ic('undo',17)}</button>`
-    : `<button class="ib" data-act="finish" title="Segna come consegnata" aria-label="Segna come consegnata">${ic('check',17)}</button>`;
-  return `<div class="arow" data-id="${l.id}">
-    <div class="a-az"><i class="dot2" style="--c:${aziendaColor(l.azienda)}"></i><span>${esc(l.azienda)||'—'}</span></div>
-    <div class="t a-co">${esc(l.commissionante)}</div>
-    <div class="t a-de">${esc(l.descrizione)}</div>
-    <div class="t a-te">${esc(l.tecnico)}</div>
-    <div class="a-sc"><input type="date" value="${esc(l.scadenza)}" aria-label="Scadenza"></div>
-    <div class="a-st">${stato}</div>
-    <div class="a-act">${act}<button class="ib" data-act="del" title="Elimina" aria-label="Elimina">${ic('trash',17)}</button></div>
-  </div>`;
-}
-function renderDone(){
-  const q = $('qd').value.trim().toLowerCase();
-  const list = lavori.filter(isArchived).filter(l=>{
-    if(!q) return true;
-    const hay = [l.azienda,l.canale,l.commissionante,l.descrizione,l.note,l.tecnico,l.consegna,l.scadenza].join(' ').toLowerCase();
-    return q.split(/\s+/).every(w=>hay.includes(w));
-  });
-  const groups = {};
-  list.forEach(l=>{ const k = l.scadenza ? l.scadenza.slice(0,7) : '0000'; (groups[k] = groups[k]||[]).push(l); });
-  let html = '';
-  Object.keys(groups).sort().reverse().forEach(k=>{
-    const items = groups[k].sort((a,b)=>(b.scadenza||'').localeCompare(a.scadenza||''));
-    const title = k==='0000' ? 'Senza scadenza' : MESI[+k.slice(5,7)-1] + ' ' + k.slice(0,4);
-    html += `<div class="dmonth">${title}<small>${items.length}</small></div>` + items.map(doneRow).join('');
-  });
-  $('doneList').innerHTML = html || '<div class="empty-state"><b>Nessun lavoro completato</b>Qui finiscono i lavori consegnati e quelli con la scadenza passata.</div>';
-  $('hintDone').textContent = 'Per riaprire un lavoro scaduto imposta una nuova scadenza. Le completate si conservano ' + MESI_CONSERVAZIONE + ' mesi dalla scadenza, poi vengono eliminate in automatico.';
-}
-$('doneList').addEventListener('click', e=>{
-  const b = e.target.closest('[data-act]'); if(!b) return;
-  const id = b.closest('.arow').dataset.id;
-  if(b.dataset.act==='restore') upd(id,'fatto',false);
-  if(b.dataset.act==='finish') upd(id,'fatto',true);
-  if(b.dataset.act==='del' && confirm('Eliminare definitivamente questo lavoro?')) colLavori.doc(id).delete();
-});
-$('doneList').addEventListener('change', e=>{
-  const t = e.target; if(t.type!=='date') return;
-  const v = t.value;
-  if(v && (+v.slice(0,4) < 2000 || +v.slice(0,4) > 2100)) return;
-  upd(t.closest('.arow').dataset.id, 'scadenza', v);
-});
-$('doneList').addEventListener('focusout', ()=>setTimeout(()=>{
-  if(pendingDone && !$('doneList').contains(document.activeElement)){ pendingDone=false; renderDone(); }
-},150));
-$('qd').addEventListener('input', renderDone);
-
 /* Finestre */
-function closeModals(){ $('mSet').classList.remove('open'); $('mTrend').classList.remove('open'); $('mDone').classList.remove('open'); document.body.style.overflow=''; }
+function closeModals(){ $('mSet').classList.remove('open'); $('mTrend').classList.remove('open'); document.body.style.overflow=''; }
 function openModal(el){ closeModals(); el.classList.add('open'); document.body.style.overflow='hidden'; }
 $('btnSet').onclick = ()=>openModal($('mSet'));
 $('btnTrend').onclick = ()=>{ renderTrend(); openModal($('mTrend')); };
-$('xSet').onclick = closeModals; $('xTrend').onclick = closeModals; $('xDone').onclick = closeModals;
-$('btnDone').onclick = ()=>{ renderDone(); openModal($('mDone')); };
-$('mDone').addEventListener('click', e=>{ if(e.target===$('mDone')) closeModals(); });
-$('mTrend').addEventListener('click', e=>{ if(e.target===$('mTrend')) closeModals(); });
+$('xSet').onclick = closeModals; $('xTrend').onclick = closeModals;$('mTrend').addEventListener('click', e=>{ if(e.target===$('mTrend')) closeModals(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModals(); });
 
 /* Avvio */
