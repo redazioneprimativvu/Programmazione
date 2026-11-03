@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4f6fa">
+<title>Flusso Lavori</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f172a; --text:#1e293b; --muted:#64748b; --faint:#94a3b8; --line:#e2e8f0; --line2:#cbd5e1;
+  --bg:#f4f6fa; --card:#fff; --accent:#4f46e5; --accent-soft:#eef2ff;
+  /* Urgenza (solo questi colori caldi indicano scadenze) */
+  --giallo-bar:#eab308; --giallo-bg:#fef6c9;
+  --arancio-bar:#f97316; --arancio-bg:#ffe6c7;
+  --rosso-bar:#dc2626;  --rosso-bg:#fcd9d9;
+  --cols:30px minmax(140px,1.3fr) minmax(88px,.8fr) minmax(110px,1fr) minmax(150px,2.2fr) minmax(96px,1fr) 124px 124px 118px;
+  --hh:110px; --ch:0px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:400 13.5px/1.35 "Geist",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+svg{flex:none}
+.inner{max-width:1440px;margin:0 auto;padding:0 16px}
+
+/* ---------- Header ---------- */
+header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:10px;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:8px}
+.logo{width:34px;height:34px;border-radius:10px;background:var(--ink);color:#fff;display:grid;place-items:center}
+.brand h1{margin:0;font-size:15.5px;font-weight:650;letter-spacing:-.01em}
+.sub{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted)}
+.live{width:6px;height:6px;border-radius:50%;background:var(--faint)}
+.live.ok{background:#16a34a}.live.err{background:#dc2626}
+.searchrow{display:flex;gap:8px;flex:1;max-width:460px}
+.search{position:relative;flex:1}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--faint);pointer-events:none}
+.search input{width:100%;height:34px;border:1px solid var(--line);background:#f8fafc;border-radius:9px;padding:0 12px 0 33px;outline:none;transition:.15s}
+.search input:focus{background:#fff;border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.14)}
+.actions{display:flex;gap:8px;margin-left:auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:34px;padding:0 12px;border:1px solid var(--line);background:#fff;border-radius:9px;font-weight:500;cursor:pointer;transition:.15s;position:relative;white-space:nowrap}
+.btn:hover{background:#f8fafc;border-color:var(--line2)}
+.btn:focus-visible,.ib:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.primary:hover{background:#1e293b}
+.badge{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;border-radius:8px;background:var(--accent);color:#fff;font-size:10px;font-weight:600;display:none;align-items:center;justify-content:center;padding:0 4px}
+.badge.on{display:flex}
+.mob-only{display:none}
+
+/* Filtri */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-bottom:10px}
+.sel{appearance:none;-webkit-appearance:none;height:30px;border:1px solid var(--line);border-radius:8px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center;padding:0 26px 0 10px;font-size:12.5px;cursor:pointer;max-width:170px;transition:.15s}
+.sel:hover{border-color:var(--line2)}
+.sel:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.14)}
+.sel.on{border-color:var(--accent);background-color:var(--accent-soft);color:var(--accent);font-weight:500}
+.sep{width:1px;height:20px;background:var(--line);margin:0 2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{height:30px;padding:0 11px 0 9px;border:1px solid var(--line);border-radius:999px;background:#fff;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--line2)}
+.chip i{width:9px;height:9px;border-radius:50%}
+.chip b{font-weight:600;color:var(--muted)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip.on b{color:#cbd5e1}
+.link{border:none;background:none;color:var(--muted);cursor:pointer;font-size:12.5px;padding:4px 6px;border-radius:6px}
+.link:hover{color:var(--ink);background:#f1f5f9}
+
+/* ---------- Griglia ---------- */
+.list{padding-top:8px;padding-bottom:90px}
+.cols{display:grid;grid-template-columns:var(--cols);gap:6px;padding:10px 9px 6px;position:sticky;top:var(--hh);z-index:8;background:var(--bg);font-size:12px;color:var(--faint);font-weight:500}
+.cols div{padding-left:8px}
+.month{position:sticky;top:calc(var(--hh) + var(--ch));z-index:7;background:var(--bg);display:flex;align-items:baseline;gap:8px;padding:16px 4px 7px;font-size:14px;font-weight:650;letter-spacing:-.005em;text-transform:capitalize}
+.month small{font-size:12px;font-weight:400;color:var(--muted);text-transform:none}
+.month .now{font-size:11px;font-weight:500;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:1px 8px;text-transform:none}
+.row{display:grid;grid-template-columns:var(--cols);grid-template-areas:"chk az ca co de te cn sc end";gap:6px;align-items:center;padding:5px 8px;margin-bottom:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:inset 4px 0 0 var(--bar,transparent);transition:box-shadow .15s,background .15s}
+.row:hover{box-shadow:inset 4px 0 0 var(--bar,transparent),0 2px 10px rgba(15,23,42,.07)}
+.row.giallo{--bar:var(--giallo-bar);background:var(--giallo-bg);border-color:#f3e29a}
+.row.arancione{--bar:var(--arancio-bar);background:var(--arancio-bg);border-color:#f6c68d}
+.row.rosso{--bar:var(--rosso-bar);background:var(--rosso-bg);border-color:#f2b3b3}
+.row.done{background:#f8fafc}
+.row.done [data-f=descrizione]{text-decoration:line-through;color:var(--faint)}
+.row.done select.azienda{color:var(--faint)}
+.chk{grid-area:chk;display:flex;justify-content:center;cursor:pointer}
+.chk input{appearance:none;-webkit-appearance:none;margin:0;width:18px;height:18px;border:1.5px solid var(--line2);border-radius:6px;background:#fff;cursor:pointer;transition:.15s}
+.chk input:hover{border-color:var(--muted)}
+.chk input:checked{background:var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/12px no-repeat;border-color:var(--ink)}
+.chk input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.f{min-width:0}
+.f::before{content:attr(data-l);display:none;font-size:11.5px;color:var(--muted);margin:0 0 2px 2px}
+.az{grid-area:az}.ca{grid-area:ca}.co{grid-area:co}.de{grid-area:de}.te{grid-area:te}.cn{grid-area:cn}.sc{grid-area:sc}
+.az::before{display:none!important}
+.row input[type=text],.row input[type=date],.row select{width:100%;height:32px;border:1px solid transparent;background:transparent;border-radius:7px;padding:0 8px;outline:none;transition:.12s;text-overflow:ellipsis}
+.row input[type=date]{padding:0 6px;font-size:12.5px}
+.row select{appearance:none;-webkit-appearance:none;padding-right:22px;cursor:pointer;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 7px center}
+.row select.empty{color:var(--faint)}
+.row input::placeholder{color:var(--faint)}
+.row input:hover,.row select:hover{border-color:rgba(15,23,42,.14);background-color:rgba(255,255,255,.7)}
+.row input:focus,.row select:focus{border-color:var(--accent);background-color:#fff;box-shadow:0 0 0 3px rgba(79,70,229,.14)}
+.sw{position:relative}
+.cdot{position:absolute;left:9px;top:50%;width:9px;height:9px;margin-top:-4.5px;border-radius:3px;background:var(--c);pointer-events:none}
+.row select.azienda{height:34px;font-size:15px;font-weight:650;letter-spacing:-.01em;padding-left:25px}
+.row select.azienda.empty{font-weight:500;font-size:14px}
+.end{grid-area:end;display:flex;align-items:center;justify-content:flex-end;gap:2px}
+.ib{width:28px;height:28px;display:grid;place-items:center;border:none;background:transparent;border-radius:7px;color:var(--faint);cursor:pointer;position:relative;transition:.12s}
+.ib:hover{background:rgba(15,23,42,.07);color:var(--ink)}
+.ib.has{color:var(--accent)}
+.ib.has::after{content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--accent);border:1.5px solid #fff}
+.excl{width:22px;height:22px;border-radius:50%;background:#d90429;color:#fff;display:inline-grid;place-items:center;font-weight:800;font-size:14px;margin-right:4px}
+.pill{font-size:11px;font-weight:600;color:#b91c1c;background:rgba(255,255,255,.8);border:1px solid #f2b3b3;border-radius:999px;padding:1px 8px;margin-right:4px}
+.note{grid-column:2/-1;display:none}
+.row.open .note{display:block}
+.empty-state{text-align:center;color:var(--muted);padding:70px 20px}
+.empty-state b{display:block;color:var(--text);font-size:15px;margin-bottom:4px}
+
+/* ---------- Finestre ---------- */
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.4);backdrop-filter:blur(2px);display:none;align-items:flex-start;justify-content:center;padding:48px 14px;overflow:auto;z-index:60}
+.modal.open{display:flex}
+.panel{background:#fff;border-radius:16px;padding:20px 22px;width:100%;max-width:720px;box-shadow:0 20px 50px rgba(15,23,42,.25)}
+.panel.wide{max-width:980px}
+.panel h2{margin:0 0 14px;font-size:16.5px;font-weight:650;display:flex;justify-content:space-between;align-items:center;letter-spacing:-.01em}
+.panel .hint{color:var(--muted);font-size:12px;margin:14px 0 0}
+.sets{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:20px}
+.sets h3{margin:0 0 8px;font-size:13px;font-weight:600}
+.item{display:flex;align-items:center;gap:8px;background:#f1f5f9;border-radius:8px;padding:5px 6px 5px 10px;margin-bottom:5px}
+.item span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item i{width:9px;height:9px;border-radius:3px;background:var(--c)}
+.item button{border:none;background:none;color:var(--faint);cursor:pointer;width:24px;height:24px;border-radius:6px;display:grid;place-items:center}
+.item button:hover{background:#e2e8f0;color:var(--ink)}
+.none{color:var(--faint);font-size:12.5px;padding:2px 0 6px}
+.addrow{display:flex;gap:6px;margin-top:8px}
+.addrow input{flex:1;min-width:0;height:34px;border:1px solid var(--line);border-radius:8px;padding:0 10px;outline:none}
+.addrow input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.14)}
+.tabs{display:inline-flex;background:#f1f5f9;border-radius:10px;padding:3px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{border:none;background:none;padding:6px 14px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500}
+.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(15,23,42,.12)}
+.scroll{overflow-x:auto}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+th,td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:500;color:var(--muted);background:#fff;position:sticky;top:0}
+td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:#fff;font-weight:600;text-transform:capitalize}
+th:first-child{font-weight:500;text-transform:none}
+td.z{color:var(--line2)}
+tr.tot td{font-weight:650;border-bottom:none}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;border:none;background:var(--ink);color:#fff;display:none;place-items:center;box-shadow:0 8px 22px rgba(15,23,42,.35);cursor:pointer;z-index:40}
+
+/* ---------- Tablet ---------- */
+@media (max-width:1139px){
+  .cols{display:none}
+  .row{grid-template-columns:30px repeat(6,minmax(0,1fr));
+    grid-template-areas:"chk az az ca ca end end" ". co co co de de de" ". te te cn cn sc sc";row-gap:4px;padding:8px}
+  .f::before{display:block}
+  .row input[type=text],.row input[type=date],.row select{border-color:var(--line);background-color:rgba(255,255,255,.8)}
+  .row select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+  .chk{align-self:center}
+  .btn .lbl{display:none}
+  .btn.ico{width:34px;padding:0}
+}
+/* ---------- Telefono ---------- */
+@media (max-width:639px){
+  .inner{padding:0 12px}
+  .bar{gap:8px;padding-top:8px;padding-bottom:8px}
+  .brand{flex:1;margin-right:0}
+  .actions{margin-left:0}
+  .actions .desk-only{display:none}
+  .searchrow{order:3;flex-basis:100%;max-width:none}
+  .mob-only{display:inline-flex}
+  .fab{display:grid}
+  .filters{display:none;padding-bottom:10px}
+  header.fopen .filters{display:flex}
+  .sel{flex:1 1 44%;max-width:none}
+  .sep{display:none}
+  .row{grid-template-columns:30px minmax(0,1.3fr) minmax(0,1fr);
+    grid-template-areas:"chk az end" ". ca te" ". co co" ". de de" ". cn sc"}
+  .end{justify-self:end}
+  .modal{padding:0;align-items:flex-end}
+  .panel{border-radius:18px 18px 0 0;max-height:92vh;overflow:auto;padding:18px 16px 24px}
+  .month{padding-top:14px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header id="hdr">
+  <div class="inner bar">
+    <div class="brand">
+      <div class="logo"><i data-ic="list" data-s="18"></i></div>
+      <div>
+        <h1>Flusso Lavori</h1>
+        <div class="sub"><span class="live" id="live"></span><span id="stTxt">Connessione…</span></div>
+      </div>
+    </div>
+    <div class="searchrow">
+      <label class="search"><i data-ic="search" data-s="16"></i><input id="q" type="search" placeholder="Cerca per azienda, persona, lavoro…" autocomplete="off"></label>
+      <button class="btn ico mob-only" id="btnFilt" aria-label="Filtri"><i data-ic="filter" data-s="17"></i><span class="badge" id="fBadge"></span></button>
+    </div>
+    <div class="actions">
+      <button class="btn primary desk-only" id="btnAdd"><i data-ic="plus" data-s="16"></i>Nuovo lavoro</button>
+      <button class="btn ico" id="btnTrend" title="Andamento"><i data-ic="chart" data-s="17"></i><span class="lbl">Andamento</span></button>
+      <button class="btn ico" id="btnSet" title="Impostazioni"><i data-ic="sliders" data-s="17"></i><span class="lbl">Impostazioni</span></button>
+    </div>
+  </div>
+  <div class="inner filters" id="filters">
+    <select class="sel" id="fAz" aria-label="Azienda"></select>
+    <select class="sel" id="fTe" aria-label="Tecnico"></select>
+    <select class="sel" id="fCa" aria-label="Canale"></select>
+    <select class="sel" id="fSt" aria-label="Stato">
+      <option value="todo">Da fare</option>
+      <option value="done">Completati</option>
+      <option value="all">Tutti gli stati</option>
+    </select>
+    <span class="sep"></span>
+    <div class="chips" id="chips"></div>
+    <button class="link" id="btnReset">Azzera filtri</button>
+  </div>
+</header>
+
+<main class="inner list">
+  <div class="cols" id="cols">
+    <div></div><div>Azienda</div><div>Canale</div><div>Commissionante</div><div>Lavoro</div><div>Tecnico</div><div>Consegna</div><div>Scadenza</div><div></div>
+  </div>
+  <div id="grid"></div>
+</main>
+<button class="fab" id="fab" aria-label="Nuovo lavoro"><i data-ic="plus" data-s="24"></i></button>
+
+<!-- Impostazioni -->
+<div class="modal" id="mSet"><div class="panel">
+  <h2>Impostazioni <button class="ib" id="xSet" aria-label="Chiudi"><i data-ic="x" data-s="18"></i></button></h2>
+  <div class="sets">
+    <div><h3>Aziende</h3><div id="lAz"></div><div class="addrow"><input id="iAz" placeholder="Nuova azienda"><button class="btn" data-add="aziende" data-inp="iAz">Aggiungi</button></div></div>
+    <div><h3>Canali</h3><div id="lCa"></div><div class="addrow"><input id="iCa" placeholder="Nuovo canale"><button class="btn" data-add="canali" data-inp="iCa">Aggiungi</button></div></div>
+    <div><h3>Tecnici</h3><div id="lTe"></div><div class="addrow"><input id="iTe" placeholder="Nuovo tecnico"><button class="btn" data-add="tecnici" data-inp="iTe">Aggiungi</button></div></div>
+  </div>
+  <p class="hint" id="hintPurge"></p>
+</div></div>
+
+<!-- Andamento -->
+<div class="modal" id="mTrend"><div class="panel wide">
+  <h2>Andamento mensile <button class="ib" id="xTrend" aria-label="Chiudi"><i data-ic="x" data-s="18"></i></button></h2>
+  <div class="tabs" id="tabs"></div>
+  <div class="scroll" id="trendTable"></div>
+  <p class="hint">I lavori sono contati nel mese della data di consegna (se manca, in quello della scadenza).</p>
+</div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ====== Configurazione Firebase ====== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAuJAH9Pnc2BW_G_S0kGTG-NoWq8Xe_wl0",
+  authDomain: "commissioni-69b21.firebaseapp.com",
+  projectId: "commissioni-69b21",
+  storageBucket: "commissioni-69b21.firebasestorage.app",
+  messagingSenderId: "110244436016",
+  appId: "1:110244436016:web:e6a84a16f9da197356b5f5"
+};
+/* ====== Soglie urgenza (giorni alla scadenza) ====== */
+const SOGLIA_GIALLO = 7, SOGLIA_ARANCIONE = 3, SOGLIA_ROSSO = 1;
+/* Conservazione: i lavori con scadenza più vecchia di tot mesi vengono eliminati in automatico */
+const MESI_CONSERVAZIONE = 24;
+
+/* Colori azienda: solo toni freddi, mai gialli/arancio/rossi (riservati all'urgenza) */
+const PALETTE = ['#4f46e5','#0284c7','#0d9488','#7c3aed','#2563eb','#0891b2','#059669','#475569','#6366f1','#0369a1'];
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+const colLavori = db.collection('lavori');
+const docCfg = db.collection('impostazioni').doc('config');
+
+let lavori = [];
+let cfg = { aziende: [], canali: ['Mail','WhatsApp','Telefono'], tecnici: [] };
+let offsetMs = 0, timeSource = 'orologio locale';
+let pendingRender = false, loaded = false, timeSynced = false, purged = false;
+let trendDim = 'tecnico', fUr = '', focusId = null;
+const openNotes = new Set();
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+
+/* ---------- Icone ---------- */
+const IC = {
+  list:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+  filter:'<path d="M3 5h18l-7 8.5V19l-4-2v-3.5z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  chart:'<path d="M4 4v16h16"/><path d="M8 16v-4M13 16V8M18 16v-7"/>',
+  sliders:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  note:'<path d="M5 5h14v11H10l-5 4z"/><path d="M9 9.5h6M9 12.5h4"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V4h6v3"/>'
+};
+const ic = (n,s=18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
+document.querySelectorAll('[data-ic]').forEach(e=>{ e.outerHTML = ic(e.dataset.ic, +e.dataset.s||18); });
+
+/* ---------- Ora da internet ---------- */
+async function syncTime(){
+  try{
+    const r = await fetch('https://worldtimeapi.org/api/timezone/Europe/Rome', {cache:'no-store'});
+    const j = await r.json();
+    offsetMs = new Date(j.datetime).getTime() - Date.now();
+    timeSource = 'worldtimeapi';
+  }catch(e){
+    try{
+      const r = await fetch(location.href, {method:'HEAD', cache:'no-store'});
+      const d = r.headers.get('Date');
+      if(d){ offsetMs = new Date(d).getTime() - Date.now(); timeSource = 'server web'; }
+    }catch(e2){ offsetMs = 0; timeSource = 'orologio locale'; }
+  }
+  timeSynced = true; tryPurge();
+  setStatus('Online · ora da ' + timeSource, true);
+  render();
+}
+function oggiStr(){ return new Date(Date.now()+offsetMs).toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'}); }
+function giorniA(dataStr){
+  if(!dataStr) return null;
+  const [y,m,d] = dataStr.split('-').map(Number);
+  const [y0,m0,d0] = oggiStr().split('-').map(Number);
+  return Math.round((Date.UTC(y,m-1,d) - Date.UTC(y0,m0-1,d0)) / 86400000);
+}
+function urgenza(l){
+  if(l.fatto) return {k:'fatto', g:null, cls:''};
+  const g = giorniA(l.scadenza);
+  if(g===null) return {k:'nessuna', g:null, cls:''};
+  if(g<=SOGLIA_ROSSO) return {k:'critico', g, cls:'rosso'};
+  if(g<=SOGLIA_ARANCIONE) return {k:'urgente', g, cls:'arancione'};
+  if(g<=SOGLIA_GIALLO) return {k:'inarrivo', g, cls:'giallo'};
+  return {k:'nessuna', g, cls:''};
+}
+function setStatus(t, ok){ $('stTxt').textContent = t; $('live').className = 'live ' + (ok===true?'ok':ok===false?'err':''); }
+
+/* ---------- Firestore ---------- */
+docCfg.onSnapshot(s=>{
+  if(s.exists){ const d=s.data(); cfg = { aziende:d.aziende||[], canali:d.canali||[], tecnici:d.tecnici||[] }; }
+  fillFilters(); renderSettings(); safeRender();
+}, err=>{ setStatus('Errore di connessione: ' + err.code, false); });
+
+function tryPurge(){
+  if(purged || !loaded || !timeSynced) return;
+  purged = true;
+  const [y,m] = oggiStr().split('-').map(Number);
+  const cutoff = new Date(Date.UTC(y, m-1-MESI_CONSERVAZIONE, 1)).toISOString().slice(0,10);
+  const vecchi = lavori.filter(l => l.scadenza && l.scadenza < cutoff);
+  for(let i=0;i<vecchi.length;i+=400){
+    const b = db.batch();
+    vecchi.slice(i,i+400).forEach(l=>b.delete(colLavori.doc(l.id)));
+    b.commit();
+  }
+}
+colLavori.onSnapshot(s=>{
+  lavori = s.docs.map(d=>({id:d.id, ...d.data()}));
+  loaded = true; tryPurge();
+  safeRender();
+}, err=>{ setStatus('Errore di connessione: ' + err.code, false); });
+
+const saveCfg = () => docCfg.set(cfg);
+const upd = (id, field, value) => colLavori.doc(id).update({[field]:value});
+
+/* ---------- Render ---------- */
+function editing(){
+  const a = document.activeElement;
+  return a && $('grid').contains(a) && (a.tagName==='INPUT' || a.tagName==='SELECT');
+}
+function safeRender(){ if(editing()) pendingRender = true; else render(); }
+$('grid').addEventListener('focusout', ()=>{ setTimeout(()=>{ if(pendingRender && !editing()){ pendingRender=false; render(); } }, 150); });
+
+function aziendaColor(name){
+  if(!name) return '#cbd5e1';
+  let i = cfg.aziende.indexOf(name);
+  if(i<0) i = [...name].reduce((s,c)=>s+c.charCodeAt(0),0);
+  return PALETTE[i % PALETTE.length];
+}
+function opts(list, current, placeholder){
+  const all = [...list]; if(current && !all.includes(current)) all.push(current);
+  return `<option value="">${placeholder}</option>` + all.map(v=>`<option ${v===current?'selected':''}>${esc(v)}</option>`).join('');
+}
+
+function filtrate(skipUrg){
+  const q = $('q').value.trim().toLowerCase();
+  const fa=$('fAz').value, ft=$('fTe').value, fc=$('fCa').value, st=$('fSt').value;
+  return lavori.filter(l=>{
+    if(st==='todo' && l.fatto) return false;
+    if(st==='done' && !l.fatto) return false;
+    if(fa && l.azienda!==fa) return false;
+    if(ft && l.tecnico!==ft) return false;
+    if(fc && l.canale!==fc) return false;
+    if(!skipUrg && fUr && urgenza(l).k!==fUr) return false;
+    if(q){
+      const hay = [l.azienda,l.canale,l.commissionante,l.descrizione,l.note,l.tecnico,l.consegna,l.scadenza].join(' ').toLowerCase();
+      if(!q.split(/\s+/).every(w=>hay.includes(w))) return false;
+    }
+    return true;
+  });
+}
+
+function rowHtml(l){
+  const u = urgenza(l);
+  let badge = '';
+  if(u.k==='critico'){
+    badge = u.g===1 ? '<span class="excl" title="Scade domani">!</span>'
+          : u.g===0 ? '<span class="pill">Oggi</span>'
+          : '<span class="pill">Scaduto</span>';
+  }
+  const hasNote = !!(l.note && l.note.trim());
+  const cls = ['row']; if(l.fatto) cls.push('done'); else if(u.cls) cls.push(u.cls); if(openNotes.has(l.id)) cls.push('open');
+  return `<div class="${cls.join(' ')}" data-id="${l.id}">
+    <label class="chk" title="Segna come fatto"><input type="checkbox" data-f="fatto" ${l.fatto?'checked':''} aria-label="Fatto"></label>
+    <div class="f az" data-l="Azienda"><div class="sw"><i class="cdot" style="--c:${aziendaColor(l.azienda)}"></i>
+      <select class="azienda ${l.azienda?'':'empty'}" data-f="azienda" aria-label="Azienda">${opts(cfg.aziende,l.azienda,'Azienda')}</select></div></div>
+    <div class="f ca" data-l="Canale"><select class="${l.canale?'':'empty'}" data-f="canale" aria-label="Canale">${opts(cfg.canali,l.canale,'Canale')}</select></div>
+    <div class="f co" data-l="Commissionante"><input type="text" data-f="commissionante" value="${esc(l.commissionante)}" placeholder="Commissionante" aria-label="Commissionante"></div>
+    <div class="f de" data-l="Lavoro"><input type="text" data-f="descrizione" value="${esc(l.descrizione)}" placeholder="Di cosa si tratta" aria-label="Lavoro"></div>
+    <div class="f te" data-l="Tecnico"><select class="${l.tecnico?'':'empty'}" data-f="tecnico" aria-label="Tecnico">${opts(cfg.tecnici,l.tecnico,'Tecnico')}</select></div>
+    <div class="f cn" data-l="Consegna"><input type="date" data-f="consegna" value="${esc(l.consegna)}" aria-label="Data di consegna"></div>
+    <div class="f sc" data-l="Scadenza"><input type="date" data-f="scadenza" value="${esc(l.scadenza)}" aria-label="Data di scadenza"></div>
+    <div class="end">${badge}
+      <button class="ib ${hasNote?'has':''}" data-act="note" title="Note" aria-label="Note">${ic('note',17)}</button>
+      <button class="ib" data-act="del" title="Elimina" aria-label="Elimina">${ic('trash',17)}</button>
+    </div>
+    <div class="note"><input type="text" data-f="note" value="${esc(l.note)}" placeholder="Note su questo lavoro…" aria-label="Note"></div>
+  </div>`;
+}
+
+const ts = l => l.createdAt?.seconds ?? Number.MAX_SAFE_INTEGER;
+
+function render(){
+  const list = filtrate(false);
+  const groups = {};
+  list.forEach(l=>{ const k = l.scadenza ? l.scadenza.slice(0,7) : '0000'; (groups[k] = groups[k]||[]).push(l); });
+  const nowKey = oggiStr().slice(0,7);
+  let html = '';
+  Object.keys(groups).sort().forEach(k=>{
+    const items = groups[k];
+    if(k==='0000') items.sort((a,b)=>ts(b)-ts(a));
+    else items.sort((a,b)=>a.scadenza.localeCompare(b.scadenza) || ts(a)-ts(b));
+    const title = k==='0000' ? 'Senza scadenza' : MESI[+k.slice(5,7)-1] + ' ' + k.slice(0,4);
+    html += `<div class="month">${title}${k===nowKey?'<span class="now">Mese corrente</span>':''}<small>${items.length} ${items.length===1?'lavoro':'lavori'}</small></div>` + items.map(rowHtml).join('');
+  });
+  $('grid').innerHTML = html || `<div class="empty-state"><b>Nessun lavoro da mostrare</b>Premi “Nuovo lavoro” per aggiungerne uno, oppure azzera i filtri.</div>`;
+  renderChips(); syncFilterStyles();
+  $('fSt').options[1].textContent = 'Completati (' + lavori.filter(l=>l.fatto).length + ')';
+  if(focusId){
+    const r = document.querySelector(`.row[data-id="${focusId}"]`);
+    if(r){ focusId = null; r.querySelector('select.azienda').focus({preventScroll:true}); }
+  }
+  if($('mTrend').classList.contains('open')) renderTrend();
+  measure();
+}
+function measure(){
+  const root = document.documentElement.style;
+  root.setProperty('--hh', $('hdr').offsetHeight + 'px');
+  root.setProperty('--ch', $('cols').offsetHeight + 'px');
+}
+new ResizeObserver(measure).observe($('hdr'));
+window.addEventListener('resize', measure);
+
+/* Chip urgenza (fanno anche da legenda) */
+const URG = [
+  ['critico','Critico','#dc2626','Scade domani, oggi o è già scaduto'],
+  ['urgente','Urgente','#f97316','Scade entro '+SOGLIA_ARANCIONE+' giorni'],
+  ['inarrivo','In arrivo','#eab308','Scade entro '+SOGLIA_GIALLO+' giorni']
+];
+function renderChips(){
+  const base = filtrate(true);
+  $('chips').innerHTML = URG.map(([k,n,c,t])=>{
+    const cnt = base.filter(l=>urgenza(l).k===k).length;
+    return `<button class="chip ${fUr===k?'on':''}" data-u="${k}" title="${t}"><i style="background:${c}"></i>${n}<b>${cnt}</b></button>`;
+  }).join('');
+}
+$('chips').addEventListener('click', e=>{
+  const b = e.target.closest('.chip'); if(!b) return;
+  fUr = fUr===b.dataset.u ? '' : b.dataset.u; render();
+});
+
+/* Filtri */
+function fillFilters(){
+  const keep = {fAz:$('fAz').value, fTe:$('fTe').value, fCa:$('fCa').value};
+  $('fAz').innerHTML = '<option value="">Tutte le aziende</option>' + cfg.aziende.map(v=>`<option>${esc(v)}</option>`).join('');
+  $('fTe').innerHTML = '<option value="">Tutti i tecnici</option>' + cfg.tecnici.map(v=>`<option>${esc(v)}</option>`).join('');
+  $('fCa').innerHTML = '<option value="">Tutti i canali</option>' + cfg.canali.map(v=>`<option>${esc(v)}</option>`).join('');
+  Object.entries(keep).forEach(([k,v])=>{ $(k).value = v; });
+}
+function syncFilterStyles(){
+  let n = 0;
+  ['fAz','fTe','fCa'].forEach(id=>{ const on = !!$(id).value; $(id).classList.toggle('on', on); if(on) n++; });
+  const stOn = $('fSt').value!=='todo'; $('fSt').classList.toggle('on', stOn); if(stOn) n++;
+  if(fUr) n++;
+  $('fBadge').textContent = n; $('fBadge').classList.toggle('on', n>0);
+  $('btnReset').style.visibility = (n>0 || $('q').value) ? 'visible' : 'hidden';
+}
+['fAz','fTe','fCa','fSt'].forEach(id=>$(id).addEventListener('change', render));
+$('q').addEventListener('input', render);
+function resetFilters(){ ['fAz','fTe','fCa','q'].forEach(id=>$(id).value=''); $('fSt').value='todo'; fUr=''; }
+$('btnReset').onclick = ()=>{ resetFilters(); render(); };
+$('btnFilt').onclick = ()=>{ $('hdr').classList.toggle('fopen'); };
+
+/* Eventi griglia */
+$('grid').addEventListener('change', e=>{
+  const t = e.target, row = t.closest('.row'); if(!row || !t.dataset.f) return;
+  const v = t.type==='checkbox' ? t.checked : t.value;
+  if(t.dataset.f==='azienda'){
+    t.classList.toggle('empty', !v);
+    row.querySelector('.cdot').style.setProperty('--c', aziendaColor(v));
+  }
+  if(t.tagName==='SELECT' && t.dataset.f!=='azienda') t.classList.toggle('empty', !v);
+  upd(row.dataset.id, t.dataset.f, v);
+});
+$('grid').addEventListener('click', e=>{
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const row = b.closest('.row'), id = row.dataset.id;
+  if(b.dataset.act==='del'){ if(confirm('Eliminare questo lavoro?')) colLavori.doc(id).delete(); }
+  if(b.dataset.act==='note'){
+    const open = row.classList.toggle('open');
+    open ? openNotes.add(id) : openNotes.delete(id);
+    if(open) row.querySelector('.note input').focus();
+  }
+});
+function nuovoLavoro(){
+  resetFilters();
+  const ref = colLavori.doc(); focusId = ref.id;
+  ref.set({azienda:'',canale:'',commissionante:'',descrizione:'',tecnico:'',consegna:oggiStr(),scadenza:'',note:'',fatto:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+  window.scrollTo({top:0, behavior:'smooth'});
+  $('hdr').classList.remove('fopen');
+}
+$('btnAdd').onclick = nuovoLavoro; $('fab').onclick = nuovoLavoro;
+
+/* Impostazioni */
+function renderSettings(){
+  [['aziende','lAz'],['canali','lCa'],['tecnici','lTe']].forEach(([key,el])=>{
+    $(el).innerHTML = cfg[key].map((v,i)=>`<div class="item">${key==='aziende'?`<i style="--c:${PALETTE[i%PALETTE.length]}"></i>`:''}<span>${esc(v)}</span><button data-rm="${key}" data-i="${i}" aria-label="Rimuovi ${esc(v)}">${ic('x',14)}</button></div>`).join('') || '<div class="none">Nessuno</div>';
+  });
+  $('hintPurge').textContent = 'I lavori con scadenza più vecchia di ' + MESI_CONSERVAZIONE + ' mesi vengono eliminati automaticamente per tenere leggero il database.';
+}
+$('mSet').addEventListener('click', e=>{
+  const t = e.target.closest('button') || e.target;
+  if(t.dataset.rm){ cfg[t.dataset.rm].splice(+t.dataset.i,1); saveCfg(); }
+  if(t.dataset.add){
+    const inp = $(t.dataset.inp), v = inp.value.trim();
+    if(v && !cfg[t.dataset.add].includes(v)){ cfg[t.dataset.add].push(v); saveCfg(); }
+    inp.value=''; inp.focus();
+  }
+  if(e.target===$('mSet')) closeModals();
+});
+['iAz','iCa','iTe'].forEach(id=>$(id).addEventListener('keydown', e=>{ if(e.key==='Enter') e.target.nextElementSibling.click(); }));
+
+/* Andamento */
+const DIMS = {tecnico:'Tecnici', commissionante:'Commissionanti', azienda:'Aziende', canale:'Canali'};
+function renderTrend(){
+  $('tabs').innerHTML = Object.entries(DIMS).map(([k,v])=>`<button data-d="${k}" class="${k===trendDim?'on':''}">${v}</button>`).join('');
+  const data = {}, vals = new Set();
+  lavori.forEach(l=>{
+    const d = l.consegna || l.scadenza; if(!d) return;
+    const m = d.slice(0,7), v = (l[trendDim]||'').trim() || '(non indicato)';
+    vals.add(v); (data[m] = data[m]||{})[v] = (data[m][v]||0)+1;
+  });
+  const cols = [...vals].sort((a,b)=>a.localeCompare(b));
+  const months = Object.keys(data).sort().reverse();
+  if(!months.length){ $('trendTable').innerHTML='<div class="empty-state"><b>Ancora nessun dato</b>I numeri compariranno appena inserisci dei lavori.</div>'; return; }
+  let max = 1; months.forEach(m=>cols.forEach(c=>{ max = Math.max(max, data[m][c]||0); }));
+  const totCol = {};
+  let h = `<table><tr><th>Mese</th>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}<th>Totale</th></tr>`;
+  months.forEach(m=>{
+    let tot = 0;
+    const cells = cols.map(c=>{
+      const n = data[m][c]||0; tot += n; totCol[c] = (totCol[c]||0)+n;
+      return n ? `<td style="background:rgba(79,70,229,${(.07+.25*n/max).toFixed(2)})">${n}</td>` : '<td class="z">–</td>';
+    }).join('');
+    h += `<tr><td>${MESI[+m.slice(5,7)-1]} ${m.slice(0,4)}</td>${cells}<td><b>${tot}</b></td></tr>`;
+  });
+  const grand = cols.reduce((s,c)=>s+totCol[c],0);
+  h += `<tr class="tot"><td>Totale</td>${cols.map(c=>`<td>${totCol[c]}</td>`).join('')}<td>${grand}</td></tr></table>`;
+  $('trendTable').innerHTML = h;
+}
+$('tabs').addEventListener('click', e=>{ if(e.target.dataset.d){ trendDim = e.target.dataset.d; renderTrend(); } });
+
+/* Finestre */
+function closeModals(){ $('mSet').classList.remove('open'); $('mTrend').classList.remove('open'); document.body.style.overflow=''; }
+function openModal(el){ closeModals(); el.classList.add('open'); document.body.style.overflow='hidden'; }
+$('btnSet').onclick = ()=>openModal($('mSet'));
+$('btnTrend').onclick = ()=>{ renderTrend(); openModal($('mTrend')); };
+$('xSet').onclick = closeModals; $('xTrend').onclick = closeModals;
+$('mTrend').addEventListener('click', e=>{ if(e.target===$('mTrend')) closeModals(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModals(); });
+
+/* Avvio */
+setStatus('Connessione…');
+syncTime();
+setInterval(syncTime, 10*60*1000);        // risincronizza l'ora ogni 10 minuti
+setInterval(()=>safeRender(), 60*1000);   // ricalcola i colori ogni minuto
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) syncTime(); });
+</script>
+</body>
+</html>
