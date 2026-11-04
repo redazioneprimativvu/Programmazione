@@ -15,6 +15,25 @@ body.so{
 }
 body.so .editors,body.so .side{display:none}
 body.so .layout{grid-template-columns:1fr}
+body.tg{
+  --accent:#d97706; --tint:#fde9c4; --tint-line:#f5d28f; --tint-ink:#7a4a00; --tint-soft:#fff6e3;
+}
+body.tg .editors,body.tg .side,body.tg .datebar{display:none}
+body.tg .layout{grid-template-columns:1fr}
+.panel[data-e=tg]{max-width:900px}
+.tgc{padding:18px 20px}
+.tgn{font-size:12px;color:var(--muted);margin-bottom:6px}
+.tgw{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#b45309;margin:18px 0 6px;padding-bottom:6px;border-bottom:2px solid var(--tint-line)}
+.tgi{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}
+.tgd{flex:0 0 104px;text-align:center;font-size:13px;font-weight:800;letter-spacing:.3px;background:var(--accent);color:#fff;border-radius:8px;padding:6px 8px}
+.tgt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tgt b{font-size:15px;color:var(--navy);overflow-wrap:anywhere}
+.tgt span{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.tgm{font-size:12px;color:var(--muted);white-space:nowrap}
+.tgdt{font-size:13px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tgx{border:0;background:transparent;color:var(--muted);font-size:15px;cursor:pointer;border-radius:6px;padding:4px 7px}
+.tgx:hover{background:#fde4e2;color:#b3261e}
+@media(max-width:700px){.tgi{flex-wrap:wrap;gap:8px}.tgd{flex:0 0 auto}.tgt{flex:1 1 60%}.tgm{order:5}}
 body.tn{
   --accent:#1f9d63; --tint:#cdeedb; --tint-line:#a9dcc0; --tint-ink:#15683f; --tint-soft:#e6f6ed;
 }
@@ -70,12 +89,14 @@ textarea.nm{font-weight:700;padding:7px 6px;line-height:1.25;overflow:hidden;res
 .card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(20,30,60,.08);overflow:hidden}
 table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:clamp(11px,.62vw,14px)}
 thead th{background:#f4f6fb;color:var(--muted);font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:11px 3px;text-align:center;border-bottom:2px solid var(--accent);white-space:nowrap;overflow:hidden}
-th.hd{width:24px}th.wsg{width:140px}th.wst{width:105px}th.wss{width:112px}th.wsi,th.wsf{width:54px}th.wa3{width:108px}.panel[data-e=so] th.wc{width:60px}.panel[data-e=so] th.wn{width:40px}th.wn{width:34px}th.wnm{width:16em}th.wg{width:15em}th.wm{width:15em}th.wc{width:96px}th.wo{width:62px}th.wd{width:100px}th.ac{width:158px}
+th.hd{width:24px}th.wsg{width:140px}th.wst{width:105px}th.wss{width:112px}th.wsi,th.wsf{width:54px}th.wa3{width:108px}.panel[data-e=so] th.wc{width:60px}.panel[data-e=so] th.wn{width:40px}th.wn{width:34px}th.wnm{width:16em}th.wg{width:15em}th.wm{width:15em}th.wc{width:46px}th.wo{width:54px}th.wd{width:66px}.panel[data-e=pt] th.wn{width:62px}th.ac{width:158px}
 td.ac{padding-left:4px;padding-right:4px}
 .th-p{display:none}
 tbody td{padding:6px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
 tbody tr:hover td{background:#fafbfe}
 td.n{font-weight:800;color:var(--navy);font-size:1.15em}
+.tgk{width:16px;height:16px;margin:0 0 0 6px;vertical-align:middle;accent-color:#d97706;cursor:pointer}
+.tgh{display:block;font-size:9px;letter-spacing:1px;color:#b45309}
 td.hd{color:#a4adc0;cursor:grab;font-size:18px;user-select:none;touch-action:none}
 td.hd:hover{color:var(--accent)}
 input[type=text]{width:100%;border:1px solid transparent;background:transparent;padding:7px 6px;border-radius:8px;font:inherit;color:var(--ink)}
@@ -92,8 +113,8 @@ select:focus{outline:0;border-color:var(--accent)}
 .ck{width:26px;height:26px;accent-color:var(--green);cursor:pointer}
 .ck:disabled{cursor:not-allowed;opacity:1}
 .ck.lock{outline:2px solid #bfe3cb;outline-offset:2px;border-radius:4px}
-td.t{width:64px;font-variant-numeric:tabular-nums;font-weight:700;color:var(--navy)}
-td.du{width:100px;border-left:1px solid var(--line)}
+td.t{width:54px;font-variant-numeric:tabular-nums;font-weight:700;color:var(--navy)}
+td.du{width:66px;border-left:1px solid var(--line)}
 input.du{text-align:center;font-weight:700;font-size:1.1em;font-variant-numeric:tabular-nums;letter-spacing:.3px}
 input.du::placeholder{font-weight:500;color:#b3bacb}
 tfoot td{background:var(--tint-soft);border-top:2px solid var(--accent);padding:10px 8px}
@@ -376,6 +397,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   header,.datebar,.editors,.overlay,.side,.np,#err,#toast{display:none!important}
   main{margin:0;max-width:none;padding:0}
   .layout{display:block}
+  .tgk,.tgh,.tgx{display:none!important}
   .panel{display:none!important}.panel.on{display:block!important}
   #panels,.panel[data-e=so]{max-width:none}
   .printhead{display:block;margin-bottom:5px;border-bottom:2px solid #111a2e;padding-bottom:3px}
@@ -526,7 +548,7 @@ const oldestDay=()=>addDays(todayId(),-RETENTION_DAYS);
 
 /* ---------- stato ---------- */
 const newPost=()=>({g:'',post:'',tipo:'',soc:'',c1:false,o1:'',t1:0,c2:false,o2:'',t2:0,x:false});
-const newRow=()=>({nome:'',titolo:'',g:'',m:'',c1:false,o1:'',t1:0,c2:false,o2:'',t2:0,x:false,du:0});
+const newRow=()=>({tgs:false,nome:'',titolo:'',g:'',m:'',c1:false,o1:'',t1:0,c2:false,o2:'',t2:0,x:false,du:0});
 
 /* durata dei servizi, salvata in secondi. Si scrive solo con le cifre: 130 diventa 1:30, 45 diventa 0:45, 3 diventa 3:00.
    Vanno bene anche 1:30, 1.30 e 1'30. */
@@ -589,7 +611,7 @@ function merge(base,src){
   return base;
 }
 let S=blank(),CFG={giornalisti:[],montatori:[],tipologie:DEF_TIP.slice(),social:DEF_SOC.slice()},hasData={};
-let active=EM[0].id,curDay=null,autoFollow=true,dayRef=null,unsubDay=null;
+let scReady=false,active=EM[0].id,curDay=null,autoFollow=true,dayRef=null,unsubDay=null;
 
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
@@ -662,13 +684,47 @@ TABS.forEach(e=>{
     <thead><tr><th class="hd np"></th><th class="wn">N°</th><th class="wsg">Giornalista</th><th class="wsp">Nome del post</th><th class="wst">Tipologia</th><th class="wss">Social</th><th class="wc np">Iniziato</th><th class="wsi"><span class="th-s">Orario</span><span class="th-p">Ora inizio</span></th><th class="wc np">Finito</th><th class="wsf"><span class="th-s">Orario</span><span class="th-p">Ora fine</span></th><th class="wa3 np"></th></tr></thead>
     <tbody></tbody></table></div>`:`<div class="printhead"><h1>${e.nome} — <span class="pdate"></span></h1></div>
   <div class="card"><table>
-    <thead><tr><th class="hd np"></th><th class="wn">N°</th><th class="wnm">Nome servizio</th><th class="wtt np">Titolo servizio</th><th class="wg">Giornalista</th><th class="wm">Montatore</th><th class="wc np">Consegnato</th><th class="wo"><span class="th-s">Orario</span><span class="th-p">Ora consegna</span></th><th class="wc np">Completato</th><th class="wo np">Orario</th><th class="wd">Durata</th><th class="ac np"></th></tr></thead>
+    <thead><tr><th class="hd np"></th><th class="wn">N°${e.id==='pt'?'<span class="np tgh" title="Spunta i pezzi che vanno nel TG della settimana">TG</span>':''}</th><th class="wnm">Nome servizio</th><th class="wtt np">Titolo servizio</th><th class="wg">Giornalista</th><th class="wm">Montatore</th><th class="wc np" title="Consegnato">Cons.</th><th class="wo"><span class="th-s">Ora</span><span class="th-p">Ora consegna</span></th><th class="wc np" title="Completato">Compl.</th><th class="wo np">Ora</th><th class="wd">Durata</th><th class="ac np"></th></tr></thead>
     <tbody></tbody>
     <tfoot><tr class="tot"><td class="tl" colspan="10"><span>Durata totale</span><small class="np tmiss"></small></td><td class="tv" data-tot>0:00</td><td class="ac np"></td></tr></tfoot></table></div>`;
   panelsEl.appendChild(p);
   TB[e.id]=p.querySelector('tbody');TT[e.id]=p;ROW[e.id]={};
 });
+const TGTAB=document.createElement('button');TGTAB.className='tab';TGTAB.textContent='TG Settimana';TGTAB.dataset.e='tg';
+TGTAB.onclick=()=>{active='tg';showTab();};tabsEl.appendChild(TGTAB);
+{const p=document.createElement('section');p.className='panel';p.dataset.e='tg';
+ p.innerHTML='<div class="printhead"><h1>TG Settimana</h1></div><div class="card tgc" id="tgBody"></div>';panelsEl.appendChild(p);}
+const GIORNI=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+const dmy=id=>id.slice(8)+'/'+id.slice(5,7)+'/'+id.slice(0,4);
+function renderTG(){
+  const box=$('#tgBody');if(!box||active!=='tg')return;
+  if(!scReady){box.innerHTML='<div class="empty">Caricamento…</div>';return;}
+  const items=[];
+  Object.keys(SC).filter(id=>/^\d{4}-\d{2}-\d{2}$/.test(id)).sort().forEach(id=>{
+    const pt=SC[id]&&SC[id].pt;if(!pt||!pt.rows)return;
+    const ord=Array.isArray(pt.order)?pt.order:Object.keys(pt.rows);
+    ord.forEach(rid=>{const r=pt.rows[rid];if(rid!=='P'&&r&&typeof r==='object'&&r.tgs&&!r.x)items.push({id,rid,r});});
+  });
+  if(!items.length){box.innerHTML='<div class="empty">Nessun pezzo scelto. In Prima Tivvù spunta la casella accanto al numero del servizio.</div>';return;}
+  let h=`<div class="tgn">${items.length} ${items.length===1?'pezzo scelto':'pezzi scelti'}, dal più vecchio al più recente</div>`,wk='';
+  items.forEach(({id,rid,r})=>{
+    const dt=new Date(id+'T12:00:00Z'),dow=dt.getUTCDay();
+    const mon=new Date(dt.getTime()-((dow+6)%7)*864e5),sun=new Date(mon.getTime()+6*864e5);
+    const mid=mon.toISOString().slice(0,10);
+    if(mid!==wk){wk=mid;h+=`<div class="tgw">Settimana dal ${dmy(mid).slice(0,5)} al ${dmy(sun.toISOString().slice(0,10)).slice(0,5)}</div>`;}
+    const who=[r.g,r.m].filter(Boolean).join(' · ');
+    h+=`<div class="tgi"><span class="tgd">${GIORNI[dow]}</span><div class="tgt"><b>${esc(r.nome||'(senza nome)')}</b>${r.titolo?`<span>${esc(r.titolo)}</span>`:''}</div>${who?`<span class="tgm">${esc(who)}</span>`:''}<span class="tgdt">${dmy(id)}</span><button class="tgx np" data-d="${id}" data-r="${rid}" title="Togli dal TG della settimana">✕</button></div>`;
+  });
+  box.innerHTML=h;
+}
+$('#panels').addEventListener('click',ev=>{
+  const b=ev.target.closest&&ev.target.closest('.tgx');if(!b)return;
+  db.collection('scalette').doc(b.dataset.d).set({pt:{rows:{[b.dataset.r]:{tgs:false}}}},{merge:true}).catch(showErr);
+  const x=SC[b.dataset.d]&&SC[b.dataset.d].pt&&SC[b.dataset.d].pt.rows[b.dataset.r];if(x)x.tgs=false;renderTG();
+});
 function showTab(){
+  document.body.classList.toggle('tg',active==='tg');
+  if(active==='tg'){ensureSC();renderTG();}
   document.body.classList.toggle('tn',active==='tn');
   document.body.classList.toggle('so',active==='so');
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.e===active));
@@ -683,7 +739,7 @@ function makeRow(e,id){
   }else{
     tr.innerHTML=`
       <td class="hd np" title="Trascina per spostare">⠿</td>
-      <td class="n"></td>
+      <td class="n"><span class="nn"></span>${e==='pt'?'<input type="checkbox" class="tgk np" data-f="tgs" title="Questo pezzo va nel TG della settimana">':''}</td>
       <td class="nm"><textarea class="nm up" rows="1" data-f="nome" placeholder="Nome servizio" autocomplete="off" spellcheck="false"></textarea></td>
       <td class="tt np"><div class="cw"><textarea class="up ti" rows="1" wrap="off" data-f="titolo" maxlength="${MAX_TITOLO}" placeholder="Titolo del servizio" autocomplete="off" spellcheck="false"></textarea><span class="cnt"></span></div></td>
       <td><select data-f="g"></select></td>
@@ -809,7 +865,7 @@ function sync(){
       const tr=map[id],r=st.rows[id];
       if(!r.x){n++;totSec+=r.du||0;if(!r.du)miss++;}
       tr.classList.toggle('barrato',!!r.x);tr.classList.toggle('np',!!r.x);
-      tr.querySelector('.n').textContent=r.x?'':n;
+      (tr.querySelector('.nn')||tr.querySelector('.n')).textContent=r.x?'':n;
       tr.querySelectorAll('[data-f]').forEach(el=>{
         const f=el.dataset.f;
         if(f==='nome'||f==='titolo'){
@@ -818,6 +874,7 @@ function sync(){
           else fitN(el);
         }
         else if(f==='g')fillSelect(el,gl,r.g);
+        else if(f==='tgs')el.checked=!!r.tgs;
         else if(f==='m')fillSelect(el,ml,r.m);
         else if(f==='c1'){el.checked=r.c1;el.disabled=(r.c1&&!adminOn())||!!r.x;el.classList.toggle('lock',r.c1&&!adminOn());el.title=(r.c1&&adminOn()&&!r.x)?'Clicca per togliere la spunta':'';}
         else if(f==='c2'){el.checked=r.c2;el.disabled=(r.c2&&!adminOn())||!r.c1||!!r.x;el.classList.toggle('lock',r.c2&&!adminOn());el.title=(r.c2&&adminOn()&&!r.x)?'Clicca per togliere la spunta':'';}
@@ -1051,6 +1108,7 @@ panelsEl.addEventListener('change',ev=>{
   const el=ev.target,f=el.dataset.f;if(!f)return;
   const tr=el.closest('tr'),e=tr.dataset.e,id=tr.dataset.id,b=e+'.rows.'+id+'.',r=S[e].rows[id];
   if(e==='so'){socChange(el,id);return;}
+  if(f==='tgs'){patch({[b+'tgs']:el.checked});return;}
   if(f==='nome'||f==='titolo'){clearTimeout(el._t);el._t=0;saveTxt(el);sync();}
   else if(f==='du'){
     const v=parseDur(el.value);
@@ -1306,7 +1364,9 @@ function ensureSC(){
   db.collection('scalette').onSnapshot(qs=>{
     Object.keys(SC).forEach(k=>delete SC[k]);
     qs.forEach(doc=>{SC[doc.id]=doc.data()||{};});
+    scReady=true;
     if($('#stOv').classList.contains('on'))renderStats();
+    renderTG();
   },e=>{scOn=false;showErr(e);});
 }
 /* fasce da 5 minuti per il tempo di montaggio, valide per il mese e per i singoli giorni */
@@ -1519,7 +1579,7 @@ window.addEventListener('beforeprint',()=>{
   document.querySelectorAll('.pdate').forEach(x=>x.textContent=longDate(curDay));
   document.querySelectorAll('td.pt').forEach(t=>t.colSpan=5);
   document.querySelectorAll('td.tl').forEach(t=>t.colSpan=5);
-  const rows=Math.max(1,S[active].order.filter(id=>id==='P'||!S[active].rows[id].x).length)+(active==='so'?0:1);   // +1 per la riga del totale dei servizi
+  const rows=!S[active]?1:Math.max(1,S[active].order.filter(id=>id==='P'||!S[active].rows[id].x).length)+(active==='so'?0:1);   // +1 per la riga del totale dei servizi
   const rh=Math.min(10,170/rows);
   const r=document.documentElement.style;
   r.setProperty('--rh',rh.toFixed(2)+'mm');
