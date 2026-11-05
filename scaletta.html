@@ -1399,8 +1399,8 @@ function modeBin(hh){
   return best;
 }
 const binTxt=lo=>lo+'–'+(lo+BIN)+' min';
-/* un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") è una foto, tutti gli altri sono servizi */
-const isFoto=n=>/^FOTO/.test(String(n||'').trim().toUpperCase());
+/* un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") o con "FN" è una foto, tutti gli altri sono servizi */
+const isFoto=n=>/^(FOTO|FN)/.test(String(n||'').trim().toUpperCase());
 const NI='(non indicato)';
 function socNew(){return {n:0,g:{},soc:{},tip:{}};}
 function socAcc(a,r){
@@ -1482,7 +1482,7 @@ function statSections(map,gmap,smap,day){
         <div class="sb"><div class="bar b1" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}</b></div>
         <div class="sb">${modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,(modes[i]+BIN)/maxA*80)}%"></div><b>${binTxt(modes[i])}</b>`:'<b>—</b>'}</div>${chips?`<div class="kcs">${chips}</div>`:''}</div>`;
     });
-    h+='<p class="snote">Le cose fatte sono i servizi completati, le foto e le attività extra spuntate. Un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") conta come foto, gli altri come servizi. Il tempo è la fascia da 5 minuti in cui cadono più servizi (moda), da "Consegnato" a "Completato"; per le attività extra va dal primo al secondo clic.'+(day?'':' I dati registrati prima di questo aggiornamento non distinguono servizi e foto e non hanno la moda: usa il pulsante ↻ per ricalcolarli.')+'</p>';
+    h+='<p class="snote">Le cose fatte sono i servizi completati, le foto e le attività extra spuntate. Un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") o con "FN" conta come foto, gli altri come servizi. Il tempo è la fascia da 5 minuti in cui cadono più servizi (moda), da "Consegnato" a "Completato"; per le attività extra va dal primo al secondo clic.'+(day?'':' I dati registrati prima di questo aggiornamento non distinguono servizi e foto e non hanno la moda: usa il pulsante ↻ per ricalcolarli.')+'</p>';
   }
   h+='</section><section class="ssec"><h3 class="sh3"><i class="dt b3"></i>Giornalisti</h3>';
   if(!garr.length){
