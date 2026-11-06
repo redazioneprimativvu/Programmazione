@@ -29,6 +29,7 @@ body.tg .layout{grid-template-columns:1fr}
 .tgt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .tgt b{font-size:15px;color:var(--navy);overflow-wrap:anywhere}
 .tgt span{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.tgo{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#b3261e;background:#fde3e3;border-radius:10px;padding:1px 8px;margin-left:6px;vertical-align:middle}
 .tgm{font-size:12px;color:var(--muted);white-space:nowrap}
 .tgdt{font-size:13px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
 .tgx{border:0;background:transparent;color:var(--muted);font-size:15px;cursor:pointer;border-radius:6px;padding:4px 7px}
@@ -723,7 +724,7 @@ function renderTG(){
   Object.keys(SC).filter(id=>/^\d{4}-\d{2}-\d{2}$/.test(id)).sort().forEach(id=>{
     const pt=SC[id]&&SC[id].pt;if(!pt||!pt.rows)return;
     const ord=Array.isArray(pt.order)?pt.order:Object.keys(pt.rows);
-    ord.forEach(rid=>{const r=pt.rows[rid];if(rid!=='P'&&r&&typeof r==='object'&&r.tgs&&!r.x)items.push({id,rid,r});});
+    ord.forEach(rid=>{const r=pt.rows[rid];if(rid!=='P'&&r&&typeof r==='object'&&r.tgs)items.push({id,rid,r});});
   });
   if(!items.length){box.innerHTML='<div class="empty">Nessun pezzo scelto. In Prima Tivvù spunta la casella accanto al numero del servizio.</div>';return;}
   let h=`<div class="tgn">${items.length} ${items.length===1?'pezzo scelto':'pezzi scelti'}, dal più vecchio al più recente</div>`,wk='';
@@ -733,7 +734,7 @@ function renderTG(){
     const mid=mon.toISOString().slice(0,10);
     if(mid!==wk){wk=mid;h+=`<div class="tgw">Settimana dal ${dmy(mid).slice(0,5)} al ${dmy(sun.toISOString().slice(0,10)).slice(0,5)}</div>`;}
     const who=[r.g,r.m].filter(Boolean).join(' · ');
-    h+=`<div class="tgi"><span class="tgd">${GIORNI[dow]}</span><div class="tgt"><b>${esc(r.nome||'(senza nome)')}</b>${r.titolo?`<span>${esc(r.titolo)}</span>`:''}</div>${who?`<span class="tgm">${esc(who)}</span>`:''}<span class="tgdt">${dmy(id)}</span><button class="tgx np" data-d="${id}" data-r="${rid}" title="Togli dal TG della settimana">✕</button></div>`;
+    h+=`<div class="tgi"><span class="tgd">${GIORNI[dow]}</span><div class="tgt"><b>${esc(r.nome||'(senza nome)')}${r.x?' <em class="tgo">non in onda</em>':''}</b>${r.titolo?`<span>${esc(r.titolo)}</span>`:''}</div>${who?`<span class="tgm">${esc(who)}</span>`:''}<span class="tgdt">${dmy(id)}</span><button class="tgx np" data-d="${id}" data-r="${rid}" title="Togli dal TG della settimana">✕</button></div>`;
   });
   box.innerHTML=h;
 }
