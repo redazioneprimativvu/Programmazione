@@ -242,6 +242,13 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .dt.b1{background:#2f6bff}.dt.b3{background:#14a38b}.dt.b4{background:#8b5cf6}
 .bar.b4{background:#8b5cf6}
 .srow .kcs{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:-2px}
+.fb{display:flex;width:100%;height:22px;border-radius:6px;overflow:hidden;background:var(--line)}
+.fb i{display:flex;align-items:center;justify-content:center;min-width:0;font-style:normal;font-size:11px;font-weight:800;color:#fff;overflow:hidden}
+.f0{background:#2fa36b}.f1{background:#8cbf3f}.f2{background:#e0b020}.f3{background:#e07a2a}.f4{background:#c8372d}
+.fb i.f1,.fb i.f2{color:#2b2b2b}
+.fl{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11px;color:var(--muted);margin:2px 0 8px}
+.fl span{display:inline-flex;align-items:center;gap:5px}
+.fl i{width:11px;height:11px;border-radius:3px;display:inline-block}
 .kc{display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:2px 10px;background:#e8eefc;color:#1f4a86}
 .kc.f{background:#fdecc8;color:#8a5a00}
 .kc.x{background:#eef1f6;color:var(--muted)}
@@ -678,7 +685,7 @@ function statsAdd(name,ym,sign,ms,extra,nome){
   const upd={nome:name,n:INC(sign)};
   if(extra)upd.ex=INC(sign);                       // attività extra (contano come cose fatte)
   else if(typeof nome==='string'){if(isFoto(nome))upd.fo=INC(sign);else upd.sv=INC(sign);}   // foto o servizio, dal nome
-  if(ms!=null&&ms>=0){upd.ms=INC(sign*ms);upd.nt=INC(sign);upd.h={[String(Math.round(ms/60000))]:INC(sign)};}   // istogramma dei minuti per la moda
+  if(!extra&&ms!=null&&ms>=0){upd.ms=INC(sign*ms);upd.nt=INC(sign);upd.h={[String(Math.round(ms/60000))]:INC(sign)};}   // istogramma dei minuti per la moda
   db.collection('statistiche').doc(ym).set({m:{[mkey(name)]:upd}},{merge:true}).catch(showErr);
 }
 
@@ -1419,6 +1426,19 @@ function modeBin(hh){
   return best;
 }
 const binTxt=lo=>lo+'–'+(lo+BIN)+' min';
+/* barra a fasce di tempo: mostra quanti pezzi cadono in ogni fascia, così si vede la dispersione e non solo il valore più frequente */
+const FASCE=[{max:5,t:'meno di 5 min'},{max:10,t:'5 a 10 min'},{max:30,t:'10 a 30 min'},{max:60,t:'30 a 60 min'},{max:Infinity,t:'oltre 1 ora'}];
+function fasceOf(hh){
+  const c=FASCE.map(()=>0);
+  Object.entries(hh||{}).forEach(([m,n])=>{if(n>0){const v=Number(m);c[FASCE.findIndex(f=>v<f.max)]+=n;}});
+  return c;
+}
+function fasceBar(hh){
+  const c=fasceOf(hh),tot=c.reduce((a,b)=>a+b,0);
+  if(!tot)return '<b>—</b>';
+  return '<div class="fb" role="img" aria-label="'+FASCE.map((f,i)=>f.t+' '+c[i]).join(', ')+'">'+c.map((n,i)=>n?`<i class="f${i}" style="flex:${n}" title="${FASCE[i].t}, ${n} ${n===1?'pezzo':'pezzi'}">${n}</i>`:'').join('')+'</div>';
+}
+const fasceLegend='<div class="fl nopr">'+FASCE.map((f,i)=>`<span><i class="f${i}"></i>${f.t}</span>`).join('')+'</div>';
 /* un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") o con "FN" è una foto, tutti gli altri sono servizi */
 const isFoto=n=>/^(FOTO|FN)/.test(String(n||'').trim().toUpperCase());
 const NI='(non indicato)';
@@ -1451,7 +1471,7 @@ function aggDay(d){
     Object.keys(exs[k]||{}).forEach(id=>{
       const x=exs[k][id];
       if(!x||typeof x!=='object'||!x.d||!String(x.t||'').trim()||!name)return;
-      const o=gm(name);o.n++;o.ex++;tm(o,x.t1,x.t2);
+      const o=gm(name);o.n++;o.ex++;   // le attività extra non entrano nei tempi di montaggio
     });
   });
   Object.values((d.so&&d.so.rows)||{}).forEach(r=>{if(r&&typeof r==='object'&&r.c2)socAcc(s,r);});
@@ -1464,20 +1484,20 @@ function socSection(sm,day){
   const by=o=>Object.values(o||{}).filter(x=>x&&x.n>0).sort((a,b)=>b.n-a.n||byName(a.nome||'',b.nome||''));
   const garr=by(sm.g),sarr=by(sm.soc),tarr=by(sm.tip);
   const all={};garr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
-  const tm=modeBin(all),modes=garr.map(x=>modeBin(x.h)),maxN=Math.max(...garr.map(x=>x.n)),maxA=Math.max(BIN,...modes.filter(a=>a!=null).map(a=>a+BIN));
-  h+=`<div class="sum"><div><small>Post finiti</small><b>${sm.n}</b></div><div><small>Giornalisti</small><b>${garr.length}</b></div><div><small>Tempo più frequente</small><b>${tm!=null?binTxt(tm):'—'}</b></div></div>
-  <div class="sh"><span>Giornalista</span><span>Post finiti</span><span>Tempo più frequente (fascia da 5 min)</span></div>`;
+  const maxN=Math.max(...garr.map(x=>x.n));
+  h+=`<div class="sum"><div><small>Post finiti</small><b>${sm.n}</b></div><div><small>Giornalisti</small><b>${garr.length}</b></div></div>
+  <div class="sh"><span>Giornalista</span><span>Post finiti</span><span>Tempi per post</span></div>${fasceLegend}`;
   garr.forEach((x,i)=>{
     h+=`<div class="srow"><div class="sn">${esc(x.nome||'')}</div>
       <div class="sb"><div class="bar b4" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}</b></div>
-      <div class="sb">${modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,(modes[i]+BIN)/maxA*80)}%"></div><b>${binTxt(modes[i])}</b>`:'<b>—</b>'}</div></div>`;
+      <div class="sb">${fasceBar(x.h)}</div></div>`;
   });
   const list=(title,arr)=>{
     const mx=Math.max(...arr.map(x=>x.n));
     return `<div class="sh4">${title}</div>`+arr.map(x=>`<div class="srow g p"><div class="sn">${esc(x.nome||'')}</div><div class="sb"><div class="bar b4" style="width:${Math.max(2,x.n/mx*80)}%"></div><b>${x.n}</b></div></div>`).join('');
   };
   h+=list('Per social network',sarr)+list('Per tipologia',tarr);
-  h+='<p class="snote">Contano i post con la spunta "Finito". Il tempo va da "Iniziato" a "Finito".</p>';
+  h+='<p class="snote">Contano i post con la spunta "Finito". La barra mostra i tempi da "Iniziato" a "Finito".</p>';
   return h+'</section>';
 }
 /* sezioni Montatori, Giornalisti e Social, uguali per il mese e per il singolo giorno */
@@ -1492,17 +1512,16 @@ function statSections(map,gmap,smap,day){
     const totSv=arr.reduce((s,x)=>s+Math.max(0,x.sv||0),0),totFo=arr.reduce((s,x)=>s+Math.max(0,x.fo||0),0);
     const kinds=totSv+totFo>0,maxN=Math.max(...arr.map(x=>x.n));
     const all={};arr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
-    const totMode=modeBin(all),modes=arr.map(x=>modeBin(x.h)),maxA=Math.max(BIN,...modes.filter(a=>a!=null).map(a=>a+BIN));
-    h+=`<div class="sum"><div><small>Cose fatte</small><b>${tot}</b></div>${kinds?`<div><small>Servizi</small><b>${totSv}</b></div><div><small>Foto</small><b>${totFo}</b></div>`:''}<div><small>Extra</small><b>${totEx}</b></div><div><small>Tempo più frequente</small><b>${totMode!=null?binTxt(totMode):'—'}</b></div></div>
-    <div class="sh"><span>Montatore</span><span>Cose fatte</span><span>Tempo più frequente (fascia da 5 min)</span></div>`;
+    h+=`<div class="sum"><div><small>Cose fatte</small><b>${tot}</b></div>${kinds?`<div><small>Servizi</small><b>${totSv}</b></div><div><small>Foto</small><b>${totFo}</b></div>`:''}<div><small>Extra</small><b>${totEx}</b></div></div>
+    <div class="sh"><span>Montatore</span><span>Cose fatte</span><span>Tempi di montaggio</span></div>${fasceLegend}`;
     arr.forEach((x,i)=>{
       const ex=x.ex>0?x.ex:0,sv=Math.max(0,x.sv||0),fo=Math.max(0,x.fo||0);
       const chips=(sv+fo>0?`<span class="kc">${sv} ${sv===1?'servizio':'servizi'}</span><span class="kc f">${fo} foto</span>`:'')+(ex?`<span class="kc x">${ex} extra</span>`:'');
       h+=`<div class="srow"><div class="sn">${esc(x.nome||'')}</div>
         <div class="sb"><div class="bar b1" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}</b></div>
-        <div class="sb">${modes[i]!=null?`<div class="bar b2" style="width:${Math.max(2,(modes[i]+BIN)/maxA*80)}%"></div><b>${binTxt(modes[i])}</b>`:'<b>—</b>'}</div>${chips?`<div class="kcs">${chips}</div>`:''}</div>`;
+        <div class="sb">${fasceBar(x.h)}</div>${chips?`<div class="kcs">${chips}</div>`:''}</div>`;
     });
-    h+='<p class="snote">Le cose fatte sono i servizi completati, le foto e le attività extra spuntate. Un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") o con "FN" conta come foto, gli altri come servizi. Il tempo è la fascia da 5 minuti in cui cadono più servizi (moda), da "Consegnato" a "Completato"; per le attività extra va dal primo al secondo clic.'+(day?'':' I dati registrati prima di questo aggiornamento non distinguono servizi e foto e non hanno la moda: usa il pulsante ↻ per ricalcolarli.')+'</p>';
+    h+='<p class="snote">Le cose fatte sono i servizi completati, le foto e le attività extra spuntate. Un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") o con "FN" conta come foto, gli altri come servizi. La barra mostra quanti pezzi di ogni montatore cadono in ciascuna fascia di tempo, da "Consegnato" a "Completato" (le attività extra non contano nei tempi): più rossa significa più lenta.'+(day?'':' I dati registrati prima di questi aggiornamenti non distinguono servizi e foto: usa il pulsante ↻ per ricalcolarli.')+'</p>';
   }
   h+='</section><section class="ssec"><h3 class="sh3"><i class="dt b3"></i>Giornalisti</h3>';
   if(!garr.length){
@@ -1591,7 +1610,6 @@ async function recalcMonth(ym){
           const ok=!!x.d&&String(x.t||'').trim()!=='';
           if(ok&&name){
             const o=get(name);o.n++;o.ex++;tot++;totEx++;
-            if(x.t1&&x.t2&&x.t2>=x.t1){const ms=x.t2-x.t1;o.ms+=ms;o.nt++;const b=String(Math.round(ms/60000));o.h[b]=(o.h[b]||0)+1;}
           }
           if(!!x.s!==ok)ups.push([doc.ref,{['extras.'+k+'.'+id+'.s']:ok}]);   // allinea il segno di "già contata"
         });
