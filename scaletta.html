@@ -22,6 +22,14 @@ body.tg .editors,body.tg .side,body.tg .datebar{display:none}
 body.tg .layout{grid-template-columns:1fr}
 .panel[data-e=tg]{max-width:900px}
 .tgc{padding:18px 20px}
+.tgnav{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.tgl{font-size:17px;font-weight:800;color:var(--navy);flex:1;min-width:200px}
+.tgcur{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;background:var(--tint);color:var(--tint-ink);border-radius:10px;padding:2px 9px;margin-left:8px;vertical-align:middle}
+.tgb{border:1px solid var(--tint-line);background:#fff;border-radius:8px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--tint-ink)}
+.tgb:hover:not(:disabled){background:var(--tint-soft)}
+.tgb:disabled{opacity:.35;cursor:default}
+.tgnow{background:var(--accent);border-color:var(--accent);color:#fff}
+.tgnow:hover:not(:disabled){background:var(--accent);filter:brightness(1.08)}
 .tgn{font-size:12px;color:var(--muted);margin-bottom:6px}
 .tgw{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#b45309;margin:18px 0 6px;padding-bottom:6px;border-bottom:2px solid var(--tint-line)}
 .tgi{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}
@@ -717,27 +725,38 @@ TGTAB.onclick=()=>{active='tg';showTab();};tabsEl.appendChild(TGTAB);
  p.innerHTML='<div class="printhead"><h1>TG Settimana</h1></div><div class="card tgc" id="tgBody"></div>';panelsEl.appendChild(p);}
 const GIORNI=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
 const dmy=id=>id.slice(8)+'/'+id.slice(5,7)+'/'+id.slice(0,4);
+/* ogni settimana (da lunedì a domenica) ha la sua scaletta del TG: parte vuota il lunedì e raccoglie i pezzi spuntati TS di quei giorni */
+const monOf=id=>{const d=new Date(id+'T12:00:00Z');return addDays(id,-((d.getUTCDay()+6)%7));};
+let tgWeek=null;
 function renderTG(){
   const box=$('#tgBody');if(!box||active!=='tg')return;
-  if(!scReady){box.innerHTML='<div class="empty">Caricamento…</div>';return;}
+  const cur=monOf(todayId()),min=monOf(oldestDay());
+  if(!tgWeek||tgWeek>cur)tgWeek=cur;
+  if(tgWeek<min)tgWeek=min;
+  const mon=tgWeek,sun=addDays(mon,6),isCur=mon===cur;
+  const lab=`Settimana dal ${dmy(mon).slice(0,5)} al ${dmy(sun)}`;
+  const ph=document.querySelector('.panel[data-e=tg] .printhead h1');if(ph)ph.textContent='TG Settimana — '+lab;
+  let h=`<div class="tgnav nopr"><button class="tgb" data-tgw="-7" ${mon<=min?'disabled':''} title="Settimana precedente">◀</button><div class="tgl">${lab}${isCur?' <span class="tgcur">questa settimana</span>':''}</div><button class="tgb" data-tgw="7" ${isCur?'disabled':''} title="Settimana successiva">▶</button>${isCur?'':'<button class="tgb tgnow" data-tgw="0">Questa settimana</button>'}</div>`;
+  if(!scReady){box.innerHTML=h+'<div class="empty">Caricamento…</div>';return;}
   const items=[];
-  Object.keys(SC).filter(id=>/^\d{4}-\d{2}-\d{2}$/.test(id)).sort().forEach(id=>{
+  Object.keys(SC).filter(id=>/^\d{4}-\d{2}-\d{2}$/.test(id)&&id>=mon&&id<=sun).sort().forEach(id=>{
     const pt=SC[id]&&SC[id].pt;if(!pt||!pt.rows)return;
     const ord=Array.isArray(pt.order)?pt.order:Object.keys(pt.rows);
     ord.forEach(rid=>{const r=pt.rows[rid];if(rid!=='P'&&r&&typeof r==='object'&&r.tgs)items.push({id,rid,r});});
   });
-  if(!items.length){box.innerHTML='<div class="empty">Nessun pezzo scelto. In Prima Tivvù spunta la casella accanto al numero del servizio.</div>';return;}
-  let h=`<div class="tgn">${items.length} ${items.length===1?'pezzo scelto':'pezzi scelti'}, dal più vecchio al più recente</div>`,wk='';
+  if(!items.length){box.innerHTML=h+`<div class="empty">${isCur?'La scaletta di questa settimana è ancora vuota. In Prima Tivvù spunta la casella TS accanto al numero del servizio.':'Nessun pezzo scelto in questa settimana.'}</div>`;return;}
+  h+=`<div class="tgn">${items.length} ${items.length===1?'pezzo scelto':'pezzi scelti'}, dal più vecchio al più recente</div>`;
   items.forEach(({id,rid,r})=>{
-    const dt=new Date(id+'T12:00:00Z'),dow=dt.getUTCDay();
-    const mon=new Date(dt.getTime()-((dow+6)%7)*864e5),sun=new Date(mon.getTime()+6*864e5);
-    const mid=mon.toISOString().slice(0,10);
-    if(mid!==wk){wk=mid;h+=`<div class="tgw">Settimana dal ${dmy(mid).slice(0,5)} al ${dmy(sun.toISOString().slice(0,10)).slice(0,5)}</div>`;}
+    const dow=new Date(id+'T12:00:00Z').getUTCDay();
     const who=[r.g,r.m].filter(Boolean).join(' · ');
     h+=`<div class="tgi"><span class="tgd">${GIORNI[dow]}</span><div class="tgt"><b>${esc(r.nome||'(senza nome)')}${r.x?' <em class="tgo">non in onda</em>':''}</b>${r.titolo?`<span>${esc(r.titolo)}</span>`:''}</div>${who?`<span class="tgm">${esc(who)}</span>`:''}<span class="tgdt">${dmy(id)}</span><button class="tgx np" data-d="${id}" data-r="${rid}" title="Togli dal TG della settimana">✕</button></div>`;
   });
   box.innerHTML=h;
 }
+$('#panels').addEventListener('click',ev=>{
+  const w=ev.target.closest&&ev.target.closest('[data-tgw]');if(!w||w.disabled)return;
+  const n=+w.dataset.tgw;tgWeek=n?addDays(tgWeek||monOf(todayId()),n):monOf(todayId());renderTG();
+});
 $('#panels').addEventListener('click',ev=>{
   const b=ev.target.closest&&ev.target.closest('.tgx');if(!b)return;
   db.collection('scalette').doc(b.dataset.d).set({pt:{rows:{[b.dataset.r]:{tgs:false}}}},{merge:true}).catch(showErr);
