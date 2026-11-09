@@ -241,14 +241,14 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .dt{width:10px;height:10px;border-radius:50%;display:inline-block}
 .dt.b1{background:#2f6bff}.dt.b3{background:#14a38b}.dt.b4{background:#8b5cf6}
 .bar.b4{background:#8b5cf6}
-.fb{display:flex;width:100%;height:22px;border-radius:6px;overflow:hidden;background:var(--line)}
-.fb i{display:flex;align-items:center;justify-content:center;min-width:0;font-style:normal;font-size:11px;font-weight:800;color:#fff;overflow:hidden}
+.fbar{display:flex;width:100%;height:22px;border-radius:6px;overflow:hidden;background:var(--line)}
+.fbar i{display:flex;align-items:center;justify-content:center;min-width:0;font-style:normal;font-size:11px;font-weight:800;color:#fff;overflow:hidden}
 .f0{background:#2fa36b}.f1{background:#8cbf3f}.f2{background:#e0b020}.f3{background:#e07a2a}.f4{background:#c8372d}
-.fb i.f1,.fb i.f2{color:#2b2b2b}
+.fbar i.f1,.fbar i.f2{color:#2b2b2b}
 .tr2{display:flex;align-items:center;gap:8px;min-width:0}
 .tr2>span{flex:0 0 74px;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
 .tr2.nolab>span{display:none}
-.tr2 .fb{flex:1;height:16px}
+.tr2 .fbar{flex:1;height:16px}
 .tr2>b{color:var(--muted)}
 .srow.m{grid-template-areas:"n c b1" "n k b2"}
 .srow.s{grid-template-areas:"n c b1"}
@@ -260,10 +260,8 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .cbar i{display:block;height:100%;border-radius:4px;background:#2f6bff}
 .cbar.b4 i{background:#8b5cf6}
 .cbar.b3 i{background:#14a38b}
-.skc{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-.sh .hl{display:flex;flex-direction:column;gap:5px;align-items:flex-start}
-.sh .hl .fl{margin:0;text-transform:none;letter-spacing:0}
-.fl{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11px;color:var(--muted);margin:2px 0 8px}
+.skc{display:flex;flex-wrap:nowrap;gap:4px;align-items:center;white-space:nowrap}
+.fl{display:flex;flex-wrap:nowrap;white-space:nowrap;gap:4px 14px;font-size:11px;color:var(--muted);margin:6px 0 4px}
 .fl span{display:inline-flex;align-items:center;gap:5px}
 .fl i{width:11px;height:11px;border-radius:3px;display:inline-block}
 .kc{display:inline-block;font-size:10.5px;font-weight:700;border-radius:20px;padding:1px 8px;white-space:nowrap;background:#e8eefc;color:#1f4a86}
@@ -278,7 +276,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .sum div{background:#f4f6fb;border-radius:10px;padding:8px 14px;min-width:110px}
 .sum small{display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
 .sum b{font-size:22px}
-.sh,.srow{display:grid;grid-template-columns:minmax(100px,140px) minmax(150px,210px) minmax(0,1fr);gap:4px 16px;align-items:center}
+.sh,.srow{display:grid;grid-template-columns:96px 274px minmax(0,1fr);gap:4px 14px;align-items:center}
 .sh{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;padding-bottom:6px;border-bottom:2px solid var(--line);align-items:end}
 .srow{padding:7px 0;border-bottom:1px solid var(--line)}
 .sn{font-weight:800;font-size:14px;overflow:hidden;text-overflow:ellipsis}
@@ -287,7 +285,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .bar.b1{background:#2f6bff}.bar.b2{background:var(--amber)}.bar.b3{background:#14a38b}
 .sb b{font-variant-numeric:tabular-nums;white-space:nowrap}
 .snote{font-size:12px;color:var(--muted);margin-top:18px;line-height:1.5}
-.sh.g,.srow.g{grid-template-columns:minmax(100px,140px) minmax(150px,420px)}
+.sh.g,.srow.g{grid-template-columns:96px minmax(150px,420px)}
 
 /* ===== telefono e tablet: ogni servizio diventa una scheda ===== */
 @media screen and (max-width:1100px){
@@ -430,6 +428,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   .mbody h2{font-size:20px}
   .xclose{width:40px;height:40px;top:8px;right:8px;z-index:2}
   .sh{display:none}
+  .fl{flex-wrap:wrap;white-space:normal}
   .srow{grid-template-columns:1fr;gap:6px}
   .srow.m{grid-template-areas:"n" "c" "k" "b1" "b2"}
   .srow.s{grid-template-areas:"n" "c" "b1"}
@@ -494,8 +493,8 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   body.pstats .sum b{font-size:17px}
   body.pstats .sn{font-size:12px}
   body.pstats .sc b{font-size:14px}
-  body.pstats .fb,body.pstats .tr2 .fb{height:13px}
-  body.pstats .fb i{font-size:9px}
+  body.pstats .fbar,body.pstats .tr2 .fbar{height:13px}
+  body.pstats .fbar i{font-size:9px}
   body.pstats .cbar{height:6px}
   body.pstats .kc{font-size:9px}
   body.pstats .snote{font-size:9px;margin-top:6px;line-height:1.35}
@@ -1470,7 +1469,7 @@ function fasceOf(hh){
 function fasceBar(hh){
   const c=fasceOf(hh),tot=c.reduce((a,b)=>a+b,0);
   if(!tot)return '<b>—</b>';
-  return '<div class="fb" role="img" aria-label="'+FASCE.map((f,i)=>f.t+' '+c[i]).join(', ')+'">'+c.map((n,i)=>n?`<i class="f${i}" style="flex:${n}" title="${FASCE[i].t}, ${n} ${n===1?'pezzo':'pezzi'}">${n}</i>`:'').join('')+'</div>';
+  return '<div class="fbar" role="img" aria-label="'+FASCE.map((f,i)=>f.t+' '+c[i]).join(', ')+'">'+c.map((n,i)=>n?`<i class="f${i}" style="flex:${n}" title="${FASCE[i].t}, ${n} ${n===1?'pezzo':'pezzi'}">${n}</i>`:'').join('')+'</div>';
 }
 function tempiBars(x){
   const any=o=>Object.values(o||{}).some(v=>v>0);
@@ -1525,7 +1524,7 @@ function socSection(sm,day){
   const all={};garr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
   const maxN=Math.max(...garr.map(x=>x.n));
   h+=`<div class="sum"><div><small>Post finiti</small><b>${sm.n}</b></div><div><small>Giornalisti</small><b>${garr.length}</b></div></div>
-  <div class="sh m"><span>Giornalista</span><span>Post finiti</span><span class="hl">Tempi per post${fasceLegend}</span></div>`;
+  <div class="sh m"><span>Giornalista</span><span>Post finiti</span><span>Tempi per post</span></div>${fasceLegend}`;
   garr.forEach((x,i)=>{
     h+=`<div class="srow s"><div class="sn">${esc(x.nome||'')}</div><div class="sc"><b>${x.n}</b><div class="cbar b4"><i style="width:${Math.max(3,x.n/maxN*100)}%"></i></div></div><div class="tr2 t1 nolab">${fasceBar(x.h)}</div></div>`;
   });
@@ -1550,7 +1549,7 @@ function statSections(map,gmap,smap,day){
     const kinds=totSv+totFo>0,maxN=Math.max(...arr.map(x=>x.n));
     const all={};arr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
     h+=`<div class="sum"><div><small>Cose fatte</small><b>${tot}</b></div>${kinds?`<div><small>Servizi</small><b>${totSv}</b></div><div><small>Foto</small><b>${totFo}</b></div>`:''}<div><small>Extra</small><b>${totEx}</b></div></div>
-    <div class="sh m"><span>Montatore</span><span>Cose fatte</span><span class="hl">Tempi di montaggio${fasceLegend}</span></div>`;
+    <div class="sh m"><span>Montatore</span><span>Cose fatte</span><span>Tempi di montaggio</span></div>${fasceLegend}`;
     arr.forEach((x,i)=>{
       const ex=x.ex>0?x.ex:0,sv=Math.max(0,x.sv||0),fo=Math.max(0,x.fo||0);
       const chips=(sv+fo>0?`<span class="kc">${sv} ${sv===1?'servizio':'servizi'}</span><span class="kc f">${fo} ${fo===1?'fotonotizia':'fotonotizie'}</span>`:'')+(ex?`<span class="kc x">${ex} extra</span>`:'');
