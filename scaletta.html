@@ -235,21 +235,38 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .sact{display:flex;gap:8px;flex:0 0 auto}
 .ib{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:15px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;transition:.15s}
 .ib:hover{background:var(--navy);border-color:var(--navy);color:#fff}
-.ssec{margin-top:26px}
-.sh3{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+.ssec{margin-top:20px}
+.sh3{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
 .sh3::after{content:"";flex:1;height:1px;background:var(--line)}
 .dt{width:10px;height:10px;border-radius:50%;display:inline-block}
 .dt.b1{background:#2f6bff}.dt.b3{background:#14a38b}.dt.b4{background:#8b5cf6}
 .bar.b4{background:#8b5cf6}
-.srow .kcs{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:-2px}
 .fb{display:flex;width:100%;height:22px;border-radius:6px;overflow:hidden;background:var(--line)}
 .fb i{display:flex;align-items:center;justify-content:center;min-width:0;font-style:normal;font-size:11px;font-weight:800;color:#fff;overflow:hidden}
 .f0{background:#2fa36b}.f1{background:#8cbf3f}.f2{background:#e0b020}.f3{background:#e07a2a}.f4{background:#c8372d}
 .fb i.f1,.fb i.f2{color:#2b2b2b}
+.tr2{display:flex;align-items:center;gap:8px;min-width:0}
+.tr2>span{flex:0 0 74px;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.tr2.nolab>span{display:none}
+.tr2 .fb{flex:1;height:16px}
+.tr2>b{color:var(--muted)}
+.srow.m{grid-template-areas:"n c b1" "n k b2"}
+.srow.s{grid-template-areas:"n c b1"}
+.srow.m .sn,.srow.s .sn{grid-area:n}.srow.m .sc,.srow.s .sc{grid-area:c}.srow .skc{grid-area:k}.srow .t1{grid-area:b1}.srow .t2{grid-area:b2}
+.srow.m .t1.tall{grid-row:1/3}
+.sc{display:flex;align-items:center;gap:10px;min-width:0}
+.sc b{flex:0 0 36px;text-align:right;font-size:17px;font-variant-numeric:tabular-nums}
+.cbar{flex:1;height:8px;border-radius:4px;background:#e9edf5;overflow:hidden}
+.cbar i{display:block;height:100%;border-radius:4px;background:#2f6bff}
+.cbar.b4 i{background:#8b5cf6}
+.cbar.b3 i{background:#14a38b}
+.skc{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.sh .hl{display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+.sh .hl .fl{margin:0;text-transform:none;letter-spacing:0}
 .fl{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11px;color:var(--muted);margin:2px 0 8px}
 .fl span{display:inline-flex;align-items:center;gap:5px}
 .fl i{width:11px;height:11px;border-radius:3px;display:inline-block}
-.kc{display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:2px 10px;background:#e8eefc;color:#1f4a86}
+.kc{display:inline-block;font-size:10.5px;font-weight:700;border-radius:20px;padding:1px 8px;white-space:nowrap;background:#e8eefc;color:#1f4a86}
 .kc.f{background:#fdecc8;color:#8a5a00}
 .kc.x{background:#eef1f6;color:var(--muted)}
 .sh4{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:20px 0 6px;padding-bottom:6px;border-bottom:2px solid var(--line)}
@@ -257,20 +274,20 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
 .lk:hover{color:var(--red)}
 .xclose{position:absolute;top:12px;right:14px;border:0;background:#eef1f6;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;color:var(--ink)}
 .xclose:hover{background:var(--red);color:#fff}
-.sum{display:flex;gap:14px;margin-bottom:22px;flex-wrap:wrap}
-.sum div{background:#f4f6fb;border-radius:12px;padding:12px 18px;min-width:150px}
+.sum{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.sum div{background:#f4f6fb;border-radius:10px;padding:8px 14px;min-width:110px}
 .sum small{display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
-.sum b{font-size:26px}
-.sh,.srow{display:grid;grid-template-columns:130px 1fr 1fr;gap:18px;align-items:center}
-.sh{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;padding-bottom:8px;border-bottom:2px solid var(--line)}
-.srow{padding:10px 0;border-bottom:1px solid var(--line)}
-.sn{font-weight:800;font-size:15px;overflow:hidden;text-overflow:ellipsis}
+.sum b{font-size:22px}
+.sh,.srow{display:grid;grid-template-columns:minmax(100px,140px) minmax(150px,210px) minmax(0,1fr);gap:4px 16px;align-items:center}
+.sh{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;padding-bottom:6px;border-bottom:2px solid var(--line);align-items:end}
+.srow{padding:7px 0;border-bottom:1px solid var(--line)}
+.sn{font-weight:800;font-size:14px;overflow:hidden;text-overflow:ellipsis}
 .sb{display:flex;align-items:center;gap:10px}
 .bar{height:22px;border-radius:6px;min-width:4px;transition:width .4s}
 .bar.b1{background:#2f6bff}.bar.b2{background:var(--amber)}.bar.b3{background:#14a38b}
 .sb b{font-variant-numeric:tabular-nums;white-space:nowrap}
 .snote{font-size:12px;color:var(--muted);margin-top:18px;line-height:1.5}
-.sh.g,.srow.g{grid-template-columns:130px 1fr}
+.sh.g,.srow.g{grid-template-columns:minmax(100px,140px) minmax(150px,420px)}
 
 /* ===== telefono e tablet: ogni servizio diventa una scheda ===== */
 @media screen and (max-width:1100px){
@@ -414,17 +431,17 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   .xclose{width:40px;height:40px;top:8px;right:8px;z-index:2}
   .sh{display:none}
   .srow{grid-template-columns:1fr;gap:6px}
+  .srow.m{grid-template-areas:"n" "c" "k" "b1" "b2"}
+  .srow.s{grid-template-areas:"n" "c" "b1"}
+  .srow.m .t1.tall{grid-row:auto}
   .sb::before{flex:0 0 64px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
-  .srow>.sb:nth-child(2)::before{content:"Fatte"}
-  .srow>.sb:nth-child(3)::before{content:"Tempo"}
   .srow.g{grid-template-columns:1fr}
   .srow.g>.sb:nth-child(2)::before{content:"Servizi"}
   .srow.g.p>.sb:nth-child(2)::before{content:"Post"}
-  .srow .kcs{grid-column:1}
   .sth{padding-right:0}
   .sum{gap:8px}
-  .sum div{min-width:0;flex:1 1 90px;padding:10px 12px}
-  .sum b{font-size:22px}
+  .sum div{min-width:0;flex:1 1 90px;padding:8px 12px}
+  .sum b{font-size:20px}
 }
 
 @media print{
@@ -467,7 +484,22 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   body.pstats .modal{display:block;width:auto;height:auto;box-shadow:none;border-radius:0;overflow:visible}
   body.pstats .mlist,body.pstats .xclose,.nopr{display:none!important}
   body.pstats .mbody{padding:0;overflow:visible}
-  body.pstats .mbody h2{font-size:22px}
+  body.pstats .mbody h2{font-size:20px}
+  body.pstats *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.pstats .ssec{margin-top:12px;break-inside:avoid}
+  body.pstats .sh3{margin-bottom:6px}
+  body.pstats .srow{padding:4px 0;break-inside:avoid}
+  body.pstats .sum{margin-bottom:8px}
+  body.pstats .sum div{padding:5px 12px}
+  body.pstats .sum b{font-size:17px}
+  body.pstats .sn{font-size:12px}
+  body.pstats .sc b{font-size:14px}
+  body.pstats .fb,body.pstats .tr2 .fb{height:13px}
+  body.pstats .fb i{font-size:9px}
+  body.pstats .cbar{height:6px}
+  body.pstats .kc{font-size:9px}
+  body.pstats .snote{font-size:9px;margin-top:6px;line-height:1.35}
+  body.pstats .sh4{margin:12px 0 4px}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -685,14 +717,16 @@ function statsAdd(name,ym,sign,ms,extra,nome){
   const upd={nome:name,n:INC(sign)};
   if(extra)upd.ex=INC(sign);                       // attività extra (contano come cose fatte)
   else if(typeof nome==='string'){if(isFoto(nome))upd.fo=INC(sign);else upd.sv=INC(sign);}   // foto o servizio, dal nome
-  if(!extra&&ms!=null&&ms>=0){upd.ms=INC(sign*ms);upd.nt=INC(sign);upd.h={[String(Math.round(ms/60000))]:INC(sign)};}   // istogramma dei minuti per la moda
+  if(!extra&&ms!=null&&ms>=0){upd.ms=INC(sign*ms);upd.nt=INC(sign);const bin=String(Math.round(ms/60000));upd.h={[bin]:INC(sign)};if(typeof nome==='string')upd[isFoto(nome)?'hf':'hs']={[bin]:INC(sign)};}   // istogramma dei minuti, in totale e separato tra servizi e fotonotizie
   db.collection('statistiche').doc(ym).set({m:{[mkey(name)]:upd}},{merge:true}).catch(showErr);
 }
 
 /* se il nome di un servizio già completato cambia da servizio a foto (o al contrario), sposto il conteggio */
-function statsKind(name,ym,was,now){
+function statsKind(name,ym,was,now,ms){
   if(!name||was===now)return;
-  db.collection('statistiche').doc(ym).set({m:{[mkey(name)]:{nome:name,[was?'fo':'sv']:INC(-1),[now?'fo':'sv']:INC(1)}}},{merge:true}).catch(showErr);
+  const u={nome:name,[was?'fo':'sv']:INC(-1),[now?'fo':'sv']:INC(1)};
+  if(ms!=null&&ms>=0){const b=String(Math.round(ms/60000));u[was?'hf':'hs']={[b]:INC(-1)};u[now?'hf':'hs']={[b]:INC(1)};}
+  db.collection('statistiche').doc(ym).set({m:{[mkey(name)]:u}},{merge:true}).catch(showErr);
 }
 /* un post social finito entra (o esce) dall'Andamento del mese in cui è stato finito, con giornalista, social, tipologia e tempo */
 function socStatsRow(r,sign){
@@ -1107,7 +1141,7 @@ function saveTxt(el){
   if(row[f]===v)return;
   const old=row[f];
   patch({[e+'.rows.'+id+'.'+f]:v});
-  if(f==='nome'&&e!=='so'&&row.c2&&row.m)statsKind(row.m,monthOf(row.t2||Date.now()),isFoto(old),isFoto(v));
+  if(f==='nome'&&e!=='so'&&row.c2&&row.m)statsKind(row.m,monthOf(row.t2||Date.now()),isFoto(old),isFoto(v),(row.t1&&row.t2>=row.t1)?row.t2-row.t1:null);
 }
 /* salva subito ciò che è in attesa (cambio app, blocco schermo, ricarica) */
 function flushTxt(){
@@ -1438,7 +1472,12 @@ function fasceBar(hh){
   if(!tot)return '<b>—</b>';
   return '<div class="fb" role="img" aria-label="'+FASCE.map((f,i)=>f.t+' '+c[i]).join(', ')+'">'+c.map((n,i)=>n?`<i class="f${i}" style="flex:${n}" title="${FASCE[i].t}, ${n} ${n===1?'pezzo':'pezzi'}">${n}</i>`:'').join('')+'</div>';
 }
-const fasceLegend='<div class="fl nopr">'+FASCE.map((f,i)=>`<span><i class="f${i}"></i>${f.t}</span>`).join('')+'</div>';
+function tempiBars(x){
+  const any=o=>Object.values(o||{}).some(v=>v>0);
+  if(!any(x.hs)&&!any(x.hf))return `<div class="tr2 t1 tall"><span>Tutti</span>${fasceBar(x.h)}</div>`;   // dati vecchi, non ancora separati: barra unica
+  return `<div class="tr2 t1"><span>Servizi</span>${fasceBar(x.hs)}</div><div class="tr2 t2"><span>Fotonotizie</span>${fasceBar(x.hf)}</div>`;
+}
+const fasceLegend='<div class="fl">'+FASCE.map((f,i)=>`<span><i class="f${i}"></i>${f.t}</span>`).join('')+'</div>';
 /* un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") o con "FN" è una foto, tutti gli altri sono servizi */
 const isFoto=n=>/^(FOTO|FN)/.test(String(n||'').trim().toUpperCase());
 const NI='(non indicato)';
@@ -1455,14 +1494,14 @@ function socAcc(a,r){
 /* riassunto di un giorno, ricavato direttamente dalla sua scaletta */
 function aggDay(d){
   const m={},g={},s=socNew();
-  const gm=n=>{const k=mkey(n);return m[k]||(m[k]={nome:n,n:0,ex:0,sv:0,fo:0,ms:0,nt:0,h:{}});};
-  const tm=(o,t1,t2)=>{if(t1&&t2>=t1){const ms=t2-t1;o.ms+=ms;o.nt++;const b=String(Math.round(ms/60000));o.h[b]=(o.h[b]||0)+1;}};
+  const gm=n=>{const k=mkey(n);return m[k]||(m[k]={nome:n,n:0,ex:0,sv:0,fo:0,ms:0,nt:0,h:{},hs:{},hf:{}});};
+  const tm=(o,t1,t2,kind)=>{if(t1&&t2>=t1){const ms=t2-t1;o.ms+=ms;o.nt++;const b=String(Math.round(ms/60000));o.h[b]=(o.h[b]||0)+1;if(kind)o[kind][b]=(o[kind][b]||0)+1;}};
   EM.forEach(e=>{
     const rows=(d[e.id]&&d[e.id].rows)||{};
     Object.values(rows).forEach(r=>{
       if(!r||typeof r!=='object')return;
       if(r.g){const k=mkey(r.g);(g[k]||(g[k]={nome:r.g,n:0})).n++;}
-      if(r.c2&&r.m){const o=gm(r.m);o.n++;if(isFoto(r.nome))o.fo++;else o.sv++;tm(o,r.t1,r.t2);}
+      if(r.c2&&r.m){const o=gm(r.m);o.n++;if(isFoto(r.nome))o.fo++;else o.sv++;tm(o,r.t1,r.t2,isFoto(r.nome)?'hf':'hs');}
     });
   });
   const exs=d.extras||{};
@@ -1486,15 +1525,13 @@ function socSection(sm,day){
   const all={};garr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
   const maxN=Math.max(...garr.map(x=>x.n));
   h+=`<div class="sum"><div><small>Post finiti</small><b>${sm.n}</b></div><div><small>Giornalisti</small><b>${garr.length}</b></div></div>
-  <div class="sh"><span>Giornalista</span><span>Post finiti</span><span>Tempi per post</span></div>${fasceLegend}`;
+  <div class="sh m"><span>Giornalista</span><span>Post finiti</span><span class="hl">Tempi per post${fasceLegend}</span></div>`;
   garr.forEach((x,i)=>{
-    h+=`<div class="srow"><div class="sn">${esc(x.nome||'')}</div>
-      <div class="sb"><div class="bar b4" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}</b></div>
-      <div class="sb">${fasceBar(x.h)}</div></div>`;
+    h+=`<div class="srow s"><div class="sn">${esc(x.nome||'')}</div><div class="sc"><b>${x.n}</b><div class="cbar b4"><i style="width:${Math.max(3,x.n/maxN*100)}%"></i></div></div><div class="tr2 t1 nolab">${fasceBar(x.h)}</div></div>`;
   });
   const list=(title,arr)=>{
     const mx=Math.max(...arr.map(x=>x.n));
-    return `<div class="sh4">${title}</div>`+arr.map(x=>`<div class="srow g p"><div class="sn">${esc(x.nome||'')}</div><div class="sb"><div class="bar b4" style="width:${Math.max(2,x.n/mx*80)}%"></div><b>${x.n}</b></div></div>`).join('');
+    return `<div class="sh4">${title}</div>`+arr.map(x=>`<div class="srow g p"><div class="sn">${esc(x.nome||'')}</div><div class="sc"><b>${x.n}</b><div class="cbar b4"><i style="width:${Math.max(3,x.n/mx*100)}%"></i></div></div></div>`).join('');
   };
   h+=list('Per social network',sarr)+list('Per tipologia',tarr);
   h+='<p class="snote">Contano i post con la spunta "Finito". La barra mostra i tempi da "Iniziato" a "Finito".</p>';
@@ -1513,15 +1550,13 @@ function statSections(map,gmap,smap,day){
     const kinds=totSv+totFo>0,maxN=Math.max(...arr.map(x=>x.n));
     const all={};arr.forEach(x=>Object.entries(x.h||{}).forEach(([m,c])=>{all[m]=(all[m]||0)+c;}));
     h+=`<div class="sum"><div><small>Cose fatte</small><b>${tot}</b></div>${kinds?`<div><small>Servizi</small><b>${totSv}</b></div><div><small>Foto</small><b>${totFo}</b></div>`:''}<div><small>Extra</small><b>${totEx}</b></div></div>
-    <div class="sh"><span>Montatore</span><span>Cose fatte</span><span>Tempi di montaggio</span></div>${fasceLegend}`;
+    <div class="sh m"><span>Montatore</span><span>Cose fatte</span><span class="hl">Tempi di montaggio${fasceLegend}</span></div>`;
     arr.forEach((x,i)=>{
       const ex=x.ex>0?x.ex:0,sv=Math.max(0,x.sv||0),fo=Math.max(0,x.fo||0);
-      const chips=(sv+fo>0?`<span class="kc">${sv} ${sv===1?'servizio':'servizi'}</span><span class="kc f">${fo} foto</span>`:'')+(ex?`<span class="kc x">${ex} extra</span>`:'');
-      h+=`<div class="srow"><div class="sn">${esc(x.nome||'')}</div>
-        <div class="sb"><div class="bar b1" style="width:${Math.max(2,x.n/maxN*70)}%"></div><b>${x.n}</b></div>
-        <div class="sb">${fasceBar(x.h)}</div>${chips?`<div class="kcs">${chips}</div>`:''}</div>`;
+      const chips=(sv+fo>0?`<span class="kc">${sv} ${sv===1?'servizio':'servizi'}</span><span class="kc f">${fo} ${fo===1?'fotonotizia':'fotonotizie'}</span>`:'')+(ex?`<span class="kc x">${ex} extra</span>`:'');
+      h+=`<div class="srow m"><div class="sn">${esc(x.nome||'')}</div><div class="sc"><b>${x.n}</b><div class="cbar"><i style="width:${Math.max(3,x.n/maxN*100)}%"></i></div></div>${chips?`<div class="skc">${chips}</div>`:''}${tempiBars(x)}</div>`;
     });
-    h+='<p class="snote">Le cose fatte sono i servizi completati, le foto e le attività extra spuntate. Un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") o con "FN" conta come foto, gli altri come servizi. La barra mostra quanti pezzi di ogni montatore cadono in ciascuna fascia di tempo, da "Consegnato" a "Completato" (le attività extra non contano nei tempi): più rossa significa più lenta.'+(day?'':' I dati registrati prima di questi aggiornamenti non distinguono servizi e foto: usa il pulsante ↻ per ricalcolarli.')+'</p>';
+    h+='<p class="snote">Le cose fatte sono i servizi completati, le foto e le attività extra spuntate. Un servizio il cui nome inizia con "Foto" (anche "Fotonotizia") o con "FN" conta come foto, gli altri come servizi. Le barre mostrano quanti pezzi di ogni montatore cadono in ciascuna fascia di tempo, separando servizi e fotonotizie, da "Consegnato" a "Completato" (le attività extra non contano nei tempi): più rossa significa più lenta.'+(day?'':' I dati registrati prima di questi aggiornamenti non separano servizi e fotonotizie: usa il pulsante ↻ per ricalcolarli.')+'</p>';
   }
   h+='</section><section class="ssec"><h3 class="sh3"><i class="dt b3"></i>Giornalisti</h3>';
   if(!garr.length){
@@ -1531,7 +1566,7 @@ function statSections(map,gmap,smap,day){
     h+=`<div class="sum"><div><small>Servizi assegnati</small><b>${gt}</b></div><div><small>Giornalisti attivi</small><b>${garr.length}</b></div></div>
     <div class="sh g"><span>Giornalista</span><span>Servizi</span></div>`;
     garr.forEach(x=>{
-      h+=`<div class="srow g"><div class="sn">${esc(x.nome||'')}</div><div class="sb"><div class="bar b3" style="width:${Math.max(2,x.n/gmax*80)}%"></div><b>${x.n}</b></div></div>`;
+      h+=`<div class="srow g"><div class="sn">${esc(x.nome||'')}</div><div class="sc"><b>${x.n}</b><div class="cbar b3"><i style="width:${Math.max(3,x.n/gmax*100)}%"></i></div></div></div>`;
     });
     h+='<p class="snote">Ogni servizio con il nome del giornalista conta uno, anche se poi non va in onda. I post social hanno la loro sezione.</p>';
   }
@@ -1587,7 +1622,7 @@ async function recalcMonth(ym){
     const qs=await db.collection('scalette').where(firebase.firestore.FieldPath.documentId(),'>=',ym+'-01').where(firebase.firestore.FieldPath.documentId(),'<=',ym+'-31').get();
     const m={},gm={},sm=socNew();let gtot=0;
     const getG=name=>{const k=mkey(name);return gm[k]||(gm[k]={nome:name,n:0});};
-    const get=name=>{const k=mkey(name);return m[k]||(m[k]={nome:name,n:0,ex:0,sv:0,fo:0,ms:0,nt:0,h:{}});};
+    const get=name=>{const k=mkey(name);return m[k]||(m[k]={nome:name,n:0,ex:0,sv:0,fo:0,ms:0,nt:0,h:{},hs:{},hf:{}});};
     const ups=[];let tot=0,totEx=0;
     qs.forEach(doc=>{
       const d=doc.data()||{};
@@ -1597,7 +1632,7 @@ async function recalcMonth(ym){
           if(r&&r.g){getG(r.g).n++;gtot++;}
           if(r&&r.c2&&r.m&&r.t2&&monthOf(r.t2)===ym){
             const o=get(r.m);o.n++;tot++;if(isFoto(r.nome))o.fo++;else o.sv++;
-            if(r.t1&&r.t2>=r.t1){const ms=r.t2-r.t1;o.ms+=ms;o.nt++;const b=String(Math.round(ms/60000));o.h[b]=(o.h[b]||0)+1;}
+            if(r.t1&&r.t2>=r.t1){const ms=r.t2-r.t1;o.ms+=ms;o.nt++;const b=String(Math.round(ms/60000));o.h[b]=(o.h[b]||0)+1;const hk=isFoto(r.nome)?o.hf:o.hs;hk[b]=(hk[b]||0)+1;}
           }
         });
       });
