@@ -88,6 +88,7 @@ main{max-width:none;margin:22px 0;padding:0 20px}
 .chip .cs{font-size:11px;font-weight:600;opacity:.92;letter-spacing:.5px;text-transform:uppercase}
 .chip .cc{font-size:12px;margin-top:3px}
 .chip .cc i{font-style:normal;font-weight:800;font-size:20px;margin-right:3px}
+.mp .grigio{display:none;margin-left:auto;padding:2px 8px;font-size:12px;background:#fff;color:#333;border:0;border-radius:6px;cursor:pointer}
 .chip.idle{background:var(--grey)}.chip.free{background:var(--green)}.chip.busy{background:var(--red)}
 .empty{color:var(--muted);font-size:14px}
 
@@ -652,7 +653,7 @@ window.addEventListener('beforeprint',fitAll);
 window.addEventListener('resize',fitAll);
 if(MQ.addEventListener)MQ.addEventListener('change',fitAll);else if(MQ.addListener)MQ.addListener(fitAll);
 function blank(){
-  const s={extras:{}};
+  const s={extras:{},idle:{}};
   TABS.forEach(e=>{
     const rows={},order=[];
     if(e.social){for(let i=0;i<5;i++){const id='s'+i;rows[id]=newPost();order.push(id);}}   // social, senza pausa
@@ -674,6 +675,7 @@ function merge(base,src){
     base[e.id]={order,rows};
   });
   base.extras=(src.extras&&typeof src.extras==='object')?src.extras:{};
+  base.idle=(src.idle&&typeof src.idle==='object')?src.idle:{};
   return base;
 }
 let S=blank(),CFG={giornalisti:[],montatori:[],tipologie:DEF_TIP.slice(),social:DEF_SOC.slice()},hasData={};
@@ -871,14 +873,14 @@ function counts(){
   EM.forEach(em=>S[em.id].order.forEach(id=>{
     if(id==='P')return;const r=S[em.id].rows[id];
     if(!r||!r.m)return;
-    if(r.c1)pres.add(r.m);
+    if(r.c1&&(r.t1||0)>=(+(S.idle||{})[mkey(r.m)]||0)&&!((S.idle||{})[mkey(r.m)]&&!r.t1))pres.add(r.m);
     if(r.c1&&!r.c2&&!r.x)c[r.m]=(c[r.m]||0)+1;
   }));
   CFG.montatori.forEach(n=>{
     const ex=S.extras[mkey(n)]||{};
     Object.values(ex).forEach(x=>{
       if(x&&String(x.t||'').trim()){
-        if(x.t1||x.d)pres.add(n);
+        if((x.t1||x.d)&&Math.max(x.t1||0,x.t2||0)>(+(S.idle||{})[mkey(n)]||0))pres.add(n);
         if(x.t1&&!x.d)c[n]=(c[n]||0)+1;      // in carico solo dopo il primo clic (inizio lavoro)
       }
     });
@@ -910,8 +912,8 @@ function syncSoc(em,gl){
       else if(f==='g')fillSelect(el,gl,r.g);
       else if(f==='tipo')fillSelect(el,tl,r.tipo);
       else if(f==='soc')fillSelect(el,sl,r.soc);
-      else if(f==='c1'){el.checked=r.c1;el.disabled=(r.c1&&!adminOn())||!!r.x;el.classList.toggle('lock',r.c1&&!adminOn());el.title=(r.c1&&adminOn()&&!r.x)?'Clicca per togliere la spunta':'';}
-      else if(f==='c2'){el.checked=r.c2;el.disabled=(r.c2&&!adminOn())||!r.c1||!!r.x;el.classList.toggle('lock',r.c2&&!adminOn());el.title=(r.c2&&adminOn()&&!r.x)?'Clicca per togliere la spunta':'';}
+      else if(f==='c1'){el.checked=r.c1;el.disabled=(r.c1&&!adminOn())||(!!r.x&&!(r.c1&&adminOn()));el.classList.toggle('lock',r.c1&&!adminOn());el.title=(r.c1&&adminOn())?'Clicca per togliere la spunta':'';}
+      else if(f==='c2'){el.checked=r.c2;el.disabled=(r.c2&&!adminOn())||!r.c1||(!!r.x&&!(r.c2&&adminOn()));el.classList.toggle('lock',r.c2&&!adminOn());el.title=(r.c2&&adminOn())?'Clicca per togliere la spunta':'';}
       else el.textContent=r[f];
     });
     const no=tr.querySelector('[data-act=no]');
@@ -955,8 +957,8 @@ function sync(){
         else if(f==='g')fillSelect(el,gl,r.g);
         else if(f==='tgs')el.checked=!!r.tgs;
         else if(f==='m')fillSelect(el,ml,r.m);
-        else if(f==='c1'){el.checked=r.c1;el.disabled=(r.c1&&!adminOn())||!!r.x;el.classList.toggle('lock',r.c1&&!adminOn());el.title=(r.c1&&adminOn()&&!r.x)?'Clicca per togliere la spunta':'';}
-        else if(f==='c2'){el.checked=r.c2;el.disabled=(r.c2&&!adminOn())||!r.c1||!!r.x;el.classList.toggle('lock',r.c2&&!adminOn());el.title=(r.c2&&adminOn()&&!r.x)?'Clicca per togliere la spunta':'';}
+        else if(f==='c1'){el.checked=r.c1;el.disabled=(r.c1&&!adminOn())||(!!r.x&&!(r.c1&&adminOn()));el.classList.toggle('lock',r.c1&&!adminOn());el.title=(r.c1&&adminOn())?'Clicca per togliere la spunta':'';}
+        else if(f==='c2'){el.checked=r.c2;el.disabled=(r.c2&&!adminOn())||!r.c1||(!!r.x&&!(r.c2&&adminOn()));el.classList.toggle('lock',r.c2&&!adminOn());el.title=(r.c2&&adminOn())?'Clicca per togliere la spunta':'';}
         else if(f==='du'){if(document.activeElement!==el)el.value=r.du?fmtMS(r.du):'';}
         else el.textContent=r[f];
       });
@@ -1001,7 +1003,7 @@ function renderPanels(ml,c,stato,txt){
     const k=mkey(name);let p=PAN[k];
     if(!p){
       const el=document.createElement('section');el.className='mp';el.dataset.k=k;
-      el.innerHTML=`<div class="mh"><span class="mn"></span><span class="mst"></span></div><div class="ml"></div><button class="btn add" data-x="add">＋ Attività extra</button>`;
+      el.innerHTML=`<div class="mh"><span class="mn"></span><span class="mst"></span><button type="button" class="btn grigio" data-x="grigio" title="Rimetti in attesa (grigio)">Metti in grigio</button></div><div class="ml"></div><button class="btn add" data-x="add">＋ Attività extra</button>`;
       p={el,list:el.querySelector('.ml'),rows:{}};PAN[k]=p;
     }
     const ex=S.extras[k]||{};
@@ -1027,6 +1029,7 @@ function renderPanels(ml,c,stato,txt){
     else if(ids.length&&emp)emp.remove();
     const s=stato(name);
     p.el.classList.toggle('busy',s==='busy');p.el.classList.toggle('free',s==='free');
+    p.el.querySelector('.grigio').style.display=(s==='free'&&adminOn())?'inline-block':'none';
     p.el.querySelector('.mn').textContent=name;
     p.el.querySelector('.mst').textContent=txt[s]+' · '+(c[name]||0);
   });
@@ -1100,6 +1103,7 @@ sideEl.addEventListener('click',ev=>{
     if(adminOn()&&!x.d)xApply(k,id,{t1:0,o1:''},li.querySelector('.xt').value);
     return;
   }
+  if(b.dataset.x==='grigio'){patch({['idle.'+k]:Date.now()});return;}
   if(b.dataset.x==='add'){
     const id=uid('x');
     patch({['extras.'+k+'.'+id]:{t:'',d:false,s:false,t1:0,o1:'',t2:0,o2:''}});
