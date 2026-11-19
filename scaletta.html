@@ -456,8 +456,9 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   .printhead{display:block;margin-bottom:5px;border-bottom:2px solid #111a2e;padding-bottom:3px}
   .printhead h1{margin:0;font-size:19px}
   .pdate{text-transform:capitalize}
-  .card{box-shadow:none;border-radius:0;overflow:visible;break-inside:avoid}
-  table{table-layout:fixed;border-collapse:collapse;width:100%;break-inside:avoid}
+  .card{box-shadow:none;border-radius:0;overflow:visible;break-inside:auto}
+  table{table-layout:fixed;border-collapse:collapse;width:100%;break-inside:auto}
+  thead{display:table-header-group}
   th,td{border:.7px solid #444!important;text-align:center!important;vertical-align:middle!important}
   thead th{padding:3px 4px;font-size:10px;letter-spacing:.4px;background:#e9ecf2!important;color:#111}
   th.wn{width:7%}th.wnm{width:30%}th.wg{width:20%}th.wm{width:20%}th.wo{width:11%}th.wd{width:12%}th.wsg{width:18%}th.wsp{width:31%}th.wst{width:12%}th.wss{width:12%}th.wsi,th.wsf{width:10%}
@@ -473,6 +474,7 @@ tr.ovb td{box-shadow:inset 0 -3px 0 var(--accent)}
   td.n{width:auto;font-size:var(--pf,12px)}
   td.nm,td.tt{width:auto;min-width:0}
   input[type=text]{display:block;width:100%;margin:0;border:0!important;padding:0;font:inherit;font-size:var(--pf,12px);line-height:1.2;text-align:center;background:transparent!important;box-shadow:none!important;height:auto}
+  textarea.nm{display:block;width:100%;margin:0;border:0!important;padding:0!important;font:inherit;font-weight:700;font-size:var(--pf,12px);line-height:1.2;height:auto!important;field-sizing:content;min-height:0;background:transparent!important;box-shadow:none!important;overflow:visible;text-align:left;color:#000}
   input::placeholder,input.du::placeholder{color:transparent}
   select{display:block;width:100%;margin:0;appearance:none;-webkit-appearance:none;border:0;background:transparent!important;color:#000;font:inherit;font-weight:600;font-size:var(--pf,12px);line-height:1.2;padding:0;min-width:0;text-align:center;text-align-last:center}
   select.vuoto{color:transparent}
@@ -1674,11 +1676,25 @@ window.addEventListener('beforeprint',()=>{
   document.querySelectorAll('.pdate').forEach(x=>x.textContent=longDate(curDay));
   document.querySelectorAll('td.pt').forEach(t=>t.colSpan=5);
   document.querySelectorAll('td.tl').forEach(t=>t.colSpan=5);
-  const rows=!S[active]?1:Math.max(1,S[active].order.filter(id=>id==='P'||!S[active].rows[id].x).length)+(active==='so'?0:1);   // +1 per la riga del totale dei servizi
-  const rh=Math.min(10,170/rows);
+  /* tutto deve stare su un solo foglio: scelgo carattere e altezza righe in base al numero di righe e alle righe di testo (titoli lunghi vanno a capo) */
+  const ids=!S[active]?[]:S[active].order.filter(id=>id==='P'||!S[active].rows[id].x);
+  const lens=ids.map(id=>{if(id==='P')return 0;const r=S[active].rows[id];return String((active==='so'?r.post:r.nome)||'').length;});
+  const extra=active==='so'?0:1;                       // riga del totale servizi
+  const colMm=active==="so"?82:79;                      // larghezza utile della colonna del nome in stampa
+  const MM=0.2646,BUD=156;
+  let pf=13,rh=10;
+  for(const f of [13,12,11,10,9,8,7,6]){
+    const cap=Math.max(8,Math.floor(colMm/(f*MM*0.72))),lh=f*1.2*MM;
+    const base=Math.min(10,BUD/Math.max(1,ids.length+extra));
+    let h=Math.min(base,10);
+    const need=hh=>lens.reduce((a,n)=>a+Math.max(hh,Math.max(1,Math.ceil(n/cap))*lh),0)+extra*Math.max(hh,lh);
+    while(h>lh&&need(h)>BUD)h-=0.25;
+    pf=f;rh=Math.max(h,lh);
+    if(need(rh)<=BUD)break;
+  }
   const r=document.documentElement.style;
   r.setProperty('--rh',rh.toFixed(2)+'mm');
-  r.setProperty('--pf',rh>=7.5?'13px':rh>=6?'11px':'9px');
+  r.setProperty('--pf',pf+'px');
 });
 window.addEventListener('afterprint',()=>{document.body.classList.remove('pstats');document.querySelectorAll('td.pt').forEach(t=>t.colSpan=t.closest('tr').dataset.e==='pt'?10:9);document.querySelectorAll('td.tl').forEach(t=>t.colSpan=t.closest('.panel').dataset.e==='pt'?11:10);});
 
