@@ -293,9 +293,21 @@
     .mb-toggle-group button { font: inherit; font-size: 11px; flex: 1; padding: 7px 4px; border: 1px solid #ccc; background: var(--paper); border-radius: 6px; cursor: pointer; color: var(--muted); }
     .mb-toggle-group button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
+    #day-nav { display: none; }
+    .mb-daynav { overflow-x: auto; scrollbar-width: none; padding: 0 14px 8px; margin: 0; }
+    .mb-daynav::-webkit-scrollbar { display: none; }
+    .mb-daynav button { flex: 0 0 auto; width: 32px; height: 32px; font-size: 12px; }
+
     .page { padding: 0 12px 60px; }
     #list { margin-top: 12px; }
   }
+
+  /* NAVIGAZIONE GIORNI */
+  .day-nav { display: flex; gap: 3px; margin: 2px 0 6px; }
+  .day-nav button { flex: 1 1 0; min-width: 0; height: 26px; padding: 0; font: inherit; font-size: 11px; font-weight: 600; border: 1px solid #ccc; background: var(--paper); color: var(--ink); border-radius: 3px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .day-nav button:hover { border-color: var(--ink); }
+  .day-nav button.empty { color: #bbb; font-weight: 400; }
+  .day-nav button.today { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
   @media print {
     @page { size: A4; margin: 8mm 8mm; }
@@ -339,6 +351,7 @@
     </div>
   </div>
   <div class="mb-filters" id="mb-filters"></div>
+  <div class="day-nav mb-daynav" id="mb-day-nav"></div>
 </div>
 
 <div class="mb-drawer-overlay" id="mb-overlay" onclick="closeDrawer()"></div>
@@ -498,6 +511,8 @@
       <button onclick="window.toggleCatPanel()" class="cat-toggle-btn no-print">Categorie ⚙</button>
       <div class="legend" id="legend"></div>
     </div>
+
+    <div class="day-nav no-print" id="day-nav"></div>
   </div>
 
   <div class="list" id="list"></div>
@@ -894,6 +909,33 @@
     return events.filter(e => e.date && e.date.startsWith(ymPrefix));
   }
 
+  function renderDayNav(daysInMonth, groups) {
+    const isThisMonth = today.getFullYear() === viewYear && today.getMonth() === viewMonth;
+    ["day-nav", "mb-day-nav"].forEach(id => {
+      const box = document.getElementById(id);
+      if (!box) return;
+      box.innerHTML = "";
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateKey = viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = d;
+        b.className = ((groups[dateKey] || []).length ? "" : "empty") + (isThisMonth && d === today.getDate() ? " today" : "");
+        b.title = DAYS_LONG[new Date(viewYear, viewMonth, d).getDay()] + " " + d;
+        b.onclick = () => scrollToDay(d);
+        box.appendChild(b);
+      }
+    });
+  }
+
+  function scrollToDay(d) {
+    const el = document.getElementById("day-" + d);
+    if (!el) return;
+    const bar = window.innerWidth <= 680 ? document.getElementById("mobile-topbar") : document.querySelector(".sticky");
+    const offset = bar ? bar.getBoundingClientRect().height : 0;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset - 6, behavior: "smooth" });
+  }
+
   function render() {
     mSel.value = viewMonth; ySel.value = viewYear;
     const mbM = document.getElementById("mb-m-sel");
@@ -963,6 +1005,7 @@
     const list = document.getElementById("list");
     list.innerHTML = "";
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    renderDayNav(daysInMonth, groups);
 
     for (let d = 1; d <= daysInMonth; d++) {
       const dateKey = viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
@@ -973,6 +1016,7 @@
       const locked = isDayLocked(dateKey);
 
       const dayDiv = document.createElement("div");
+      dayDiv.id = "day-" + d;
       dayDiv.className = "day"
         + (items.length === 0 ? " empty-day" : "")
         + (locked ? " day-locked" : " day-done");
