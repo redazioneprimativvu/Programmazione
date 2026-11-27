@@ -43,6 +43,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .and-bar{height:7px;border-radius:4px;background:#e2e8f0;overflow:hidden}
 .and-bar>div{height:100%;border-radius:4px}
 .and-tot{font-size:1rem;font-weight:800;color:#0f172a}
+.and-table.and-show-t td:not(:first-child){position:relative;padding-top:15px}
+.and-ts{position:absolute;top:3px;right:5px;font-size:.58rem;line-height:1;color:#64748b;font-weight:600;white-space:nowrap}
+.and-clock{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:#cbd5e1;padding:4px;border-radius:50%;user-select:none}
+.and-clock:hover{color:#64748b}
+.and-clock.on{color:#3b82f6}
 .week-nav{display:flex;align-items:center;gap:6px}
 .week-nav button{background:#334155;color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:.85rem}
 .week-nav button:hover{background:#475569}
@@ -72,17 +77,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .zone-title{font-size:.64rem;color:#94a3b8;font-weight:800;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;flex-shrink:0;margin-right:2px}
 .zone-empty{font-size:.72rem;color:#cbd5e1;font-style:italic;white-space:nowrap}
 .strip-divider{width:2px;align-self:stretch;background:#cbd5e1;border-radius:2px;flex-shrink:0;margin:2px 0}
-.grid-wrap{padding:10px;overflow-x:auto}
-.grid{border-collapse:collapse;width:100%;min-width:700px;background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden;table-layout:auto}
+.grid-wrap{padding:10px}
+.grid{border-collapse:collapse;width:100%;min-width:0;background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden;table-layout:fixed}
 .grid th{background:#f8fafc;padding:5px 3px;text-align:center;font-size:.75rem;font-weight:700;color:#475569;border:1px solid #e2e8f0}
-.grid th:first-child{text-align:left;padding-left:8px;white-space:nowrap;position:sticky;left:0;z-index:2;background:#f8fafc}
+.grid th:first-child{text-align:left;padding-left:8px;width:15%;min-width:0;background:#f8fafc}
 .grid td{padding:0;border:1px solid #e2e8f0;vertical-align:top;height:48px}
-.grid td:first-child{padding:3px 8px;font-size:.82rem;font-weight:600;position:sticky;left:0;background:white;z-index:1;display:flex;flex-direction:column;justify-content:center;white-space:nowrap}
+.grid td:not(:first-child){position:relative}
+.grid td:first-child{padding:3px 8px;font-size:.82rem;font-weight:600;background:white;vertical-align:middle;white-space:normal;overflow-wrap:anywhere}
 .grid tr:hover td{background:#f8fafc}
 .grid tr:hover td:first-child{background:#f8fafc}
 .grid tr.group-start td{border-top:7px solid #f0f2f5}
 .grid tr.group-start td:first-child{border-top:7px solid #f0f2f5}
-.cell{height:100%;width:100%;padding:2px;transition:background .12s;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;overflow:hidden}
+.cell{position:absolute;inset:0;padding:2px;transition:background .12s;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;overflow:hidden}
 .cell.drag-over{background:#dbeafe!important;outline:2px dashed #3b82f6;outline-offset:-2px}
 .cell-chip{
   padding:2px 4px;
@@ -331,7 +337,7 @@ const S={
   presetReorder:null,
   modalStaff:false, modalProg:false, editProg:null,
   modalFerie:false,
-  modalAndamento:false, andMonth:null,
+  modalAndamento:false, andMonth:null, andTempi:false, _storico:null, _storicoInCorso:false,
   cellModal:null, removePrompt:null,
   presetMenu:null,
   dragging:null,
@@ -678,7 +684,7 @@ function getShift(pid,iso){
   if(m!==null)return m.blocked?null:m;
   return null;
 }
-function setManual(pid,iso,val){const k=`${pid}|${iso}|${S.cat}`;if(val===null)delete S.turni[k];else S.turni[k]=val;}
+function setManual(pid,iso,val){const k=`${pid}|${iso}|${S.cat}`;if(val===null)delete S.turni[k];else{val.mod=Date.now();S.turni[k]=val;}}
 function conflictCheck(pid,iso){
   const cur=getShift(pid,iso);if(!cur?.eventoId||BUILTIN_IDS.has(cur.eventoId))return null;
   const pg=byId(S.programmi,cur.eventoId);if(!pg||!pg.nome)return null;
@@ -836,7 +842,7 @@ function gridSection(){
     const cells=dates.map(d=>buildCell(s.id,d)).join('');
     const newGroup=idx>0 && list[idx-1].ruolo!==s.ruolo;
     const trClass=newGroup?' class="group-start"':'';
-    return`<tr${trClass}><td><div style="font-weight:700;font-size:.82rem;white-space:nowrap">${esc(s.cognome)} ${esc(s.nome)}</div><div class="role-badge">${esc(s.ruolo)}</div></td>${cells}</tr>`;
+    return`<tr${trClass}><td><div style="font-weight:700;font-size:.82rem;line-height:1.15;overflow-wrap:anywhere">${esc(s.cognome)} ${esc(s.nome)}</div><div class="role-badge">${esc(s.ruolo)}</div></td>${cells}</tr>`;
   }).join('');
   return`<div class="grid-wrap" id="capture-area">
     <div id="pdf-header">
@@ -927,8 +933,8 @@ function modalStaff(){
 }
 // ── ANDAMENTO (statistiche mensili, consultabili da tutti: nessun codice richiesto) ──
 const MESI_FULL=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
-function openAndamento(){const n=new Date();S.andMonth={y:n.getFullYear(),m:n.getMonth()};S.modalAndamento=true;render();}
-function closeAndamento(){S.modalAndamento=false;render();}
+function openAndamento(){const n=new Date();S.andMonth={y:n.getFullYear(),m:n.getMonth()};S.andTempi=false;S.modalAndamento=true;render();}
+function closeAndamento(){S.modalAndamento=false;S.andTempi=false;render();}
 function andamentoMese(delta){
   if(!S.andMonth){andamentoOggi();return;}
   let{y,m}=S.andMonth;m+=delta;
@@ -945,7 +951,7 @@ function andamentoCalcola(cat,y,m){
   let nDom=0;
   for(let d=1;d<=nGiorni;d++){if(new Date(y,m,d).getDay()===0)nDom++;}
   const stat={};
-  people.forEach(p=>{stat[p.id]={dom:0,prog:{}};});
+  people.forEach(p=>{stat[p.id]={dom:0,prog:{},domT:null,progT:{}};});
   const usati={};
   Object.keys(S.turni).forEach(k=>{
     const parti=k.split('|');
@@ -957,14 +963,67 @@ function andamentoCalcola(cat,y,m){
     const sh=S.turni[k];
     if(!sh||sh.blocked||sh.eventoId==='riposo')return;
     if(isOnFerie(pid,iso))return;
-    if(dt.getDay()===0)st.dom++;
+    const tm=S.andTempi?(tempoTurno(k,sh)||{t:0}):null;
+    if(dt.getDay()===0){st.dom++;if(S.andTempi)st.domT=piuRecente(st.domT,tm);}
     if(sh.eventoId&&!BUILTIN_IDS.has(sh.eventoId)){
       const pg=byId(S.programmi,sh.eventoId);
-      if(pg&&pg.isRealProg!==false&&!eTurnoBase(pg)){st.prog[pg.id]=(st.prog[pg.id]||0)+1;usati[pg.id]=pg;}
+      if(pg&&pg.isRealProg!==false&&!eTurnoBase(pg)){st.prog[pg.id]=(st.prog[pg.id]||0)+1;usati[pg.id]=pg;if(S.andTempi)st.progT[pg.id]=piuRecente(st.progT[pg.id],tm);}
     }
   });
   const progs=Object.values(usati).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
   return{people,stat,progs,nDom};
+}
+// ── Orologio: ultima modifica di ogni casella ──
+// I turni salvati da ora in poi portano la data esatta (campo `mod`).
+// Per quelli già esistenti la data viene ricostruita dai backup automatici sul cloud:
+// si cerca da quando il turno ha il valore attuale.
+//   (niente)  = data esatta
+//   ~         = data stimata dai backup (la modifica è avvenuta poco prima)
+//   ≤         = modifica precedente a quella data (oltre non arriva lo storico)
+function canon(v){
+  if(Array.isArray(v))return '['+v.map(canon).join(',')+']';
+  if(v&&typeof v==='object')return '{'+Object.keys(v).filter(x=>x!=='mod').sort().map(x=>JSON.stringify(x)+':'+canon(v[x])).join(',')+'}';
+  return JSON.stringify(v===undefined?null:v);
+}
+function piuRecente(a,b){if(!a)return b;if(!b)return a;return b.t>a.t?b:a;}
+async function caricaStorico(){
+  if(S._storico||S._storicoInCorso)return;
+  S._storicoInCorso=true;
+  const snaps=[];
+  try{
+    if(window._fbListBackups){
+      const lista=await window._fbListBackups();
+      lista.forEach(b=>{try{const d=JSON.parse(b.blob);if(b.ts)snaps.push({ts:b.ts,t:d.turni||{}});}catch(e){}});
+    }
+  }catch(e){console.error('storico:',e);}
+  snaps.sort((a,b)=>a.ts-b.ts);
+  S._storico={snaps};
+  S._storicoInCorso=false;
+}
+function tempoTurno(k,sh){
+  if(sh.mod)return{t:sh.mod,k:''};
+  if(S._storicoInCorso||!S._storico)return{t:0,loading:true};
+  const sn=S._storico.snaps;
+  if(!sn.length)return null;
+  const cur=canon(sh);
+  let i=sn.length-1;
+  // il valore attuale non è nemmeno nell'ultimo backup: modifica successiva
+  if(sn[i].t[k]===undefined||canon(sn[i].t[k])!==cur)return _lastTs?{t:_lastTs,k:'~'}:null;
+  while(i>0&&sn[i-1].t[k]!==undefined&&canon(sn[i-1].t[k])===cur)i--;
+  return i===0?{t:sn[0].ts,k:'≤'}:{t:sn[i].ts,k:'~'};
+}
+function fmtMod(x){
+  if(x&&x.loading)return '…';
+  if(!x||!x.t)return 'n.d.';
+  const d=new Date(x.t),p=n=>String(n).padStart(2,'0');
+  return (x.k?x.k+' ':'')+p(d.getDate())+'/'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+async function toggleAndTempi(){
+  S.andTempi=!S.andTempi;render();
+  if(S.andTempi&&!S._storico){
+    await caricaStorico();
+    if(S.modalAndamento&&S.andTempi)render();
+  }
 }
 // Turni base "Mattina" e "Pomeriggio" (anche se rinominati/modificati dai preset): non sono programmi particolari.
 function eTurnoBase(pg){
@@ -978,6 +1037,7 @@ function modalAndamento(){
   const titolo=S.cat==='giornalisti'?'Giornalisti':'Tecnici';
   const COL_DOM='#f97316';
   const bar=(v,tot,col)=>`<div class="and-bar-wrap"><div class="and-bar-label"><b>${v}</b> / ${tot}</div><div class="and-bar"><div style="width:${tot?Math.round(v/tot*100):0}%;background:${col}"></div></div></div>`;
+  const ts=(n,x)=>(S.andTempi&&n)?`<span class="and-ts" title="Ultima modifica">${fmtMod(x)}</span>`:'';
   let corpo;
   if(!R.people.length){
     corpo=`<div class="empty-state">Nessun personale in questa categoria.</div>`;
@@ -992,15 +1052,15 @@ function modalAndamento(){
         const c=st.prog[pg.id]||0;
         if(!c)return`<td><span class="and-zero">–</span></td>`;
         const col=pg.colore||'#6366f1';
-        return`<td><span class="and-num" style="border-color:${col};background:${hexToRgba(col,.12+.38*c/maxProg[pg.id])}">${c}</span></td>`;
+        return`<td><span class="and-num" style="border-color:${col};background:${hexToRgba(col,.12+.38*c/maxProg[pg.id])}">${c}</span>${ts(c,st.progT[pg.id])}</td>`;
       }).join('');
       return`<tr${nuovoGruppo?' class="and-group"':''}>
         <td><div style="font-weight:700;font-size:.82rem">${esc(p.cognome)} ${esc(p.nome)}</div><div class="role-badge">${esc(p.ruolo)}</div></td>
-        <td>${bar(st.dom,R.nDom,COL_DOM)}</td>
+        <td>${bar(st.dom,R.nDom,COL_DOM)}${ts(st.dom,st.domT)}</td>
         ${celleProg}
       </tr>`;
     }).join('');
-    corpo=`<div class="and-scroll"><table class="and-table">
+    corpo=`<div class="and-scroll"><table class="and-table${S.andTempi?' and-show-t':''}">
       <thead><tr><th>Nome</th><th>Domeniche<div style="font-weight:500;color:#94a3b8">su ${R.nDom} nel mese</div></th>${thProg}</tr></thead>
       <tbody>${righe}</tbody>
     </table></div>`;
@@ -1017,9 +1077,9 @@ function modalAndamento(){
       <button onclick="andamentoOggi()" style="font-size:.72rem">Oggi</button>
     </div>
   </div>
-  <div class="and-info">Domeniche con un turno assegnato e volte in cui la persona ha lavorato su ciascun programma nel mese (Assente e Ferie esclusi; i turni base Mattina e Pomeriggio non sono conteggiati). Le celle dei programmi sono più scure dove la persona ha lavorato di più.</div>
+  <div class="and-info">Domeniche con un turno assegnato e volte in cui la persona ha lavorato su ciascun programma nel mese (Assente e Ferie esclusi; i turni base Mattina e Pomeriggio non sono conteggiati). Le celle dei programmi sono più scure dove la persona ha lavorato di più.${S.andTempi?' <b>Orologio attivo:</b> in alto a destra di ogni casella compare data e ora dell’ultima modifica (~ = ora stimata dai backup, ≤ = modifica precedente a quella data).':''}</div>
   ${corpo}
-  <div class="modal-footer"><button class="btn btn-secondary" onclick="closeAndamento()">Chiudi</button></div>
+  <div class="modal-footer" style="justify-content:space-between;align-items:center"><span class="and-clock${S.andTempi?' on':''}" onclick="toggleAndTempi()" title="Mostra l’ultima modifica di ogni casella"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><button class="btn btn-secondary" onclick="closeAndamento()">Chiudi</button></div>
 </div></div>`;
 }
 function modalFerie(){
@@ -1228,7 +1288,8 @@ function copiaSettimanaSuccessiva(){
   if(giaPresenti>0)msg+='\n\n⚠️ La settimana successiva contiene già '+giaPresenti+' turni: verranno SOSTITUITI.';
   if(!confirm(msg))return;
   daSvuotare.forEach(k=>delete S.turni[k]);
-  copie.forEach(([k,v])=>{S.turni[k]=v;});
+  const oraCopia=Date.now();
+  copie.forEach(([k,v])=>{v.mod=oraCopia;S.turni[k]=v;});
   save().catch(e=>console.error(e));
   S.weekStart=addDays(S.weekStart,7);
   render();
@@ -1627,7 +1688,7 @@ function bindDrag(){
 // ── ESPOSIZIONE FUNZIONI USATE NEGLI ATTRIBUTI onclick ──
 window.prevWeek=prevWeek;window.nextWeek=nextWeek;window.goToday=goToday;window.setTab=setTab;
 window.copiaSettimanaSuccessiva=copiaSettimanaSuccessiva;
-window.openAndamento=openAndamento;window.closeAndamento=closeAndamento;window.andamentoMese=andamentoMese;window.andamentoOggi=andamentoOggi;
+window.toggleAndTempi=toggleAndTempi;window.openAndamento=openAndamento;window.closeAndamento=closeAndamento;window.andamentoMese=andamentoMese;window.andamentoOggi=andamentoOggi;
 window.openStaff=openStaff;window.openProg=openProg;window.openCell=openCell;window.onCellClick=onCellClick;
 window.dropOnCell=dropOnCell;window.addStaff=addStaff;window.removeStaff=removeStaff;window.changeStaffRole=changeStaffRole;
 window.updateRuoloOpts=updateRuoloOpts;window.startNewProg=startNewProg;window.startEditProg=startEditProg;
